@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="flex-1 flex items-center justify-center px-6 text-center">
       <div className="max-w-lg flex flex-col items-center gap-6">
-        <div className="text-[11px] uppercase tracking-widest text-stone">MyShop</div>
+        <div className="text-[11px] uppercase tracking-widest text-stone">Shoppi</div>
         <h1 className="font-display text-4xl leading-tight">
           Покупай у своих людей, не у алгоритма.
         </h1>

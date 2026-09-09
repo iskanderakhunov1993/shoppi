@@ -80,7 +80,7 @@ export function CreatorDashboard({
         </div>
         {me.slug && (
           <a href={`/${me.slug}`} className="text-[12.5px] text-stone border border-line px-3 py-2">
-            myshop.ru/{me.slug}
+            shoppi.ru/{me.slug}
           </a>
         )}
       </div>

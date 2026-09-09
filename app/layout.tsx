@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MyShop — витрина куратора",
+  title: "Shoppi — витрина куратора",
   description: "Покупай у своих людей, не у алгоритма.",
 };
 

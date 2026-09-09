@@ -70,7 +70,7 @@ export default function SignupPage() {
     <main className="grid md:grid-cols-2 flex-1">
       <div className="border-b md:border-b-0 md:border-r border-line flex flex-col justify-center px-8 py-14 md:px-16">
         <div className="text-[11px] uppercase tracking-widest text-stone mb-4">
-          MyShop
+          Shoppi
         </div>
         <h2 className="font-display text-3xl leading-tight max-w-[12ch]">
           Покупай у своих людей, не у алгоритма.
