@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { inputClass } from "@/app/components/Field";
+import { placeholderAvatar } from "@/lib/avatar";
 
 export function ProfileEditor({
   me,
   onSaved,
 }: {
-  me: { displayName: string; bio?: string };
+  me: { displayName: string; bio?: string; avatarUrl?: string; slug?: string };
   onSaved: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio }),
+      body: JSON.stringify({ displayName, bio, avatarUrl }),
     });
     const data = await res.json();
     setSaving(false);
@@ -67,6 +69,27 @@ export function ProfileEditor({
             placeholder="Одна строка о том, что вы советуете"
             onChange={(e) => setBio(e.target.value)}
           />
+
+          <label className="text-[11px] uppercase tracking-wider text-stone">
+            Фото профиля
+          </label>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatarUrl || placeholderAvatar(me.slug ?? me.displayName)}
+              alt=""
+              className="w-12 h-12 rounded-full object-cover bg-raise flex-none border border-line"
+            />
+            <input
+              className={`${inputClass} border border-line px-3 py-2.5 flex-1 min-w-0`}
+              value={avatarUrl}
+              placeholder="Ссылка на фото"
+              onChange={(e) => setAvatarUrl(e.target.value)}
+            />
+          </div>
+          <p className="text-stone text-[12px] leading-relaxed">
+            Пусто — покажем нарисованный портрет, одинаковый при каждом заходе.
+          </p>
 
           {error && <p className="text-error text-sm">{error}</p>}
           <button

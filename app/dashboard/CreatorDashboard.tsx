@@ -35,11 +35,15 @@ export function CreatorDashboard({
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
   const [category, setCategory] = useState<Category>("cosmetics");
+  const [imageUrl, setImageUrl] = useState("");
+  const [price, setPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editCategory, setEditCategory] = useState<Category>("cosmetics");
+  const [editPrice, setEditPrice] = useState("");
+  const [editImage, setEditImage] = useState("");
   const [origin, setOrigin] = useState("");
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -61,7 +65,13 @@ export function CreatorDashboard({
     const res = await fetch("/api/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, targetUrl, category }),
+      body: JSON.stringify({
+        title,
+        targetUrl,
+        category,
+        imageUrl: imageUrl.trim() || undefined,
+        price: price.trim() ? Number(price) : undefined,
+      }),
     });
     const data = await res.json();
     setSubmitting(false);
@@ -73,6 +83,8 @@ export function CreatorDashboard({
 
     setTitle("");
     setTargetUrl("");
+    setImageUrl("");
+    setPrice("");
     await loadLinks();
   }
 
@@ -80,13 +92,20 @@ export function CreatorDashboard({
     setEditingId(link.id);
     setEditTitle(link.title);
     setEditCategory(link.category);
+    setEditPrice(link.price ? String(link.price) : "");
+    setEditImage(link.imageUrl ?? "");
   }
 
   async function saveEdit(id: string) {
     const res = await fetch(`/api/links/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: editTitle, category: editCategory }),
+      body: JSON.stringify({
+        title: editTitle,
+        category: editCategory,
+        price: editPrice.trim() ? Number(editPrice) : null,
+        imageUrl: editImage.trim() || null,
+      }),
     });
     if (res.ok) {
       setEditingId(null);
@@ -169,6 +188,22 @@ export function CreatorDashboard({
                 <option value="mens">Мужские товары</option>
                 <option value="clothing">Одежда</option>
               </select>
+              <input
+                placeholder="Ссылка на фото (необязательно)"
+                type="url"
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              <input
+                placeholder="Цена в рублях (необязательно)"
+                type="number"
+                min="0"
+                step="1"
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
               {error && <p className="text-error text-sm">{error}</p>}
               <button type="submit" disabled={submitting} className={buttonClass}>
                 {submitting ? "Добавляем…" : "Добавить"}
@@ -212,6 +247,19 @@ export function CreatorDashboard({
                         <option value="mens">Мужские товары</option>
                         <option value="clothing">Одежда</option>
                       </select>
+                      <input
+                        className={`${inputClass} border border-line px-3 py-2`}
+                        value={editImage}
+                        placeholder="Ссылка на фото"
+                        onChange={(e) => setEditImage(e.target.value)}
+                      />
+                      <input
+                        className={`${inputClass} border border-line px-3 py-2`}
+                        value={editPrice}
+                        type="number"
+                        placeholder="Цена"
+                        onChange={(e) => setEditPrice(e.target.value)}
+                      />
                       <div className="flex gap-2">
                         <button
                           onClick={() => saveEdit(link.id)}

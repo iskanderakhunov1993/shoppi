@@ -10,6 +10,7 @@
  * minutes and buys nothing for demo data.
  */
 import { hashPassword } from "../lib/auth.ts";
+import { placeholderAvatar } from "../lib/avatar.ts";
 import {
   addFavorite,
   addLink,
@@ -100,7 +101,11 @@ for (let i = 0; i < CREATORS; i++) {
   if (!creator) continue;
 
   const name = `${pick(FIRST)} ${pick(LAST)}`;
-  updateCreator(creator.id, { displayName: name, bio: pick(BIOS) });
+  updateCreator(creator.id, {
+    displayName: name,
+    bio: pick(BIOS),
+    avatarUrl: placeholderAvatar(creator.slug),
+  });
 
   const linkCount = randomInt(4, 25);
   for (let j = 0; j < linkCount; j++) {
@@ -114,6 +119,9 @@ for (let i = 0; i < CREATORS; i++) {
       category,
       targetUrl: `https://${mp.host}${mp.path(article)}`,
       price: randomInt(390, 24_900),
+      // Placeholder product shots: nonsense images, but they show the real
+      // shape of a populated storefront, which an empty grid does not.
+      imageUrl: `https://picsum.photos/seed/p${article}/600/450`,
       marketplace: mp.host.includes("wildberries") ? "wildberries" : "ozon",
       articleId: article,
     });

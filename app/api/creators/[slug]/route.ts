@@ -24,6 +24,7 @@ export async function GET(
     slug: creator.slug,
     displayName: creator.displayName,
     bio: creator.bio,
+    avatarUrl: creator.avatarUrl,
     links,
   });
 }

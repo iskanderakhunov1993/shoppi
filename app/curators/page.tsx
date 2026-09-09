@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { seedDemoAccounts } from "@/lib/seed";
 import { countCreators, listCreators } from "@/lib/store";
+import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 
@@ -80,10 +81,10 @@ export default async function CuratorsDirectoryPage({
                   href={`/${creator.slug}`}
                   className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
                 >
-                  <div className="aspect-[4/5] overflow-hidden bg-line">
+                  <div className="aspect-square overflow-hidden bg-raise">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={creator.avatarUrl ?? `https://picsum.photos/seed/${creator.slug}/400/500`}
+                      src={creator.avatarUrl || placeholderAvatar(creator.slug)}
                       alt={creator.displayName}
                       className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />

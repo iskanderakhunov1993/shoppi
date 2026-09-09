@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
+import { placeholderAvatar } from "@/lib/avatar";
 
 const CATEGORY_LABEL: Record<string, string> = {
   cosmetics: "Косметика",
@@ -31,6 +32,7 @@ async function getStorefront(slug: string) {
     displayName: string;
     bio?: string;
     links: StorefrontLink[];
+    avatarUrl?: string;
   }>;
 }
 
@@ -46,6 +48,12 @@ export default async function StorefrontPage({
   return (
     <main className="flex-1">
       <div className="text-center px-8 py-12 border-b border-line">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={creator.avatarUrl || placeholderAvatar(creatorSlug)}
+          alt={creator.displayName}
+          className="w-24 h-24 rounded-full object-cover mx-auto mb-5 bg-raise"
+        />
         <div className="text-[11px] uppercase tracking-wider text-stone">
           Витрина куратора
         </div>

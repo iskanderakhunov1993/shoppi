@@ -11,6 +11,7 @@ import {
   type Role,
 } from "./store.ts";
 import { parseMarketplaceItem } from "./marketplace.ts";
+import { placeholderAvatar } from "./avatar.ts";
 
 // Seeds a handful of already-verified accounts so the login page can offer
 // one-click demo logins and the landing page has real storefronts to link
@@ -29,6 +30,7 @@ type SeedLink = {
   category: "cosmetics" | "mens" | "clothing";
   url: string;
   price: number;
+  image?: string;
 };
 
 export function seedCreatorAccount(
@@ -45,7 +47,7 @@ export function seedCreatorAccount(
   markUserVerified(user.id);
   if (!creator) return undefined;
 
-  updateCreator(creator.id, { displayName, bio });
+  updateCreator(creator.id, { displayName, bio, avatarUrl: placeholderAvatar(creator.slug) });
 
   for (const link of links) {
     const { marketplace, articleId } = parseMarketplaceItem(link.url);
@@ -55,6 +57,7 @@ export function seedCreatorAccount(
       category: link.category,
       targetUrl: link.url,
       price: link.price,
+      imageUrl: link.image,
       marketplace,
       articleId,
     });
@@ -73,12 +76,14 @@ export function seedDemoAccounts() {
         title: "Сыворотка с витамином C",
         category: "cosmetics",
         url: "https://www.wildberries.ru/catalog/172247725/detail.aspx",
+        image: "https://picsum.photos/seed/shoppi-serum/600/450",
         price: 2490,
       },
       {
         title: "Крем для рук, без отдушки",
         category: "cosmetics",
         url: "https://www.letu.ru/product/krem-dlya-ruk-101",
+        image: "https://picsum.photos/seed/shoppi-cream/600/450",
         price: 690,
       },
     ]
@@ -93,12 +98,14 @@ export function seedDemoAccounts() {
         title: "Складной нож для кемпинга",
         category: "mens",
         url: "https://www.wildberries.ru/catalog/183920144/detail.aspx",
+        image: "https://picsum.photos/seed/shoppi-knife/600/450",
         price: 4200,
       },
       {
         title: "Механический триммер для бороды",
         category: "mens",
         url: "https://www.ozon.ru/product/trimmer-dlya-borody-1284900733/",
+        image: "https://picsum.photos/seed/shoppi-trimmer/600/450",
         price: 3190,
       },
     ]
@@ -113,12 +120,14 @@ export function seedDemoAccounts() {
         title: "Пальто из шерсти, серое",
         category: "clothing",
         url: "https://www.lamoda.ru/p/palto-sherstyanoe-770211/",
+        image: "https://picsum.photos/seed/shoppi-coat/600/450",
         price: 14900,
       },
       {
         title: "Свитер оверсайз, бежевый",
         category: "clothing",
         url: "https://www.ozon.ru/product/sviter-overrazmer-1102938471/",
+        image: "https://picsum.photos/seed/shoppi-sweater/600/450",
         price: 5400,
       },
     ]

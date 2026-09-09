@@ -8,6 +8,7 @@ import {
 } from "@/lib/store";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { placeholderAvatar } from "@/lib/avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -52,8 +53,18 @@ export default async function MediaKitPage({
 
       <section className="px-6 md:px-10 py-12 border-b border-line">
         <div className="max-w-4xl mx-auto">
-          <span className="text-[11px] uppercase tracking-widest text-stone">Медиакит</span>
-          <h1 className="font-display text-4xl md:text-5xl mt-2 mb-2">{creator.displayName}</h1>
+          <div className="flex items-center gap-5 mb-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={creator.avatarUrl || placeholderAvatar(creator.slug)}
+              alt={creator.displayName}
+              className="w-20 h-20 rounded-full object-cover bg-raise flex-none"
+            />
+            <div>
+              <span className="text-[11px] uppercase tracking-widest text-stone">Медиакит</span>
+              <h1 className="font-display text-4xl md:text-5xl mt-1">{creator.displayName}</h1>
+            </div>
+          </div>
           {creator.bio && <p className="text-stone text-sm max-w-lg">{creator.bio}</p>}
           <a
             href={`/${creator.slug}`}
