@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { FavoriteButton } from "@/app/components/FavoriteButton";
 
 const CATEGORY_LABEL: Record<string, string> = {
   cosmetics: "Косметика",
@@ -61,33 +62,35 @@ export default async function StorefrontPage({
       ) : (
         <div className="grid sm:grid-cols-2 md:grid-cols-3">
           {creator.links.map((link, i) => (
-            <a
+            <div
               key={link.id}
-              href={link.wrappedUrl}
-              className={`flex flex-col gap-2 p-5 border-b border-line hover:opacity-85 transition-opacity ${
+              className={`flex flex-col gap-2 p-5 border-b border-line ${
                 (i + 1) % 3 !== 0 ? "md:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r md:border-r-0" : ""}`}
             >
-              {link.imageUrl && (
-                <div className="aspect-[4/3] bg-line overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={link.imageUrl}
-                    alt={link.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <span className="text-[10px] uppercase tracking-wide text-stone">
-                {CATEGORY_LABEL[link.category]}
-              </span>
-              <div className="text-sm font-medium leading-snug">{link.title}</div>
-              {link.price && (
-                <div className="text-[13.5px] text-stone mt-auto">
-                  {link.price.toLocaleString("ru-RU")} ₽
-                </div>
-              )}
-            </a>
+              <a href={link.wrappedUrl} className="flex flex-col gap-2 hover:opacity-85 transition-opacity">
+                {link.imageUrl && (
+                  <div className="aspect-[4/3] bg-line overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={link.imageUrl}
+                      alt={link.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <span className="text-[10px] uppercase tracking-wide text-stone">
+                  {CATEGORY_LABEL[link.category]}
+                </span>
+                <div className="text-sm font-medium leading-snug">{link.title}</div>
+                {link.price && (
+                  <div className="text-[13.5px] text-stone">
+                    {link.price.toLocaleString("ru-RU")} ₽
+                  </div>
+                )}
+              </a>
+              <FavoriteButton linkId={link.id} />
+            </div>
           ))}
         </div>
       )}

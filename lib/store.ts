@@ -1,11 +1,16 @@
 import { randomUUID } from "crypto";
 
+export type Role = "shopper" | "creator" | "brand";
+
 export type User = {
   id: string;
   email: string;
   passwordHash: string;
   verified: boolean;
   verificationToken: string | null;
+  role: Role;
+  // Only set when role === "brand": the domain whose links belong to this brand.
+  brandDomain?: string;
 };
 
 export type Creator = {
@@ -44,6 +49,7 @@ const creatorsByUserId = new Map<string, string>();
 const creatorsBySlug = new Map<string, string>();
 const links = new Map<string, Link>();
 const clicks: Click[] = [];
+const favorites = new Map<string, Set<string>>(); // userId -> Set<linkId>
 
 function slugify(input: string): string {
   return input
@@ -54,15 +60,32 @@ function slugify(input: string): string {
     .replace(/-+/g, "-");
 }
 
-export function createUser(email: string, passwordHash: string) {
+export function createUser(
+  email: string,
+  passwordHash: string,
+  role: Role,
+  brandDomain?: string
+): { user: User; creator?: Creator } {
   if (usersByEmail.has(email)) {
     throw new Error("Email already registered");
   }
   const id = randomUUID();
   const verificationToken = randomUUID();
-  const user: User = { id, email, passwordHash, verified: false, verificationToken };
+  const user: User = {
+    id,
+    email,
+    passwordHash,
+    verified: false,
+    verificationToken,
+    role,
+    brandDomain: role === "brand" ? brandDomain : undefined,
+  };
   users.set(id, user);
   usersByEmail.set(email, id);
+
+  if (role !== "creator") {
+    return { user };
+  }
 
   const baseSlug = `${slugify(email.split("@")[0])}-${id.slice(0, 6)}`;
   const creator: Creator = { id: randomUUID(), userId: id, slug: baseSlug, displayName: email.split("@")[0] };
@@ -123,6 +146,21 @@ export function listLinksByCreator(creatorId: string): Link[] {
     .sort((a, b) => linkInsertOrder.get(b.id)! - linkInsertOrder.get(a.id)!);
 }
 
+function hostnameOf(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+export function listLinksByDomain(domain: string): Link[] {
+  const normalized = domain.replace(/^www\./, "").toLowerCase();
+  return [...links.values()]
+    .filter((l) => hostnameOf(l.targetUrl) === normalized)
+    .sort((a, b) => linkInsertOrder.get(b.id)! - linkInsertOrder.get(a.id)!);
+}
+
 export function recordClick(linkId: string, referrer?: string, userAgent?: string): Click {
   const click: Click = { id: randomUUID(), linkId, clickedAt: new Date().toISOString(), referrer, userAgent };
   clicks.push(click);
@@ -131,6 +169,25 @@ export function recordClick(linkId: string, referrer?: string, userAgent?: strin
 
 export function countClicksForLink(linkId: string): number {
   return clicks.filter((c) => c.linkId === linkId).length;
+}
+
+export function addFavorite(userId: string, linkId: string): void {
+  if (!favorites.has(userId)) favorites.set(userId, new Set());
+  favorites.get(userId)!.add(linkId);
+}
+
+export function removeFavorite(userId: string, linkId: string): void {
+  favorites.get(userId)?.delete(linkId);
+}
+
+export function listFavoriteLinks(userId: string): Link[] {
+  const ids = favorites.get(userId);
+  if (!ids) return [];
+  return [...ids].map((id) => links.get(id)).filter((l): l is Link => Boolean(l));
+}
+
+export function isFavorite(userId: string, linkId: string): boolean {
+  return favorites.get(userId)?.has(linkId) ?? false;
 }
 
 // Test-only: clears all in-memory state between test runs.
@@ -144,4 +201,5 @@ export function __resetStoreForTests() {
   clicks.length = 0;
   linkInsertOrder.clear();
   linkSequence = 0;
+  favorites.clear();
 }

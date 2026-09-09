@@ -8,7 +8,8 @@ beforeEach(() => {
 
 describe("resolveRedirectTarget", () => {
   it("returns the target_url when the link exists", () => {
-    const { creator } = createUser("anna@example.com", "hashed");
+    const { creator } = createUser("anna@example.com", "hashed", "creator");
+    if (!creator) throw new Error("expected a creator profile");
     const link = addLink({
       creatorId: creator.id,
       title: "Item",
