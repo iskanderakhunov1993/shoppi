@@ -103,9 +103,13 @@ export function getCreatorBySlug(slug: string): Creator | undefined {
   return id ? creators.get(id) : undefined;
 }
 
+let linkSequence = 0;
+const linkInsertOrder = new Map<string, number>();
+
 export function addLink(input: Omit<Link, "id" | "createdAt">): Link {
   const link: Link = { ...input, id: randomUUID(), createdAt: new Date().toISOString() };
   links.set(link.id, link);
+  linkInsertOrder.set(link.id, linkSequence++);
   return link;
 }
 
@@ -116,7 +120,7 @@ export function getLink(id: string): Link | undefined {
 export function listLinksByCreator(creatorId: string): Link[] {
   return [...links.values()]
     .filter((l) => l.creatorId === creatorId)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => linkInsertOrder.get(b.id)! - linkInsertOrder.get(a.id)!);
 }
 
 export function recordClick(linkId: string, referrer?: string, userAgent?: string): Click {
@@ -138,4 +142,6 @@ export function __resetStoreForTests() {
   creatorsBySlug.clear();
   links.clear();
   clicks.length = 0;
+  linkInsertOrder.clear();
+  linkSequence = 0;
 }
