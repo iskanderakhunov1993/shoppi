@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { DashboardHeader } from "./DashboardHeader";
 
 type FavoriteLink = {
   id: string;
@@ -19,33 +21,57 @@ const CATEGORY_LABEL: Record<FavoriteLink["category"], string> = {
 export function ShopperDashboard({ me }: { me: { displayName: string } }) {
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
 
-  useEffect(() => {
-    fetch("/api/favorites")
-      .then((res) => (res.ok ? res.json() : { favorites: [] }))
-      .then((data) => setFavorites(data.favorites));
+  const load = useCallback(async () => {
+    const res = await fetch("/api/favorites");
+    setFavorites(res.ok ? (await res.json()).favorites : []);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function remove(linkId: string) {
+    await fetch(`/api/favorites?linkId=${encodeURIComponent(linkId)}`, { method: "DELETE" });
+    await load();
+  }
 
   return (
     <main className="flex-1 flex flex-col">
-      <div className="px-8 py-6 border-b border-line">
-        <div className="text-[11px] uppercase tracking-wider text-stone">Мой вкус</div>
-        <div className="font-display text-xl">{me.displayName}</div>
-      </div>
+      <DashboardHeader
+        label="Мой вкус"
+        title={me.displayName}
+        action={
+          <Link
+            href="/curators"
+            className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+          >
+            Все кураторы
+          </Link>
+        }
+      />
 
       <div className="px-8 py-8">
-        <div className="flex justify-between items-baseline mb-4">
-          <h3 className="text-[11px] uppercase tracking-wider text-stone">
-            Сохранённые товары
-          </h3>
+        <div className="flex justify-between items-baseline mb-6">
+          <h3 className="text-[11px] uppercase tracking-wider text-stone">Сохранённые товары</h3>
           {favorites && <span className="text-xs text-stone">{favorites.length}</span>}
         </div>
 
         {favorites === null ? (
           <p className="text-stone text-sm">Загрузка…</p>
         ) : favorites.length === 0 ? (
-          <p className="font-display italic text-base text-stone">
-            Пока пусто — сохраняйте товары на витринах куратора кнопкой «Сохранить».
-          </p>
+          <div className="max-w-md flex flex-col gap-3">
+            <p className="font-display italic text-base text-stone">Пока пусто.</p>
+            <p className="text-stone text-sm leading-relaxed">
+              Откройте витрину куратора и нажмите «Сохранить» на товаре — он появится здесь, и
+              к нему можно будет вернуться позже.
+            </p>
+            <Link
+              href="/curators"
+              className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity"
+            >
+              Смотреть кураторов
+            </Link>
+          </div>
         ) : (
           <ul className="flex flex-col">
             {favorites.map((link) => (
@@ -61,9 +87,19 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
                     {CATEGORY_LABEL[link.category]}
                   </span>
                 </div>
-                {link.price && (
-                  <div className="text-sm text-stone">{link.price.toLocaleString("ru-RU")} ₽</div>
-                )}
+                <div className="flex items-center gap-4">
+                  {link.price && (
+                    <span className="text-sm text-stone">
+                      {link.price.toLocaleString("ru-RU")} ₽
+                    </span>
+                  )}
+                  <button
+                    onClick={() => remove(link.id)}
+                    className="text-[11px] uppercase tracking-wide text-stone hover:text-error transition-colors cursor-pointer"
+                  >
+                    Убрать
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

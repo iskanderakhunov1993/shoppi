@@ -130,9 +130,11 @@ export function createUser(
 
   const creatorId = randomUUID();
   const slug = `${slugify(email.split("@")[0])}-${id.slice(0, 6)}`;
+  const initialName = email.split("@")[0];
   db.prepare(
-    `INSERT INTO creators (id, user_id, slug, display_name, created_at) VALUES (?, ?, ?, ?, ?)`
-  ).run(creatorId, id, slug, email.split("@")[0], now);
+    `INSERT INTO creators (id, user_id, slug, display_name, display_name_lower, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(creatorId, id, slug, initialName, initialName.toLowerCase(), now);
 
   return { user, creator: getCreatorById(creatorId)! };
 }
@@ -187,10 +189,12 @@ export function updateCreator(
   const current = getCreatorById(creatorId);
   if (!current) return undefined;
 
+  const nextName = patch.displayName ?? current.displayName;
   db.prepare(
-    `UPDATE creators SET display_name = ?, bio = ?, avatar_url = ?, slug = ? WHERE id = ?`
+    `UPDATE creators SET display_name = ?, display_name_lower = ?, bio = ?, avatar_url = ?, slug = ? WHERE id = ?`
   ).run(
-    patch.displayName ?? current.displayName,
+    nextName,
+    nextName.toLowerCase(),
     patch.bio ?? current.bio ?? null,
     patch.avatarUrl ?? current.avatarUrl ?? null,
     patch.slug ?? current.slug,
@@ -211,7 +215,7 @@ export function listCreators(opts: { limit?: number; offset?: number; query?: st
       db
         .prepare(
           `SELECT * FROM creators
-           WHERE lower(display_name) LIKE ? OR lower(slug) LIKE ?
+           WHERE display_name_lower LIKE ? OR slug LIKE ?
            ORDER BY display_name LIMIT ? OFFSET ?`
         )
         .all(q, q, limit, offset) as Row[]
@@ -227,7 +231,7 @@ export function countCreators(query?: string): number {
   if (query?.trim()) {
     const q = `%${query.trim().toLowerCase()}%`;
     const r = db
-      .prepare("SELECT COUNT(*) AS c FROM creators WHERE lower(display_name) LIKE ? OR lower(slug) LIKE ?")
+      .prepare("SELECT COUNT(*) AS c FROM creators WHERE display_name_lower LIKE ? OR slug LIKE ?")
       .get(q, q) as { c: number };
     return Number(r.c);
   }

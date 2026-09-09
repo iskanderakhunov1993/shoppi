@@ -21,7 +21,7 @@ export function LandingFooter() {
         <div>
           <h4 className="text-[11px] uppercase tracking-widest text-stone mb-4">Шопперам</h4>
           <ul className="flex flex-col gap-2 text-sm">
-            <li><a href="#curators" className="hover:underline underline-offset-4">Все кураторы</a></li>
+            <li><Link href="/curators" className="hover:underline underline-offset-4">Все кураторы</Link></li>
             <li><Link href="/login" className="hover:underline underline-offset-4">Мой вкус</Link></li>
           </ul>
         </div>

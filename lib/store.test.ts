@@ -15,6 +15,9 @@ import {
   removeFavorite,
   listFavoriteLinks,
   isFavorite,
+  listCreators,
+  countCreators,
+  updateCreator,
   __resetStoreForTests,
 } from "./store";
 
@@ -176,5 +179,31 @@ describe("favorites", () => {
 
     removeFavorite(shopper.id, link.id);
     expect(listFavoriteLinks(shopper.id)).toEqual([]);
+  });
+});
+
+describe("listCreators", () => {
+  it("finds a creator by a Cyrillic name regardless of case", () => {
+    // SQLite's lower() only folds ASCII, so searching a Cyrillic name
+    // used to return nothing at all.
+    const { creator } = createCreator("anna@example.com");
+    updateCreator(creator.id, { displayName: "Анна Иванова" });
+
+    expect(listCreators({ query: "анна" }).map((c) => c.id)).toEqual([creator.id]);
+    expect(listCreators({ query: "АННА" }).map((c) => c.id)).toEqual([creator.id]);
+    expect(listCreators({ query: "Иванова" }).map((c) => c.id)).toEqual([creator.id]);
+    expect(countCreators("анна")).toBe(1);
+  });
+
+  it("returns nothing for a name that is not there", () => {
+    createCreator("anna@example.com");
+    expect(listCreators({ query: "Владимир" })).toEqual([]);
+  });
+
+  it("pages through results rather than returning everything", () => {
+    for (let i = 0; i < 5; i++) createCreator(`c${i}@example.com`);
+    expect(listCreators({ limit: 2 })).toHaveLength(2);
+    expect(listCreators({ limit: 2, offset: 4 })).toHaveLength(1);
+    expect(countCreators()).toBe(5);
   });
 });

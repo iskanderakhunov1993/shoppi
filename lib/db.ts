@@ -13,11 +13,22 @@ if (!isTest) {
 
 export const db = new DatabaseSync(DB_PATH);
 
+// `next build` runs several workers at once and each one opens this file,
+// so every statement here has to tolerate a concurrent writer. A busy
+// timeout makes them queue instead of failing outright.
+db.exec("PRAGMA busy_timeout = 5000");
+
 // WAL lets the dev server's several module instances (Turbopack gives
 // route handlers and server components separate module graphs) read and
-// write the same file without locking each other out.
+// write the same file without locking each other out. The setting is
+// stored in the file itself, so it only has to succeed once — if another
+// process is mid-write we can safely carry on without it.
 if (!isTest) {
-  db.exec("PRAGMA journal_mode = WAL");
+  try {
+    db.exec("PRAGMA journal_mode = WAL");
+  } catch {
+    // already set by whoever opened the file first
+  }
 }
 db.exec("PRAGMA foreign_keys = ON");
 
@@ -39,6 +50,10 @@ db.exec(`
     user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slug         TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
+    -- SQLite's lower() only folds ASCII, so a Cyrillic name would never
+    -- match a lowercased search term. This column is folded in JS, where
+    -- toLowerCase() is Unicode-aware.
+    display_name_lower TEXT NOT NULL DEFAULT '',
     bio          TEXT,
     avatar_url   TEXT,
     created_at   TEXT NOT NULL
@@ -85,6 +100,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_clicks_link    ON clicks(link_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_fp      ON clicks(link_id, fingerprint, clicked_at);
 `);
+
+// Adds columns introduced after a database file already existed.
+for (const [table, column, ddl] of [
+  ["creators", "display_name_lower", "ALTER TABLE creators ADD COLUMN display_name_lower TEXT NOT NULL DEFAULT ''"],
+] as const) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    try {
+      db.exec(ddl);
+    } catch {
+      // another worker added it first
+    }
+  }
+}
 
 export function nextSeq(): number {
   const row = db.prepare("SELECT COALESCE(MAX(seq), 0) AS m FROM links").get() as { m: number };
