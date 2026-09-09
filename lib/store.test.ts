@@ -94,8 +94,8 @@ describe("links and clicks", () => {
     });
 
     expect(countClicksForLink(link.id)).toBe(0);
-    recordClick(link.id);
-    recordClick(link.id);
+    recordClick(link.id, { isBot: false });
+    recordClick(link.id, { isBot: false });
     expect(countClicksForLink(link.id)).toBe(2);
   });
 });

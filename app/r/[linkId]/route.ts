@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLink, recordClick } from "@/lib/store";
+import { getLink, hasRecentClick, recordClick } from "@/lib/store";
+import { isBotUserAgent, clientIpFrom } from "@/lib/bot-detection";
+import { visitorFingerprint } from "@/lib/auth";
 
 export function resolveRedirectTarget(linkId: string): string | null {
   const link = getLink(linkId);
@@ -17,11 +19,22 @@ export async function GET(
     return NextResponse.json({ error: "Link not found" }, { status: 404 });
   }
 
-  recordClick(
-    linkId,
-    request.headers.get("referer") ?? undefined,
-    request.headers.get("user-agent") ?? undefined
-  );
+  const userAgent = request.headers.get("user-agent");
+  const isBot = isBotUserAgent(userAgent);
+  const fingerprint = visitorFingerprint(clientIpFrom(request.headers), userAgent ?? "");
+
+  // A reader refreshing or coming back within the window is one visit,
+  // not several. Bot hits are always recorded so the raw total stays true.
+  const isRepeat = !isBot && hasRecentClick(linkId, fingerprint, 30);
+
+  if (!isRepeat) {
+    recordClick(linkId, {
+      referrer: request.headers.get("referer") ?? undefined,
+      userAgent: userAgent ?? undefined,
+      isBot,
+      fingerprint,
+    });
+  }
 
   return NextResponse.redirect(targetUrl, { status: 302 });
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCreator } from "@/lib/require-creator";
-import { addLink, countClicksForLink, listLinksByCreator } from "@/lib/store";
+import { addLink, countClicksForLinks, listLinksByCreator } from "@/lib/store";
+import { parseMarketplaceItem } from "@/lib/marketplace";
 
 const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
 
@@ -10,9 +11,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const links = listLinksByCreator(creator.id).map((link) => ({
+  const rows = listLinksByCreator(creator.id);
+  // One grouped query for every link, instead of a count per link.
+  const counts = countClicksForLinks(rows.map((l) => l.id));
+
+  const links = rows.map((link) => ({
     ...link,
-    clicks: countClicksForLink(link.id),
+    clicks: counts.get(link.id)?.human ?? 0,
+    clicksTotal: counts.get(link.id)?.total ?? 0,
     wrappedUrl: `/r/${link.id}`,
   }));
 
@@ -43,11 +49,12 @@ export async function POST(request: NextRequest) {
     );
   }
   try {
-    // eslint-disable-next-line no-new
     new URL(targetUrl);
   } catch {
     return NextResponse.json({ error: "targetUrl must be a valid URL" }, { status: 400 });
   }
+
+  const { marketplace, articleId } = parseMarketplaceItem(targetUrl);
 
   const link = addLink({
     creatorId: creator.id,
@@ -56,6 +63,8 @@ export async function POST(request: NextRequest) {
     category: category as (typeof CATEGORIES)[number],
     imageUrl: body?.imageUrl || undefined,
     price: typeof body?.price === "number" ? body.price : undefined,
+    marketplace,
+    articleId,
   });
 
   return NextResponse.json({ ...link, wrappedUrl: `/r/${link.id}` }, { status: 201 });

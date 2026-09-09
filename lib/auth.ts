@@ -1,4 +1,5 @@
-import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "crypto";
+import { createHash, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "crypto";
+import { createSessionRow, deleteSessionRow, getSessionUserId } from "./store.ts";
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -15,23 +16,31 @@ export function verifyPassword(password: string, storedHash: string): boolean {
   return timingSafeEqual(derived, stored);
 }
 
-// In-memory session store: token -> userId. Swap for a signed cookie or
-// real session table when the app moves past the in-memory MVP store.
-const sessions = new Map<string, string>();
-
+// Sessions live in the database so a server restart no longer signs
+// everyone out.
 export function createSession(userId: string): string {
   const token = randomUUID();
-  sessions.set(token, userId);
+  createSessionRow(token, userId);
   return token;
 }
 
 export function getUserIdForSession(token: string | undefined): string | null {
   if (!token) return null;
-  return sessions.get(token) ?? null;
+  return getSessionUserId(token);
 }
 
 export function destroySession(token: string | undefined) {
-  if (token) sessions.delete(token);
+  if (token) deleteSessionRow(token);
 }
 
 export const SESSION_COOKIE = "session";
+
+/**
+ * Stable, non-reversible visitor fingerprint for click de-duplication.
+ * The raw IP is never stored — under 152-ФЗ it counts as personal data,
+ * and we only ever need equality, not the address itself.
+ */
+export function visitorFingerprint(ip: string, userAgent: string): string {
+  const salt = process.env.CLICK_SALT ?? "shoppi-dev-salt";
+  return createHash("sha256").update(`${salt}:${ip}:${userAgent}`).digest("hex").slice(0, 32);
+}
