@@ -38,7 +38,7 @@ export default async function CategoryPage({
 
   return (
     <main className="flex-1 flex flex-col">
-      <LandingNav />
+      <LandingNav overlay />
 
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -49,17 +49,19 @@ export default async function CategoryPage({
         />
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-black/20" />
         <div className="relative h-full flex flex-col justify-end px-6 md:px-10 pb-10">
+          <div className="max-w-[1200px] mx-auto w-full">
           <span className="text-[11px] uppercase tracking-widest text-white/70 mb-2 font-display italic">
             По категории
           </span>
           <h1 className="font-display text-white text-4xl md:text-6xl">
             {CATEGORY_LABEL[category]}
           </h1>
+          </div>
         </div>
       </div>
 
       <section className="px-6 md:px-10 py-14 md:py-16">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           {links.length === 0 ? (
             <p className="font-display italic text-stone">
               В этой категории пока нет опубликованных товаров.

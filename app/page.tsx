@@ -21,15 +21,10 @@ export default function Home() {
 
   return (
     <main className="flex-1 flex flex-col">
-      {/* The nav sits on top of the hero photo, as on the reference site,
-          so it needs the hero's own dark scrim behind it rather than a
-          separate bar above it. */}
-      <div className="relative">
-        <div className="absolute top-0 left-0 right-0">
-          <LandingNav overlay />
-        </div>
-        <Hero />
-      </div>
+      {/* The bar is fixed, so it rides over the hero rather than sitting
+          above it, and stays put once the page scrolls. */}
+      <LandingNav overlay />
+      <Hero />
       <HowItWorks />
       <CuratorGrid creators={creators} />
       <ShopByCategory />

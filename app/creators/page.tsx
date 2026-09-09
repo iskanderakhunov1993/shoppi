@@ -21,7 +21,7 @@ const ITEMS = [
 export default function CreatorsPage() {
   return (
     <main className="flex-1 flex flex-col">
-      <LandingNav />
+      <LandingNav overlay />
       <RoleHero
         eyebrow="Для кураторов"
         titlePrefix="Твой вкус —"

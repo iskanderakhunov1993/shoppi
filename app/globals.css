@@ -4,6 +4,7 @@
   --ink: #111111;
   --paper: #ffffff;
   --card: #ffffff;
+  --raise: #f5f4f2;
   --line: #e7e5e2;
   --stone: #737066;
   --error: #b42318;
@@ -13,7 +14,8 @@
   :root:not([data-theme="light"]) {
     --ink: #f5f4f2;
     --paper: #121212;
-    --card: #191919;
+    --card: #1c1c1a;
+    --raise: #232320;
     --line: #2c2c2a;
     --stone: #a6a399;
   }
@@ -22,7 +24,8 @@
 :root[data-theme="dark"] {
   --ink: #f5f4f2;
   --paper: #121212;
-  --card: #191919;
+  --card: #1c1c1a;
+  --raise: #232320;
   --line: #2c2c2a;
   --stone: #a6a399;
 }
@@ -31,6 +34,7 @@
   --color-ink: var(--ink);
   --color-paper: var(--paper);
   --color-card: var(--card);
+  --color-raise: var(--raise);
   --color-line: var(--line);
   --color-stone: var(--stone);
   --color-error: var(--error);

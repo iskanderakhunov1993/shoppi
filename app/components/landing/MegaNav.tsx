@@ -122,9 +122,9 @@ const PANEL_ALIGN: Record<Menu["align"], string> = {
 };
 
 const ARROW_ALIGN: Record<Menu["align"], string> = {
-  left: "left-10",
+  left: "left-14",
   center: "left-1/2 -translate-x-1/2",
-  right: "right-10",
+  right: "right-14",
 };
 
 export function MegaNav({
@@ -138,8 +138,20 @@ export function MegaNav({
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menus = buildMenus(demoSlug);
+
+  // The bar rides over the hero photo at the top of the page, then takes
+  // on a solid background once it starts covering ordinary content.
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 24);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -162,15 +174,19 @@ export function MegaNav({
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }
 
-  const textColor = overlay ? "text-white" : "text-ink";
-  const mutedColor = overlay ? "text-white/75" : "text-stone";
+  const transparent = overlay && !scrolled && !open && !mobileOpen;
+  const textColor = transparent ? "text-white" : "text-ink";
+  const mutedColor = transparent ? "text-white/75" : "text-stone";
 
   return (
     <nav
-      className={`relative z-30 ${overlay ? "" : "border-b border-line bg-paper"}`}
+      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-200 ${
+        transparent ? "bg-transparent" : "bg-paper/95 backdrop-blur-md border-b border-line"
+      }`}
       onMouseLeave={scheduleClose}
     >
-      <div className="flex items-center justify-between px-6 md:px-10 py-5">
+      <div className="px-6 md:px-10">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between py-5">
         <Link href="/" className={`font-display text-lg ${textColor}`}>
           Shoppi
         </Link>
@@ -212,7 +228,7 @@ export function MegaNav({
             <Link
               href="/dashboard"
               className={`text-[12px] font-semibold uppercase tracking-wide px-4 py-2.5 transition-opacity hover:opacity-80 ${
-                overlay ? "bg-white text-black" : "bg-ink text-paper"
+                transparent ? "bg-white text-black" : "bg-ink text-paper"
               }`}
             >
               Кабинет
@@ -228,7 +244,7 @@ export function MegaNav({
               <Link
                 href="/signup"
                 className={`text-[12px] font-semibold uppercase tracking-wide px-4 py-2.5 transition-opacity hover:opacity-80 ${
-                  overlay ? "bg-white text-black" : "bg-ink text-paper"
+                  transparent ? "bg-white text-black" : "bg-ink text-paper"
                 }`}
               >
                 Регистрация
@@ -247,6 +263,7 @@ export function MegaNav({
             <span className="block w-5 h-px bg-current" />
           </button>
         </div>
+        </div>
       </div>
 
       {/* desktop dropdown panel */}
@@ -255,17 +272,17 @@ export function MegaNav({
           key={menu.key}
           onMouseEnter={cancelClose}
           onMouseLeave={scheduleClose}
-          className={`hidden md:block absolute top-full mx-6 md:mx-10 ${PANEL_ALIGN[menu.align]} ${
+          className={`hidden md:block absolute top-full mt-1 mx-6 md:mx-10 ${PANEL_ALIGN[menu.align]} ${
             open === menu.key ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
           } transition-opacity duration-150`}
         >
           <div
-            className={`absolute -top-1.5 w-3 h-3 rotate-45 bg-card border-l border-t border-line ${
+            className={`absolute -top-[7px] w-3.5 h-3.5 rotate-45 bg-card rounded-[2px] ${
               ARROW_ALIGN[menu.align]
             }`}
           />
-          <div className="relative bg-card border border-line shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] p-8 w-[min(88vw,720px)]">
-            <div className="grid grid-cols-3 gap-x-8 gap-y-7">
+          <div className="relative bg-card rounded-2xl shadow-[0_28px_70px_-24px_rgba(0,0,0,0.45)] px-12 py-11 w-[min(92vw,940px)]">
+            <div className="grid grid-cols-3 gap-x-14 gap-y-10">
               {menu.items.map((item) => (
                 <Link
                   key={item.label}
@@ -273,10 +290,10 @@ export function MegaNav({
                   onClick={() => setOpen(null)}
                   className="group block"
                 >
-                  <span className="font-display text-[17px] text-ink group-hover:underline underline-offset-4">
+                  <span className="font-display text-[19px] text-ink group-hover:underline underline-offset-[5px]">
                     {item.label}
                   </span>
-                  <p className="text-stone text-[12.5px] leading-relaxed mt-1.5">
+                  <p className="text-stone text-[13.5px] leading-[1.6] mt-2.5">
                     {item.description}
                   </p>
                 </Link>

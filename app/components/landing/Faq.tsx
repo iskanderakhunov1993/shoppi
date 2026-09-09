@@ -19,8 +19,8 @@ const ITEMS = [
 
 export function Faq() {
   return (
-    <section className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
-      <div className="max-w-3xl mx-auto">
+    <section id="faq" className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
+      <div className="max-w-[1200px] mx-auto">
         <span className="text-[11px] uppercase tracking-widest text-stone">Вопросы</span>
         <h2 className="font-display text-2xl md:text-3xl mt-3 mb-10">Коротко о главном</h2>
         <div className="flex flex-col">

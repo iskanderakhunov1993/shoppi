@@ -2,8 +2,9 @@ import Link from "next/link";
 
 export function RoleTeasers() {
   return (
-    <section id="brands" className="grid md:grid-cols-2 border-b border-line">
-      <div className="px-6 md:px-10 py-16 md:py-20 md:border-r border-line flex flex-col">
+    <section id="brands" className="border-b border-line px-6 md:px-10">
+      <div className="max-w-[1200px] mx-auto grid md:grid-cols-2">
+      <div className="py-16 md:py-20 md:pr-14 md:border-r border-line flex flex-col">
         <span className="text-[11px] uppercase tracking-widest text-stone mb-3">
           Для кураторов
         </span>
@@ -22,7 +23,7 @@ export function RoleTeasers() {
           Стать куратором
         </Link>
       </div>
-      <div className="px-6 md:px-10 py-16 md:py-20 flex flex-col">
+      <div className="py-16 md:py-20 md:pl-14 flex flex-col">
         <span className="text-[11px] uppercase tracking-widest text-stone mb-3">
           Для брендов
         </span>
@@ -40,6 +41,7 @@ export function RoleTeasers() {
         >
           Подключить бренд
         </Link>
+      </div>
       </div>
     </section>
   );

@@ -31,8 +31,8 @@ export default async function CuratorsDirectoryPage({
     <main className="flex-1 flex flex-col">
       <LandingNav />
 
-      <section className="px-6 md:px-10 py-12 md:py-16 border-b border-line">
-        <div className="max-w-5xl mx-auto">
+      <section className="px-6 md:px-10 pt-32 pb-12 md:py-16 border-b border-line">
+        <div className="max-w-[1200px] mx-auto">
           <span className="font-display italic text-lg text-stone block mb-1">По</span>
           <h1 className="font-display text-4xl md:text-5xl mb-6">Куратору</h1>
 
@@ -68,7 +68,7 @@ export default async function CuratorsDirectoryPage({
       </section>
 
       <section className="px-6 md:px-10 py-12 flex-1">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           {creators.length === 0 ? (
             <p className="font-display italic text-stone">
               По этому запросу кураторов не нашлось.

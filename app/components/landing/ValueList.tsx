@@ -9,7 +9,7 @@ export function ValueList({
 }) {
   return (
     <section className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         <span className="text-[11px] uppercase tracking-widest text-stone">{eyebrow}</span>
         <h2 className="font-display text-2xl md:text-3xl mt-3 mb-12 max-w-lg">{title}</h2>
         <div className="grid md:grid-cols-3 gap-10 md:gap-8">

@@ -51,8 +51,8 @@ export default async function MediaKitPage({
     <main className="flex-1 flex flex-col">
       <LandingNav />
 
-      <section className="px-6 md:px-10 py-12 border-b border-line">
-        <div className="max-w-4xl mx-auto">
+      <section className="px-6 md:px-10 pt-32 pb-12 border-b border-line">
+        <div className="max-w-[1200px] mx-auto">
           <div className="flex items-center gap-5 mb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -76,7 +76,7 @@ export default async function MediaKitPage({
       </section>
 
       <section className="px-6 md:px-10 py-12 border-b border-line">
-        <div className="max-w-4xl mx-auto grid sm:grid-cols-3 gap-8">
+        <div className="max-w-[1200px] mx-auto grid sm:grid-cols-3 gap-8">
           <div>
             <div className="text-[42px] font-display leading-none">{stats.human}</div>
             <div className="text-[11px] uppercase tracking-wider text-stone mt-2">
@@ -96,7 +96,7 @@ export default async function MediaKitPage({
             </div>
           </div>
         </div>
-        <p className="max-w-4xl mx-auto text-stone text-[12.5px] mt-8 leading-relaxed">
+        <p className="max-w-[1200px] mx-auto text-stone text-[12.5px] mt-8 leading-relaxed">
           {botShare}% переходов — автоматические запросы мессенджеров и поисковых роботов за
           превью ссылки. Они исключены из «живых»: показывать их как читателей было бы нечестно
           по отношению к рекламодателю.
@@ -105,7 +105,7 @@ export default async function MediaKitPage({
 
       {stats.byDay.length > 0 && (
         <section className="px-6 md:px-10 py-12 border-b border-line">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-[1200px] mx-auto">
             <h2 className="text-[11px] uppercase tracking-wider text-stone mb-6">
               Живые переходы по дням
             </h2>
@@ -132,7 +132,7 @@ export default async function MediaKitPage({
       )}
 
       <section className="px-6 md:px-10 py-12">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
+        <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12">
           <div>
             <h2 className="text-[11px] uppercase tracking-wider text-stone mb-5">
               Что кликают чаще всего

@@ -28,7 +28,7 @@ export default function ShoppersPage() {
 
   return (
     <main className="flex-1 flex flex-col">
-      <LandingNav />
+      <LandingNav overlay />
       <RoleHero
         eyebrow="Для покупателей"
         titlePrefix="Место, чтобы"

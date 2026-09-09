@@ -14,7 +14,8 @@ export function Hero() {
             theme-relative ink/paper tokens, which flip meaning in dark
             mode; this overlay must stay dark regardless of site theme. */}
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/70 to-black/30" />
-        <div className="relative h-full flex flex-col justify-end px-6 md:px-10 pb-14 md:pb-20 max-w-3xl">
+        <div className="relative h-full flex flex-col justify-end px-6 md:px-10 pb-14 md:pb-20">
+          <div className="max-w-[1200px] mx-auto w-full">
           <span className="text-[11px] uppercase tracking-widest text-white/70 mb-4">
             Shoppi
           </span>
@@ -38,6 +39,7 @@ export function Hero() {
             >
               Стать куратором
             </Link>
+            </div>
           </div>
         </div>
       </div>

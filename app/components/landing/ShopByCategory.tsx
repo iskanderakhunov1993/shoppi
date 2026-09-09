@@ -7,7 +7,7 @@ const CATEGORIES = [
 export function ShopByCategory() {
   return (
     <section className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
             <span className="font-display italic text-lg text-stone block mb-1">По</span>

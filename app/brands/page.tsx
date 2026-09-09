@@ -29,7 +29,7 @@ export default function BrandsPage() {
 
   return (
     <main className="flex-1 flex flex-col">
-      <LandingNav />
+      <LandingNav overlay />
       <RoleHero
         eyebrow="Для брендов"
         titlePrefix="Никто не продвигает продукт"

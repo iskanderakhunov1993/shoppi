@@ -9,7 +9,7 @@ const SEEDS: Record<string, string> = {
 export function CuratorGrid({ creators }: { creators: Creator[] }) {
   return (
     <section id="curators" className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
             <span className="text-[11px] uppercase tracking-widest text-stone">
