@@ -18,6 +18,12 @@ import {
   listCreators,
   countCreators,
   updateCreator,
+  followCreator,
+  unfollowCreator,
+  isFollowing,
+  countFollowers,
+  listFollowedCreators,
+  circleFeed,
   __resetStoreForTests,
 } from "./store";
 
@@ -205,5 +211,56 @@ describe("listCreators", () => {
     expect(listCreators({ limit: 2 })).toHaveLength(2);
     expect(listCreators({ limit: 2, offset: 4 })).toHaveLength(1);
     expect(countCreators()).toBe(5);
+  });
+});
+
+describe("follows (circles)", () => {
+  it("follows and unfollows a creator", () => {
+    const { creator } = createCreator("anna@example.com");
+    const { user: shopper } = createUser("shopper@example.com", "hashed", "shopper");
+
+    expect(isFollowing(shopper.id, creator.id)).toBe(false);
+    followCreator(shopper.id, creator.id);
+    expect(isFollowing(shopper.id, creator.id)).toBe(true);
+    expect(countFollowers(creator.id)).toBe(1);
+    expect(listFollowedCreators(shopper.id).map((c) => c.id)).toEqual([creator.id]);
+
+    unfollowCreator(shopper.id, creator.id);
+    expect(isFollowing(shopper.id, creator.id)).toBe(false);
+    expect(countFollowers(creator.id)).toBe(0);
+  });
+
+  it("following twice does not double-count", () => {
+    const { creator } = createCreator("anna@example.com");
+    const { user: shopper } = createUser("shopper@example.com", "hashed", "shopper");
+
+    followCreator(shopper.id, creator.id);
+    followCreator(shopper.id, creator.id);
+    expect(countFollowers(creator.id)).toBe(1);
+  });
+
+  it("blends links from every followed creator into one feed, newest first", () => {
+    const a = createCreator("a@example.com").creator;
+    const b = createCreator("b@example.com").creator;
+    const { user: shopper } = createUser("shopper@example.com", "hashed", "shopper");
+
+    const first = addLink({ creatorId: a.id, title: "A1", category: "cosmetics", targetUrl: "https://example.com/a1" });
+    const second = addLink({ creatorId: b.id, title: "B1", category: "mens", targetUrl: "https://example.com/b1" });
+
+    followCreator(shopper.id, a.id);
+    followCreator(shopper.id, b.id);
+
+    expect(circleFeed(shopper.id).map((l) => l.id)).toEqual([second.id, first.id]);
+  });
+
+  it("only shows links from followed creators, not everyone", () => {
+    const followed = createCreator("followed@example.com").creator;
+    const stranger = createCreator("stranger@example.com").creator;
+    const { user: shopper } = createUser("shopper@example.com", "hashed", "shopper");
+
+    addLink({ creatorId: stranger.id, title: "Not yours", category: "cosmetics", targetUrl: "https://example.com/x" });
+    followCreator(shopper.id, followed.id);
+
+    expect(circleFeed(shopper.id)).toEqual([]);
   });
 });

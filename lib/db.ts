@@ -95,10 +95,20 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 
+  -- A shopper's own "circle": creators whose picks they want blended into
+  -- one feed, rather than checking each storefront separately.
+  CREATE TABLE IF NOT EXISTS follows (
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    creator_id TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, creator_id)
+  );
+
   CREATE INDEX IF NOT EXISTS idx_links_creator  ON links(creator_id);
   CREATE INDEX IF NOT EXISTS idx_links_article  ON links(article_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_link    ON clicks(link_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_fp      ON clicks(link_id, fingerprint, clicked_at);
+  CREATE INDEX IF NOT EXISTS idx_follows_creator ON follows(creator_id);
 `);
 
 // Adds columns introduced after a database file already existed.

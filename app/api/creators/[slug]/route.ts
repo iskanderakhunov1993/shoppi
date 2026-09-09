@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCreatorBySlug, listLinksByCreator } from "@/lib/store";
+import { countFollowers, getCreatorBySlug, listLinksByCreator } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -21,10 +21,12 @@ export async function GET(
   }));
 
   return NextResponse.json({
+    id: creator.id,
     slug: creator.slug,
     displayName: creator.displayName,
     bio: creator.bio,
     avatarUrl: creator.avatarUrl,
+    followers: countFollowers(creator.id),
     links,
   });
 }

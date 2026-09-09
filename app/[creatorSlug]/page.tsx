@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
+import { FollowButton } from "@/app/components/FollowButton";
 import { placeholderAvatar } from "@/lib/avatar";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -28,11 +29,13 @@ async function getStorefront(slug: string) {
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to load storefront");
   return res.json() as Promise<{
+    id: string;
     slug: string;
     displayName: string;
     bio?: string;
     links: StorefrontLink[];
     avatarUrl?: string;
+    followers: number;
   }>;
 }
 
@@ -59,8 +62,11 @@ export default async function StorefrontPage({
         </div>
         <h1 className="font-display text-3xl mt-2 mb-2">{creator.displayName}</h1>
         {creator.bio && (
-          <p className="text-stone text-sm max-w-md mx-auto">{creator.bio}</p>
+          <p className="text-stone text-sm max-w-md mx-auto mb-6">{creator.bio}</p>
         )}
+        <div className="flex justify-center mt-2">
+          <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
+        </div>
       </div>
 
       {creator.links.length === 0 ? (

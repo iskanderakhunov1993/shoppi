@@ -520,6 +520,67 @@ export function listFavoriteIds(userId: string, linkIds: string[]): Set<string> 
   return new Set(rows.map((r) => str(r.link_id)));
 }
 
+/* ---------------------------------------------------------------- follows */
+
+export function followCreator(userId: string, creatorId: string): void {
+  db.prepare(
+    "INSERT OR IGNORE INTO follows (user_id, creator_id, created_at) VALUES (?, ?, ?)"
+  ).run(userId, creatorId, new Date().toISOString());
+}
+
+export function unfollowCreator(userId: string, creatorId: string): void {
+  db.prepare("DELETE FROM follows WHERE user_id = ? AND creator_id = ?").run(userId, creatorId);
+}
+
+export function isFollowing(userId: string, creatorId: string): boolean {
+  const r = db
+    .prepare("SELECT 1 AS x FROM follows WHERE user_id = ? AND creator_id = ?")
+    .get(userId, creatorId) as Row | undefined;
+  return Boolean(r);
+}
+
+export function countFollowers(creatorId: string): number {
+  const r = db.prepare("SELECT COUNT(*) AS c FROM follows WHERE creator_id = ?").get(creatorId) as {
+    c: number;
+  };
+  return Number(r.c);
+}
+
+export function listFollowedCreators(userId: string): Creator[] {
+  return (
+    db
+      .prepare(
+        `SELECT c.* FROM creators c JOIN follows f ON f.creator_id = c.id
+         WHERE f.user_id = ? ORDER BY f.created_at DESC`
+      )
+      .all(userId) as Row[]
+  ).map(toCreator);
+}
+
+export function countFollowedCreators(userId: string): number {
+  const r = db.prepare("SELECT COUNT(*) AS c FROM follows WHERE user_id = ?").get(userId) as {
+    c: number;
+  };
+  return Number(r.c);
+}
+
+/**
+ * The shopper's "circle" feed: every link from every creator they follow,
+ * newest first — the one blended stream Circles is actually for, instead
+ * of checking each storefront in turn.
+ */
+export function circleFeed(userId: string, opts: { limit?: number } = {}): Link[] {
+  const limit = Math.min(opts.limit ?? 60, 200);
+  return (
+    db
+      .prepare(
+        `SELECT l.* FROM links l JOIN follows f ON f.creator_id = l.creator_id
+         WHERE f.user_id = ? ORDER BY l.seq DESC LIMIT ?`
+      )
+      .all(userId, limit) as Row[]
+  ).map(toLink);
+}
+
 /* ------------------------------------------------------------- sessions */
 
 export function createSessionRow(token: string, userId: string): void {
