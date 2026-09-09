@@ -126,6 +126,10 @@ export function getCreatorBySlug(slug: string): Creator | undefined {
   return id ? creators.get(id) : undefined;
 }
 
+export function getCreatorById(id: string): Creator | undefined {
+  return creators.get(id);
+}
+
 let linkSequence = 0;
 const linkInsertOrder = new Map<string, number>();
 
@@ -159,6 +163,24 @@ export function listLinksByDomain(domain: string): Link[] {
   return [...links.values()]
     .filter((l) => hostnameOf(l.targetUrl) === normalized)
     .sort((a, b) => linkInsertOrder.get(b.id)! - linkInsertOrder.get(a.id)!);
+}
+
+export function listLinksByCategory(category: Link["category"]): Link[] {
+  return [...links.values()]
+    .filter((l) => l.category === category)
+    .sort((a, b) => linkInsertOrder.get(b.id)! - linkInsertOrder.get(a.id)!);
+}
+
+export function listDistinctBrandDomains(): { domain: string; linkCount: number }[] {
+  const counts = new Map<string, number>();
+  for (const link of links.values()) {
+    const host = hostnameOf(link.targetUrl);
+    if (!host) continue;
+    counts.set(host, (counts.get(host) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([domain, linkCount]) => ({ domain, linkCount }))
+    .sort((a, b) => b.linkCount - a.linkCount);
 }
 
 export function recordClick(linkId: string, referrer?: string, userAgent?: string): Click {

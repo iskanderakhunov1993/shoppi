@@ -25,7 +25,13 @@ function seedCreator(
   email: string,
   displayName: string,
   bio: string,
-  links: { title: string; category: "cosmetics" | "mens" | "clothing"; slug: string; price: number }[]
+  links: {
+    title: string;
+    category: "cosmetics" | "mens" | "clothing";
+    domain: string;
+    slug: string;
+    price: number;
+  }[]
 ) {
   if (getUserByEmail(email)) return;
   const { user, creator } = createUser(email, hashPassword(DEMO_PASSWORD), "creator");
@@ -39,7 +45,7 @@ function seedCreator(
       creatorId: creator.id,
       title: link.title,
       category: link.category,
-      targetUrl: `https://wildberries.ru/catalog/${link.slug}`,
+      targetUrl: `https://${link.domain}/catalog/${link.slug}`,
       price: link.price,
     });
   }
@@ -51,8 +57,8 @@ export function seedDemoAccounts() {
     "Белла",
     "Уход, который правда работает — то, что покупаю не первый раз.",
     [
-      { title: "Сыворотка с витамином C", category: "cosmetics", slug: "demo-serum", price: 2490 },
-      { title: "Крем для рук, без отдушки", category: "cosmetics", slug: "demo-hand-cream", price: 690 },
+      { title: "Сыворотка с витамином C", category: "cosmetics", domain: "wildberries.ru", slug: "demo-serum", price: 2490 },
+      { title: "Крем для рук, без отдушки", category: "cosmetics", domain: "letu.ru", slug: "demo-hand-cream", price: 690 },
     ]
   );
 
@@ -61,8 +67,8 @@ export function seedDemoAccounts() {
     "Максим",
     "Инструменты и снаряжение, которые проверил сам — ничего лишнего.",
     [
-      { title: "Складной нож для кемпинга", category: "mens", slug: "demo-knife", price: 4200 },
-      { title: "Механический триммер для бороды", category: "mens", slug: "demo-trimmer", price: 3190 },
+      { title: "Складной нож для кемпинга", category: "mens", domain: "wildberries.ru", slug: "demo-knife", price: 4200 },
+      { title: "Механический триммер для бороды", category: "mens", domain: "ozon.ru", slug: "demo-trimmer", price: 3190 },
     ]
   );
 
@@ -71,8 +77,8 @@ export function seedDemoAccounts() {
     "Соня",
     "Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.",
     [
-      { title: "Пальто из шерсти, серое", category: "clothing", slug: "demo-coat", price: 14900 },
-      { title: "Свитер оверсайз, бежевый", category: "clothing", slug: "demo-sweater", price: 5400 },
+      { title: "Пальто из шерсти, серое", category: "clothing", domain: "lamoda.ru", slug: "demo-coat", price: 14900 },
+      { title: "Свитер оверсайз, бежевый", category: "clothing", domain: "ozon.ru", slug: "demo-sweater", price: 5400 },
     ]
   );
 

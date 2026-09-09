@@ -3,17 +3,19 @@ import Link from "next/link";
 export function LandingNav() {
   return (
     <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-line">
-      <span className="font-display text-lg">Shoppi</span>
+      <Link href="/" className="font-display text-lg">
+        Shoppi
+      </Link>
       <div className="hidden md:flex items-center gap-8 text-[12px] uppercase tracking-wide text-stone">
-        <a href="#curators" className="hover:text-ink transition-colors">
-          Кураторы
-        </a>
-        <a href="#how" className="hover:text-ink transition-colors">
-          Как это устроено
-        </a>
-        <a href="#brands" className="hover:text-ink transition-colors">
+        <Link href="/shoppers" className="hover:text-ink transition-colors">
+          Покупателям
+        </Link>
+        <Link href="/creators" className="hover:text-ink transition-colors">
+          Кураторам
+        </Link>
+        <Link href="/brands" className="hover:text-ink transition-colors">
           Брендам
-        </a>
+        </Link>
       </div>
       <div className="flex items-center gap-3">
         <Link
