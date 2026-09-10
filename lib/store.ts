@@ -37,6 +37,9 @@ export type Link = {
   targetUrl: string;
   marketplace?: string;
   articleId?: string;
+  // Not surfaced in any UI yet — see the note on the `promo_code` column
+  // in lib/db.ts.
+  promoCode?: string;
   createdAt: string;
 };
 
@@ -91,6 +94,7 @@ function toLink(r: Row): Link {
     targetUrl: str(r.target_url),
     marketplace: opt(r.marketplace),
     articleId: opt(r.article_id),
+    promoCode: opt(r.promo_code),
     createdAt: str(r.created_at),
   };
 }
@@ -245,12 +249,13 @@ export function addLink(input: Omit<Link, "id" | "createdAt">): Link {
   const id = randomUUID();
   const now = new Date().toISOString();
   db.prepare(
-    `INSERT INTO links (id, creator_id, title, image_url, price, category, target_url, marketplace, article_id, created_at, seq)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, created_at, seq)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     input.creatorId,
     input.title,
+    input.title.toLowerCase(),
     input.imageUrl ?? null,
     input.price ?? null,
     input.category,
@@ -275,8 +280,10 @@ export function updateLink(
   const current = getLink(id);
   if (!current) return undefined;
 
-  db.prepare(`UPDATE links SET title = ?, category = ?, price = ?, image_url = ? WHERE id = ?`).run(
-    patch.title ?? current.title,
+  const title = patch.title ?? current.title;
+  db.prepare(`UPDATE links SET title = ?, title_lower = ?, category = ?, price = ?, image_url = ? WHERE id = ?`).run(
+    title,
+    title.toLowerCase(),
     patch.category ?? current.category,
     patch.price === undefined ? (current.price ?? null) : patch.price,
     patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl,
@@ -355,6 +362,23 @@ export function listLinksByCategory(
 export function countLinksByCategory(category: Link["category"]): number {
   const r = db.prepare("SELECT COUNT(*) AS c FROM links WHERE category = ?").get(category) as { c: number };
   return Number(r.c);
+}
+
+export type LinkSearchResult = Link & { creatorSlug: string; creatorName: string };
+
+export function searchLinks(query: string, opts: { limit?: number } = {}): LinkSearchResult[] {
+  const limit = Math.min(opts.limit ?? 24, 100);
+  const q = `%${query.trim().toLowerCase()}%`;
+  return (
+    db
+      .prepare(
+        `SELECT links.*, creators.slug AS creator_slug, creators.display_name AS creator_name
+         FROM links JOIN creators ON creators.id = links.creator_id
+         WHERE links.title_lower LIKE ?
+         ORDER BY links.seq DESC LIMIT ?`
+      )
+      .all(q, limit) as (Row & { creator_slug: string; creator_name: string })[]
+  ).map((r) => ({ ...toLink(r), creatorSlug: str(r.creator_slug), creatorName: str(r.creator_name) }));
 }
 
 export function listDistinctBrandDomains(limit = 12): { domain: string; linkCount: number }[] {

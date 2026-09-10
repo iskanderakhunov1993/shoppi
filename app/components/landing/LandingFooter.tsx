@@ -83,6 +83,10 @@ export async function LandingFooter() {
           </Link>
           <p className="text-[13px] text-white/55 mt-3">
             © 2026 Shoppi &nbsp;|&nbsp; Покупай у своих людей, не у алгоритма.
+            &nbsp;|&nbsp;{" "}
+            <Link href="/privacy" className="underline hover:text-white transition-colors">
+              Политика конфиденциальности
+            </Link>
           </p>
         </div>
       </div>

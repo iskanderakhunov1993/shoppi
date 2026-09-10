@@ -20,6 +20,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -131,8 +132,22 @@ export default function SignupPage() {
               />
             </Field>
           )}
+          <label className="flex items-start gap-2.5 text-[13px] text-stone leading-relaxed cursor-pointer">
+            <input
+              type="checkbox"
+              required
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-0.5 shrink-0"
+            />
+            Согласен(на) с{" "}
+            <Link href="/privacy" className="underline underline-offset-4 text-ink">
+              политикой конфиденциальности
+            </Link>{" "}
+            и обработкой данных, описанных в ней.
+          </label>
           {error && <p className="text-error text-sm">{error}</p>}
-          <button type="submit" disabled={submitting} className={buttonClass}>
+          <button type="submit" disabled={submitting || !consent} className={buttonClass}>
             {submitting ? "Секунду…" : "Зарегистрироваться"}
           </button>
         </form>

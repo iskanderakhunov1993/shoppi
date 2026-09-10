@@ -63,12 +63,17 @@ db.exec(`
     id          TEXT PRIMARY KEY,
     creator_id  TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
     title       TEXT NOT NULL,
+    title_lower TEXT NOT NULL DEFAULT '',
     image_url   TEXT,
     price       REAL,
     category    TEXT NOT NULL,
     target_url  TEXT NOT NULL,
     marketplace TEXT,
     article_id  TEXT,
+    -- Not surfaced anywhere yet: this is architectural insurance for P2
+    -- promo-code attribution, so the column exists before any UI needs it
+    -- rather than requiring a migration once it does.
+    promo_code  TEXT,
     created_at  TEXT NOT NULL,
     seq         INTEGER NOT NULL
   );
@@ -105,6 +110,7 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_links_creator  ON links(creator_id);
+  CREATE INDEX IF NOT EXISTS idx_links_title_lower ON links(title_lower);
   CREATE INDEX IF NOT EXISTS idx_links_article  ON links(article_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_link    ON clicks(link_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_fp      ON clicks(link_id, fingerprint, clicked_at);
@@ -114,6 +120,8 @@ db.exec(`
 // Adds columns introduced after a database file already existed.
 for (const [table, column, ddl] of [
   ["creators", "display_name_lower", "ALTER TABLE creators ADD COLUMN display_name_lower TEXT NOT NULL DEFAULT ''"],
+  ["links", "title_lower", "ALTER TABLE links ADD COLUMN title_lower TEXT NOT NULL DEFAULT ''"],
+  ["links", "promo_code", "ALTER TABLE links ADD COLUMN promo_code TEXT"],
 ] as const) {
   const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
   if (!cols.some((c) => c.name === column)) {

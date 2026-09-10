@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { FollowButton } from "@/app/components/FollowButton";
+import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -70,9 +71,9 @@ export default async function StorefrontPage({
       </div>
 
       {creator.links.length === 0 ? (
-        <p className="font-display italic text-center text-stone py-16">
-          Куратор пока не добавил товары.
-        </p>
+        <div className="py-16 flex justify-center">
+          <EmptyState title="Куратор пока не добавил товары." />
+        </div>
       ) : (
         <div className="grid sm:grid-cols-2 md:grid-cols-3">
           {creator.links.map((link, i) => (

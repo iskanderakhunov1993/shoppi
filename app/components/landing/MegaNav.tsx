@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type Item = { label: string; href: string; description: string };
@@ -139,8 +140,19 @@ export function MegaNav({
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
   const menus = buildMenus(demoSlug);
+
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    setSearchOpen(false);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  }
 
   // The bar rides over the hero photo at the top of the page, then takes
   // on a solid background once it starts covering ordinary content.
@@ -224,6 +236,33 @@ export function MegaNav({
         </div>
 
         <div className="flex items-center gap-3">
+          {searchOpen ? (
+            <form onSubmit={submitSearch} className="hidden sm:flex items-center">
+              <input
+                autoFocus
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => !searchQuery && setSearchOpen(false)}
+                placeholder="Товары и кураторы"
+                className={`text-[13px] w-48 px-3 py-1.5 border-b bg-transparent outline-none ${
+                  transparent ? "border-white text-white placeholder:text-white/60" : "border-ink text-ink placeholder:text-stone"
+                }`}
+              />
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Поиск"
+              className={`hidden sm:flex items-center justify-center w-7 h-7 ${mutedColor} hover:${textColor} transition-colors cursor-pointer`}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
           {signedIn ? (
             <Link
               href="/dashboard"

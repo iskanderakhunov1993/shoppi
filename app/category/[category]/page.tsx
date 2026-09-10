@@ -3,6 +3,7 @@ import { seedDemoAccounts } from "@/lib/seed";
 import { listLinksByCategory, getCreatorById, type Link as ShopLink } from "@/lib/store";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { EmptyState } from "@/app/components/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -63,9 +64,7 @@ export default async function CategoryPage({
       <section className="px-6 md:px-10 py-14 md:py-16">
         <div className="max-w-[1200px] mx-auto">
           {links.length === 0 ? (
-            <p className="font-display italic text-stone">
-              В этой категории пока нет опубликованных товаров.
-            </p>
+            <EmptyState title="В этой категории пока нет опубликованных товаров." />
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
               {links.map((link) => {

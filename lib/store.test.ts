@@ -18,6 +18,7 @@ import {
   listCreators,
   countCreators,
   updateCreator,
+  searchLinks,
   followCreator,
   unfollowCreator,
   isFollowing,
@@ -211,6 +212,29 @@ describe("listCreators", () => {
     expect(listCreators({ limit: 2 })).toHaveLength(2);
     expect(listCreators({ limit: 2, offset: 4 })).toHaveLength(1);
     expect(countCreators()).toBe(5);
+  });
+});
+
+describe("searchLinks", () => {
+  it("finds a link by a Cyrillic title regardless of case, with creator info attached", () => {
+    const { creator } = createCreator("anna@example.com");
+    const link = addLink({
+      creatorId: creator.id,
+      title: "Сыворотка для лица",
+      category: "cosmetics",
+      targetUrl: "https://example.com/serum",
+    });
+
+    const results = searchLinks("сыворотка");
+    expect(results.map((l) => l.id)).toEqual([link.id]);
+    expect(results[0].creatorSlug).toBe(creator.slug);
+    expect(results[0].creatorName).toBe(creator.displayName);
+  });
+
+  it("returns nothing for a title that is not there", () => {
+    const { creator } = createCreator("anna@example.com");
+    addLink({ creatorId: creator.id, title: "Крем", category: "cosmetics", targetUrl: "https://example.com/1" });
+    expect(searchLinks("шампунь")).toEqual([]);
   });
 });
 

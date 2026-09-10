@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { inputClass } from "@/app/components/Field";
 import { DashboardHeader } from "./DashboardHeader";
+import { EmptyState } from "@/app/components/EmptyState";
 
 type BrandLink = {
   id: string;
@@ -10,11 +11,14 @@ type BrandLink = {
   category: "cosmetics" | "mens" | "clothing";
   targetUrl: string;
   articleId?: string;
+  createdAt: string;
   clicks: number;
   clicksTotal: number;
   creatorName?: string;
   creatorSlug?: string;
 };
+
+const LAST_SEEN_KEY = "shoppi:brand:linksLastSeen";
 
 const CATEGORY_LABEL: Record<BrandLink["category"], string> = {
   cosmetics: "Косметика",
@@ -33,10 +37,26 @@ export function BrandDashboard({
   const [articlesInput, setArticlesInput] = useState((me.brandArticles ?? []).join("\n"));
   const [saving, setSaving] = useState(false);
   const [unrecognized, setUnrecognized] = useState<string[]>([]);
+  const [newSinceLastVisit, setNewSinceLastVisit] = useState(0);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/brand/links");
-    if (res.ok) setLinks((await res.json()).links);
+    if (!res.ok) return;
+    const data = (await res.json()).links as BrandLink[];
+    setLinks(data);
+
+    // Per-viewer convenience only, so it lives in localStorage rather than
+    // the database: "new since I last looked" has no meaning shared across
+    // devices or people.
+    try {
+      const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
+      if (lastSeen) {
+        setNewSinceLastVisit(data.filter((l) => l.createdAt > lastSeen).length);
+      }
+      localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+    } catch {
+      // localStorage unavailable (private mode, blocked) — skip the banner
+    }
   }, []);
 
   useEffect(() => {
@@ -102,6 +122,14 @@ export function BrandDashboard({
         </div>
 
         <div className="px-8 py-8">
+          {newSinceLastVisit > 0 && (
+            <p className="text-[12.5px] text-ink bg-raise border border-line px-4 py-3 mb-6">
+              {newSinceLastVisit === 1
+                ? "Появилась 1 новая ссылка"
+                : `Появилось новых ссылок: ${newSinceLastVisit}`}{" "}
+              на ваши товары с прошлого визита.
+            </p>
+          )}
           <div className="flex justify-between items-baseline mb-6 flex-wrap gap-2">
             <h3 className="text-[11px] uppercase tracking-wider text-stone">
               Кто ссылается на ваши товары
@@ -117,26 +145,15 @@ export function BrandDashboard({
           {links === null ? (
             <p className="text-stone text-sm">Загрузка…</p>
           ) : !hasArticles ? (
-            <div className="max-w-md flex flex-col gap-3">
-              <p className="font-display italic text-base text-stone">
-                Пока не указано ни одного товара.
-              </p>
-              <p className="text-stone text-sm leading-relaxed">
-                Добавьте артикулы слева — и здесь появятся кураторы, которые уже ссылаются на
-                ваши карточки, вместе с числом переходов по каждой.
-              </p>
-            </div>
+            <EmptyState
+              title="Пока не указано ни одного товара."
+              description="Добавьте артикулы слева — и здесь появятся кураторы, которые уже ссылаются на ваши карточки, вместе с числом переходов по каждой."
+            />
           ) : links.length === 0 ? (
-            <div className="max-w-md flex flex-col gap-3">
-              <p className="font-display italic text-base text-stone">
-                На эти товары пока никто не ссылается.
-              </p>
-              <p className="text-stone text-sm leading-relaxed">
-                Данные появятся, как только куратор добавит один из ваших артикулов к себе на
-                витрину. Проверьте, что артикулы указаны верно — сейчас отслеживается{" "}
-                {(me.brandArticles ?? []).length}.
-              </p>
-            </div>
+            <EmptyState
+              title="На эти товары пока никто не ссылается."
+              description={`Данные появятся, как только куратор добавит один из ваших артикулов к себе на витрину. Проверьте, что артикулы указаны верно — сейчас отслеживается ${(me.brandArticles ?? []).length}.`}
+            />
           ) : (
             <ul className="flex flex-col">
               {links.map((link) => (

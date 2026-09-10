@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { inputClass, buttonClass } from "@/app/components/Field";
 import { DashboardHeader } from "./DashboardHeader";
 import { ProfileEditor } from "./ProfileEditor";
+import { EmptyState } from "@/app/components/EmptyState";
+import { OnboardingProgress } from "./OnboardingProgress";
 
 type Category = "cosmetics" | "mens" | "clothing";
 
@@ -142,6 +144,13 @@ export function CreatorDashboard({
         action={
           me.slug && (
             <div className="flex items-center gap-2">
+              <OnboardingProgress
+                steps={[
+                  { label: "Заполните описание витрины", done: Boolean(me.bio?.trim()) },
+                  { label: "Добавьте первый товар", done: links.length > 0 },
+                  { label: "Получите первый живой переход", done: totalHuman > 0 },
+                ]}
+              />
               <a
                 href={`/${me.slug}/stats`}
                 className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
@@ -224,9 +233,7 @@ export function CreatorDashboard({
           </div>
 
           {links.length === 0 ? (
-            <p className="font-display italic text-base text-stone">
-              Ваша витрина пока пуста — добавьте первый товар в форме выше.
-            </p>
+            <EmptyState title="Ваша витрина пока пуста — добавьте первый товар в форме выше." />
           ) : (
             <ul className="flex flex-col">
               {links.map((link) => (

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardHeader } from "./DashboardHeader";
+import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
 
 type FavoriteLink = {
@@ -98,19 +99,11 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
           {favorites === null ? (
             <p className="text-stone text-sm">Загрузка…</p>
           ) : favorites.length === 0 ? (
-            <div className="max-w-md flex flex-col gap-3">
-              <p className="font-display italic text-base text-stone">Пока пусто.</p>
-              <p className="text-stone text-sm leading-relaxed">
-                Откройте витрину куратора и нажмите «Сохранить» на товаре — он появится здесь, и
-                к нему можно будет вернуться позже.
-              </p>
-              <Link
-                href="/curators"
-                className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity"
-              >
-                Смотреть кураторов
-              </Link>
-            </div>
+            <EmptyState
+              title="Пока пусто."
+              description="Откройте витрину куратора и нажмите «Сохранить» на товаре — он появится здесь, и к нему можно будет вернуться позже."
+              cta={{ label: "Смотреть кураторов", href: "/curators" }}
+            />
           ) : (
             <ul className="flex flex-col">
               {favorites.map((link) => (
@@ -151,27 +144,19 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
           {circle === null ? (
             <p className="text-stone text-sm">Загрузка…</p>
           ) : circle.creators.length === 0 ? (
-            <div className="max-w-md flex flex-col gap-4 items-start">
-              <div className="w-12 h-12 grid grid-cols-2 gap-1 p-2 border border-line">
-                <span className="bg-line" />
-                <span className="bg-line" />
-                <span className="bg-line" />
-                <span className="bg-line" />
-              </div>
-              <div>
-                <p className="font-display text-xl mb-2">Пока нет кураторов</p>
-                <p className="text-stone text-sm leading-relaxed">
-                  Добавьте кураторов, чьему вкусу доверяете — их находки соберутся в одну ленту,
-                  вместо того чтобы проверять каждую витрину по отдельности.
-                </p>
-              </div>
-              <Link
-                href="/curators"
-                className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity"
-              >
-                Найти кураторов
-              </Link>
-            </div>
+            <EmptyState
+              icon={
+                <div className="w-12 h-12 grid grid-cols-2 gap-1 p-2 border border-line">
+                  <span className="bg-line" />
+                  <span className="bg-line" />
+                  <span className="bg-line" />
+                  <span className="bg-line" />
+                </div>
+              }
+              title="Пока нет кураторов"
+              description="Добавьте кураторов, чьему вкусу доверяете — их находки соберутся в одну ленту, вместо того чтобы проверять каждую витрину по отдельности."
+              cta={{ label: "Найти кураторов", href: "/curators" }}
+            />
           ) : (
             <div className="flex flex-col gap-10">
               <div>
