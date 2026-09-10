@@ -1,8 +1,11 @@
 import { defineConfig } from 'vitest/config'
 import path from 'path'
-import { config } from 'dotenv'
 
-config({ path: path.resolve(__dirname, '.env.local') })
+try {
+  process.loadEnvFile(path.resolve(__dirname, '.env.local'))
+} catch {
+  // no .env.local (e.g. CI with DATABASE_URL already in the environment)
+}
 
 export default defineConfig({
   resolve: {
