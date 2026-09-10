@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Shoppi — Афиша</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0B0B0C; --ink:#F5F3EE; --muted:#8B8590; --line:#242226; --card:#141315;
+    --lime:#D4FF3F;
+  }
+  /* Dark-first, deliberate single-look direction — intentionally no light-mode swap. */
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Manrope',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:26px 0;border-bottom:1px solid var(--line);}
+  .wordmark{font-family:'Archivo Black',sans-serif;font-size:19px;letter-spacing:-0.01em;}
+  .navlinks{display:flex;gap:30px;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  .navlinks a{color:inherit;text-decoration:none;}
+  .navlinks a.lime{color:var(--lime);}
+
+  header.hero{padding:100px 0 70px;position:relative;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:0 0 22px;display:flex;align-items:center;gap:10px;}
+  .eyebrow::before{content:"";width:8px;height:8px;background:var(--lime);display:inline-block;}
+  h1{font-family:'Archivo Black',sans-serif;font-size:clamp(46px,9vw,104px);line-height:0.92;letter-spacing:-0.02em;margin:0 0 30px;text-transform:uppercase;}
+  h1 span{color:var(--muted);-webkit-text-stroke:1px var(--muted);color:transparent;}
+  .sub{font-size:17px;line-height:1.6;color:var(--muted);max-width:44ch;margin:0 0 36px;}
+  .cta-row{display:flex;gap:14px;}
+  .btn{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:16px 24px;text-decoration:none;font-weight:700;}
+  .btn.solid{background:var(--lime);color:#0B0B0C;}
+  .btn.outline{border:1px solid var(--line);color:var(--ink);}
+
+  section{padding:64px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:36px;gap:20px;flex-wrap:wrap;}
+  .section-head h2{font-family:'Archivo Black',sans-serif;font-size:28px;text-transform:uppercase;margin:0;}
+  .section-head p{color:var(--muted);font-size:13.5px;max-width:32ch;margin:0;}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .stub{background:var(--card);border:1px solid var(--line);position:relative;padding:22px;}
+  .stub::after{
+    content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+    width:18px;height:18px;background:var(--paper);border:1px solid var(--line);border-radius:50%;
+  }
+  .stub h3{font-family:'Archivo Black',sans-serif;font-size:19px;margin:0 0 8px;text-transform:uppercase;}
+  .stub p{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 16px;}
+  .stub .perf{border-top:1px dashed var(--line);padding-top:14px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);text-transform:uppercase;}
+  .stub .perf b{color:var(--lime);font-size:14px;font-variant-numeric:tabular-nums;}
+
+  .drop{display:grid;grid-template-columns:1.1fr 1fr;gap:0;border:1px solid var(--line);}
+  .drop .art{background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;border-right:1px solid var(--line);min-height:340px;}
+  .drop .info{padding:32px;display:flex;flex-direction:column;justify-content:center;gap:14px;}
+  .drop .info .cat{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+  .drop .info h3{font-family:'Archivo Black',sans-serif;font-size:26px;margin:0;text-transform:uppercase;}
+  .drop .info .price{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .promo{display:inline-flex;align-items:center;gap:8px;background:var(--lime);color:#0B0B0C;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;padding:8px 14px;width:fit-content;position:relative;}
+  .promo::before,.promo::after{content:"";position:absolute;top:50%;transform:translateY(-50%);width:10px;height:10px;background:var(--paper);border-radius:50%;}
+  .promo::before{left:-5px;} .promo::after{right:-5px;}
+
+  footer{padding:36px 0;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="wordmark">SHOPPI</div>
+      <div class="navlinks"><a href="#">Покупателям</a><a href="#">Кураторам</a><a href="#" class="lime">Брендам</a></div>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">Направление C · Дроп</p>
+      <h1>Покупай<br><span>у своих</span><br>людей.</h1>
+      <p class="sub">Не у алгоритма. Косметика, мужские товары, одежда — витрины людей, которым ты доверяешь.</p>
+      <div class="cta-row">
+        <a class="btn solid" href="#">Смотреть кураторов</a>
+        <a class="btn outline" href="#">Стать куратором</a>
+      </div>
+    </header>
+
+    <section>
+      <div class="section-head"><h2>По куратору</h2><p>Три витрины, которые уже в деле.</p></div>
+      <div class="grid">
+        <div class="stub"><h3>Белла</h3><p>Уход, который правда работает — то, что покупаю не первый раз.</p>
+          <div class="perf"><span>Живых переходов</span><b>128</b></div>
+        </div>
+        <div class="stub"><h3>Максим</h3><p>Инструменты и снаряжение, которые проверил сам — ничего лишнего.</p>
+          <div class="perf"><span>Живых переходов</span><b>94</b></div>
+        </div>
+        <div class="stub"><h3>Соня</h3><p>Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.</p>
+          <div class="perf"><span>Живых переходов</span><b>203</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-bottom:none;">
+      <div class="section-head"><h2>Товар недели</h2><p>Промокод — как отрывной купон.</p></div>
+      <div class="drop">
+        <div class="art">фото товара</div>
+        <div class="info">
+          <span class="cat">Косметика · от Беллы</span>
+          <h3>Крем для рук, без отдушки</h3>
+          <span class="price">690 ₽</span>
+          <span class="promo">BELLA10 →</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>Shoppi © 2026 — макет для сравнения, не боевой код</footer>
+  </div>
+</body>
+</html>

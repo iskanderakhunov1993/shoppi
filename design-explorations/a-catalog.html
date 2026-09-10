@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Shoppi — Каталог</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F5F0; --ink:#17140F; --stone:#8A8272; --line:#DDD6C7;
+    --card:#FFFFFE; --tag:#B21F2D; --tag-ink:#FFF6EC;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#15130F; --ink:#F3EFE4; --stone:#9B9280; --line:#332E23;
+      --card:#1C1913; --tag:#E23B49; --tag-ink:#1C0507;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#15130F; --ink:#F3EFE4; --stone:#9B9280; --line:#332E23;
+    --card:#1C1913; --tag:#E23B49; --tag-ink:#1C0507;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Public Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:28px 0;border-bottom:1px solid var(--line);}
+  .wordmark{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-0.01em;}
+  .navlinks{display:flex;gap:32px;font-size:13px;letter-spacing:.02em;color:var(--stone);}
+  .navlinks a{color:inherit;text-decoration:none;}
+  header.hero{padding:88px 0 64px;border-bottom:1px solid var(--line);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tag);margin:0 0 18px;}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(40px,7vw,76px);line-height:0.98;letter-spacing:-0.015em;margin:0 0 28px;max-width:14ch;}
+  h1 em{font-style:italic;font-weight:500;color:var(--stone);}
+  .sub{font-size:17px;line-height:1.55;color:var(--stone);max-width:46ch;margin:0 0 36px;}
+  .cta-row{display:flex;gap:14px;align-items:center;}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;padding:14px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);text-decoration:none;}
+  .btn.ghost{background:transparent;color:var(--ink);}
+
+  section.creators{padding:72px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:40px;gap:20px;flex-wrap:wrap;}
+  .section-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:34px;margin:0;}
+  .section-head p{color:var(--stone);font-size:14px;max-width:32ch;margin:0;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .card{background:var(--card);padding:26px;display:flex;flex-direction:column;gap:10px;position:relative;}
+  .card .num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--stone);}
+  .card h3{font-family:'Fraunces',serif;font-size:22px;font-weight:500;margin:0;}
+  .card p{font-size:13.5px;color:var(--stone);line-height:1.5;margin:0;}
+
+  section.products{padding:72px 0;}
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .pcard{position:relative;}
+  .pcard .frame{aspect-ratio:4/5;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--stone);font-size:12px;font-family:'IBM Plex Mono',monospace;overflow:hidden;position:relative;}
+  .tag{
+    position:absolute;top:14px;right:-9px;background:var(--tag);color:var(--tag-ink);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.03em;
+    padding:7px 14px 7px 12px;transform:rotate(2deg);
+    clip-path:polygon(0 0,100% 0,100% 100%,10% 100%,0 70%);
+  }
+  .pmeta{padding-top:14px;display:flex;justify-content:space-between;align-items:baseline;}
+  .pmeta h4{font-family:'Public Sans',sans-serif;font-weight:600;font-size:14.5px;margin:0 0 4px;}
+  .pmeta .cat{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--stone);text-transform:uppercase;letter-spacing:.05em;}
+  .price{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;}
+  footer{padding:40px 0;color:var(--stone);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="wordmark">Shoppi</div>
+      <div class="navlinks"><a href="#">Покупателям</a><a href="#">Кураторам</a><a href="#">Брендам</a></div>
+      <div class="navlinks"><a href="#">Войти</a></div>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">Направление А · Каталог</p>
+      <h1>Покупай у своих людей, <em>не у алгоритма.</em></h1>
+      <p class="sub">Косметика, мужские товары, одежда — витрины людей, которым ты доверяешь, а не бесконечная лента.</p>
+      <div class="cta-row">
+        <a class="btn" href="#">Смотреть кураторов</a>
+        <a class="btn ghost" href="#">Стать куратором</a>
+      </div>
+    </header>
+
+    <section class="creators">
+      <div class="section-head">
+        <h2>По куратору</h2>
+        <p>Инсайдерский доступ к находкам людей, чьему вкусу вы доверяете.</p>
+      </div>
+      <div class="grid">
+        <div class="card"><span class="num">01</span><h3>Белла</h3><p>Уход, который правда работает — то, что покупаю не первый раз.</p></div>
+        <div class="card"><span class="num">02</span><h3>Максим</h3><p>Инструменты и снаряжение, которые проверил сам — ничего лишнего.</p></div>
+        <div class="card"><span class="num">03</span><h3>Соня</h3><p>Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.</p></div>
+      </div>
+    </section>
+
+    <section class="products">
+      <div class="section-head">
+        <h2>С промокодом</h2>
+        <p>Ценник — не метаданные, а призыв к действию.</p>
+      </div>
+      <div class="pgrid">
+        <div class="pcard">
+          <div class="frame">фото товара<span class="tag">BELLA10</span></div>
+          <div class="pmeta"><div><h4>Крем для рук, без отдушки</h4><span class="cat">Косметика</span></div><span class="price">690 ₽</span></div>
+        </div>
+        <div class="pcard">
+          <div class="frame">фото товара</div>
+          <div class="pmeta"><div><h4>Сыворотка с витамином C</h4><span class="cat">Косметика</span></div><span class="price">2 490 ₽</span></div>
+        </div>
+        <div class="pcard">
+          <div class="frame">фото товара</div>
+          <div class="pmeta"><div><h4>Складной нож для кемпинга</h4><span class="cat">Мужские товары</span></div><span class="price">4 200 ₽</span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Shoppi © 2026 — макет для сравнения, не боевой код</footer>
+  </div>
+</body>
+</html>
