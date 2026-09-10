@@ -15,14 +15,14 @@ export default async function CuratorsDirectoryPage({
   searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const { page: pageParam, q } = await searchParams;
-  seedDemoAccounts();
+  await seedDemoAccounts();
 
   const page = Math.max(1, Number(pageParam) || 1);
   const query = q?.trim() ?? "";
 
-  const total = countCreators(query);
+  const total = await countCreators(query);
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const creators = listCreators({ limit: PER_PAGE, offset: (page - 1) * PER_PAGE, query });
+  const creators = await listCreators({ limit: PER_PAGE, offset: (page - 1) * PER_PAGE, query });
 
   const pageHref = (n: number) =>
     `/curators?page=${n}${query ? `&q=${encodeURIComponent(query)}` : ""}`;

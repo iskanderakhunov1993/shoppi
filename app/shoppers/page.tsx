@@ -22,9 +22,9 @@ const ITEMS = [
   },
 ];
 
-export default function ShoppersPage() {
-  seedDemoAccounts();
-  const creators = listLandingCreators();
+export default async function ShoppersPage() {
+  await seedDemoAccounts();
+  const creators = await listLandingCreators();
 
   return (
     <main className="flex-1 flex flex-col">

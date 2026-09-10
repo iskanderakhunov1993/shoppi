@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (getUserByEmail(email)) {
+  if (await getUserByEmail(email)) {
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
   }
 
-  const { user, creator } = createUser(
+  const { user, creator } = await createUser(
     email,
     hashPassword(password),
     role as Role,

@@ -6,14 +6,14 @@ import { parseMarketplaceItem } from "@/lib/marketplace";
 const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
 
 export async function GET(request: NextRequest) {
-  const creator = requireCreator(request);
+  const creator = await requireCreator(request);
   if (!creator) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const rows = listLinksByCreator(creator.id);
+  const rows = await listLinksByCreator(creator.id);
   // One grouped query for every link, instead of a count per link.
-  const counts = countClicksForLinks(rows.map((l) => l.id));
+  const counts = await countClicksForLinks(rows.map((l) => l.id));
 
   const links = rows.map((link) => ({
     ...link,
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const creator = requireCreator(request);
+  const creator = await requireCreator(request);
   if (!creator) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
   const { marketplace, articleId } = parseMarketplaceItem(targetUrl);
 
-  const link = addLink({
+  const link = await addLink({
     creatorId: creator.id,
     title,
     targetUrl,

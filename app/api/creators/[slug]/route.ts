@@ -6,12 +6,13 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const creator = getCreatorBySlug(slug);
+  const creator = await getCreatorBySlug(slug);
   if (!creator) {
     return NextResponse.json({ error: "Creator not found" }, { status: 404 });
   }
 
-  const links = listLinksByCreator(creator.id).map((link) => ({
+  const linkRows = await listLinksByCreator(creator.id);
+  const links = linkRows.map((link) => ({
     id: link.id,
     title: link.title,
     imageUrl: link.imageUrl,
@@ -26,7 +27,7 @@ export async function GET(
     displayName: creator.displayName,
     bio: creator.bio,
     avatarUrl: creator.avatarUrl,
-    followers: countFollowers(creator.id),
+    followers: await countFollowers(creator.id),
     links,
   });
 }

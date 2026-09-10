@@ -20,11 +20,11 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  seedDemoAccounts();
+  await seedDemoAccounts();
 
   const query = q?.trim() ?? "";
-  const creators = query ? listCreators({ query, limit: 8 }) : [];
-  const links = query ? searchLinks(query, { limit: 24 }) : [];
+  const creators = query ? await listCreators({ query, limit: 8 }) : [];
+  const links = query ? await searchLinks(query, { limit: 24 }) : [];
   const hasResults = creators.length > 0 || links.length > 0;
 
   return (

@@ -34,8 +34,15 @@ export default async function CategoryPage({
   const { category } = await params;
   if (!isCategory(category)) notFound();
 
-  seedDemoAccounts();
-  const links: ShopLink[] = listLinksByCategory(category);
+  await seedDemoAccounts();
+  const links: ShopLink[] = await listLinksByCategory(category);
+  const creatorsById = new Map(
+    await Promise.all(
+      [...new Set(links.map((l) => l.creatorId))].map(
+        async (id) => [id, await getCreatorById(id)] as const
+      )
+    )
+  );
 
   return (
     <main className="flex-1 flex flex-col">
@@ -68,7 +75,7 @@ export default async function CategoryPage({
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
               {links.map((link) => {
-                const creator = getCreatorById(link.creatorId);
+                const creator = creatorsById.get(link.creatorId);
                 return (
                   <a
                     key={link.id}

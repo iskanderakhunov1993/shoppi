@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `role must be one of: ${ROLES.join(", ")}` }, { status: 400 });
   }
 
-  seedDemoAccounts();
-  const user = getUserByEmail(DEMO_ACCOUNTS[role as Role]);
+  await seedDemoAccounts();
+  const user = await getUserByEmail(DEMO_ACCOUNTS[role as Role]);
   if (!user) {
     return NextResponse.json({ error: "Demo account seeding failed" }, { status: 500 });
   }
 
-  const token = createSession(user.id);
+  const token = await createSession(user.id);
   const response = NextResponse.json({ email: user.email, role: user.role });
   response.cookies.set(SESSION_COOKIE, token, { httpOnly: true, sameSite: "lax", path: "/" });
   return response;

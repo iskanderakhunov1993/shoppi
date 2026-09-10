@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 import { getUserIdForSession, SESSION_COOKIE } from "@/lib/auth";
 import { getCreatorByUserId, type Creator } from "@/lib/store";
 
-export function requireCreator(request: NextRequest): Creator | null {
+export async function requireCreator(request: NextRequest): Promise<Creator | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const userId = getUserIdForSession(token);
+  const userId = await getUserIdForSession(token);
   if (!userId) return null;
-  return getCreatorByUserId(userId) ?? null;
+  return (await getCreatorByUserId(userId)) ?? null;
 }

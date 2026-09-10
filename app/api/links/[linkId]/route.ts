@@ -5,11 +5,11 @@ import { deleteLink, getLink, updateLink } from "@/lib/store";
 const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
 
 /** Both handlers refuse to touch a link that belongs to someone else. */
-function authorize(request: NextRequest, linkId: string) {
-  const creator = requireCreator(request);
+async function authorize(request: NextRequest, linkId: string) {
+  const creator = await requireCreator(request);
   if (!creator) return { error: NextResponse.json({ error: "Not authenticated" }, { status: 401 }) };
 
-  const link = getLink(linkId);
+  const link = await getLink(linkId);
   if (!link) return { error: NextResponse.json({ error: "Link not found" }, { status: 404 }) };
   if (link.creatorId !== creator.id) {
     return { error: NextResponse.json({ error: "Not your link" }, { status: 403 }) };
@@ -23,7 +23,7 @@ export async function PUT(
   { params }: { params: Promise<{ linkId: string }> }
 ) {
   const { linkId } = await params;
-  const { error } = authorize(request, linkId);
+  const { error } = await authorize(request, linkId);
   if (error) return error;
 
   const body = await request.json().catch(() => null);
@@ -39,7 +39,7 @@ export async function PUT(
     return NextResponse.json({ error: "title cannot be empty" }, { status: 400 });
   }
 
-  const updated = updateLink(linkId, {
+  const updated = await updateLink(linkId, {
     title: body?.title,
     category: category as (typeof CATEGORIES)[number] | undefined,
     price: body?.price === null ? null : typeof body?.price === "number" ? body.price : undefined,
@@ -54,9 +54,9 @@ export async function DELETE(
   { params }: { params: Promise<{ linkId: string }> }
 ) {
   const { linkId } = await params;
-  const { error } = authorize(request, linkId);
+  const { error } = await authorize(request, linkId);
   if (error) return error;
 
-  deleteLink(linkId);
+  await deleteLink(linkId);
   return NextResponse.json({ ok: true });
 }

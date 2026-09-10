@@ -33,25 +33,25 @@ type SeedLink = {
   image?: string;
 };
 
-export function seedCreatorAccount(
+export async function seedCreatorAccount(
   email: string,
   displayName: string,
   bio: string,
   links: SeedLink[],
   passwordHash?: string
-): Creator | undefined {
-  const existing = getUserByEmail(email);
+): Promise<Creator | undefined> {
+  const existing = await getUserByEmail(email);
   if (existing) return getCreatorByUserId(existing.id);
 
-  const { user, creator } = createUser(email, passwordHash ?? hashPassword(DEMO_PASSWORD), "creator");
-  markUserVerified(user.id);
+  const { user, creator } = await createUser(email, passwordHash ?? hashPassword(DEMO_PASSWORD), "creator");
+  await markUserVerified(user.id);
   if (!creator) return undefined;
 
-  updateCreator(creator.id, { displayName, bio, avatarUrl: placeholderAvatar(creator.slug) });
+  await updateCreator(creator.id, { displayName, bio, avatarUrl: placeholderAvatar(creator.slug) });
 
   for (const link of links) {
     const { marketplace, articleId } = parseMarketplaceItem(link.url);
-    addLink({
+    await addLink({
       creatorId: creator.id,
       title: link.title,
       category: link.category,
@@ -66,8 +66,8 @@ export function seedCreatorAccount(
   return getCreatorByUserId(user.id);
 }
 
-export function seedDemoAccounts() {
-  seedCreatorAccount(
+export async function seedDemoAccounts(): Promise<void> {
+  await seedCreatorAccount(
     DEMO_ACCOUNTS.creator,
     "Белла",
     "Уход, который правда работает — то, что покупаю не первый раз.",
@@ -89,7 +89,7 @@ export function seedDemoAccounts() {
     ]
   );
 
-  seedCreatorAccount(
+  await seedCreatorAccount(
     LANDING_CREATORS[0],
     "Максим",
     "Инструменты и снаряжение, которые проверил сам — ничего лишнего.",
@@ -111,7 +111,7 @@ export function seedDemoAccounts() {
     ]
   );
 
-  seedCreatorAccount(
+  await seedCreatorAccount(
     LANDING_CREATORS[1],
     "Соня",
     "Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.",
@@ -133,37 +133,37 @@ export function seedDemoAccounts() {
     ]
   );
 
-  if (!getUserByEmail(DEMO_ACCOUNTS.shopper)) {
-    const { user } = createUser(DEMO_ACCOUNTS.shopper, hashPassword(DEMO_PASSWORD), "shopper");
-    markUserVerified(user.id);
+  if (!(await getUserByEmail(DEMO_ACCOUNTS.shopper))) {
+    const { user } = await createUser(DEMO_ACCOUNTS.shopper, hashPassword(DEMO_PASSWORD), "shopper");
+    await markUserVerified(user.id);
   }
 
-  if (!getUserByEmail(DEMO_ACCOUNTS.brand)) {
-    const { user } = createUser(
+  if (!(await getUserByEmail(DEMO_ACCOUNTS.brand))) {
+    const { user } = await createUser(
       DEMO_ACCOUNTS.brand,
       hashPassword(DEMO_PASSWORD),
       "brand",
       "wildberries.ru"
     );
-    markUserVerified(user.id);
+    await markUserVerified(user.id);
     // The demo brand claims the two WB articles seeded above, so its
     // dashboard shows its own products rather than every WB link.
-    setBrandArticles(user.id, ["172247725", "183920144"]);
+    await setBrandArticles(user.id, ["172247725", "183920144"]);
   }
 }
 
-export function getDemoCreatorSlug(): string | undefined {
-  const user = getUserByEmail(DEMO_ACCOUNTS.creator);
-  return user ? getCreatorByUserId(user.id)?.slug : undefined;
+export async function getDemoCreatorSlug(): Promise<string | undefined> {
+  const user = await getUserByEmail(DEMO_ACCOUNTS.creator);
+  return user ? (await getCreatorByUserId(user.id))?.slug : undefined;
 }
 
-export function listLandingCreators(): Creator[] {
+export async function listLandingCreators(): Promise<Creator[]> {
   const emails = [DEMO_ACCOUNTS.creator, ...LANDING_CREATORS];
-  return emails
-    .map((email) => getUserByEmail(email))
-    .filter((u): u is NonNullable<typeof u> => Boolean(u))
-    .map((u) => getCreatorByUserId(u.id))
-    .filter((c): c is Creator => Boolean(c));
+  const users = (await Promise.all(emails.map((email) => getUserByEmail(email)))).filter(
+    (u): u is NonNullable<typeof u> => Boolean(u)
+  );
+  const creators = await Promise.all(users.map((u) => getCreatorByUserId(u.id)));
+  return creators.filter((c): c is Creator => Boolean(c));
 }
 
 export { DEMO_PASSWORD };

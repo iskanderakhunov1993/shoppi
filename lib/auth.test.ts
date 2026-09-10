@@ -9,8 +9,8 @@ import {
 } from "./auth";
 import { createUser, __resetStoreForTests } from "./store";
 
-beforeEach(() => {
-  __resetStoreForTests();
+beforeEach(async () => {
+  await __resetStoreForTests();
 });
 
 describe("password hashing", () => {
@@ -30,29 +30,29 @@ describe("password hashing", () => {
 });
 
 describe("sessions", () => {
-  it("resolves a created session to its userId", () => {
-    const { user } = createUser("session@example.com", "hashed", "shopper");
-    const token = createSession(user.id);
-    expect(getUserIdForSession(token)).toBe(user.id);
+  it("resolves a created session to its userId", async () => {
+    const { user } = await createUser("session@example.com", "hashed", "shopper");
+    const token = await createSession(user.id);
+    expect(await getUserIdForSession(token)).toBe(user.id);
   });
 
-  it("returns null for an unknown token", () => {
-    expect(getUserIdForSession("does-not-exist")).toBeNull();
+  it("returns null for an unknown token", async () => {
+    expect(await getUserIdForSession("does-not-exist")).toBeNull();
   });
 
-  it("returns null after a session is destroyed", () => {
-    const { user } = createUser("session@example.com", "hashed", "shopper");
-    const token = createSession(user.id);
-    destroySession(token);
-    expect(getUserIdForSession(token)).toBeNull();
+  it("returns null after a session is destroyed", async () => {
+    const { user } = await createUser("session@example.com", "hashed", "shopper");
+    const token = await createSession(user.id);
+    await destroySession(token);
+    expect(await getUserIdForSession(token)).toBeNull();
   });
 
-  it("survives being read back from storage, not just from memory", () => {
-    const { user } = createUser("session@example.com", "hashed", "shopper");
-    const token = createSession(user.id);
+  it("survives being read back from storage, not just from memory", async () => {
+    const { user } = await createUser("session@example.com", "hashed", "shopper");
+    const token = await createSession(user.id);
     // Sessions are rows now, so a fresh lookup must resolve the same user.
-    expect(getUserIdForSession(token)).toBe(user.id);
-    expect(getUserIdForSession(token)).toBe(user.id);
+    expect(await getUserIdForSession(token)).toBe(user.id);
+    expect(await getUserIdForSession(token)).toBe(user.id);
   });
 });
 

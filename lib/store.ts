@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { db, nextSeq } from "./db.ts";
+import { sql, nextSeq } from "./db.ts";
 
 export type Role = "shopper" | "creator" | "brand";
 
@@ -38,7 +38,7 @@ export type Link = {
   marketplace?: string;
   articleId?: string;
   // Not surfaced in any UI yet — see the note on the `promo_code` column
-  // in lib/db.ts.
+  // in the init migration.
   promoCode?: string;
   createdAt: string;
 };
@@ -64,7 +64,7 @@ function toUser(r: Row): User {
     id: str(r.id),
     email: str(r.email),
     passwordHash: str(r.password_hash),
-    verified: Number(r.verified) === 1,
+    verified: Boolean(r.verified),
     verificationToken: r.verification_token === null ? null : str(r.verification_token),
     role: str(r.role) as Role,
     brandDomain: opt(r.brand_domain),
@@ -110,13 +110,13 @@ function slugify(input: string): string {
 
 /* ---------------------------------------------------------------- users */
 
-export function createUser(
+export async function createUser(
   email: string,
   passwordHash: string,
   role: Role,
   brandDomain?: string
-): { user: User; creator?: Creator } {
-  if (getUserByEmail(email)) {
+): Promise<{ user: User; creator?: Creator }> {
+  if (await getUserByEmail(email)) {
     throw new Error("Email already registered");
   }
 
@@ -124,193 +124,182 @@ export function createUser(
   const verificationToken = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(
-    `INSERT INTO users (id, email, password_hash, verified, verification_token, role, brand_domain, created_at)
-     VALUES (?, ?, ?, 0, ?, ?, ?, ?)`
-  ).run(id, email, passwordHash, verificationToken, role, role === "brand" ? (brandDomain ?? null) : null, now);
+  await sql`
+    INSERT INTO users (id, email, password_hash, verified, verification_token, role, brand_domain, created_at)
+    VALUES (${id}, ${email}, ${passwordHash}, false, ${verificationToken}, ${role}, ${role === "brand" ? (brandDomain ?? null) : null}, ${now})
+  `;
 
-  const user = getUserById(id)!;
+  const user = (await getUserById(id))!;
   if (role !== "creator") return { user };
 
   const creatorId = randomUUID();
   const slug = `${slugify(email.split("@")[0])}-${id.slice(0, 6)}`;
   const initialName = email.split("@")[0];
-  db.prepare(
-    `INSERT INTO creators (id, user_id, slug, display_name, display_name_lower, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(creatorId, id, slug, initialName, initialName.toLowerCase(), now);
+  await sql`
+    INSERT INTO creators (id, user_id, slug, display_name, display_name_lower, created_at)
+    VALUES (${creatorId}, ${id}, ${slug}, ${initialName}, ${initialName.toLowerCase()}, ${now})
+  `;
 
-  return { user, creator: getCreatorById(creatorId)! };
+  return { user, creator: (await getCreatorById(creatorId))! };
 }
 
-export function getUserByEmail(email: string): User | undefined {
-  const r = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as Row | undefined;
-  return r ? toUser(r) : undefined;
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const rows = await sql`SELECT * FROM users WHERE email = ${email}`;
+  return rows[0] ? toUser(rows[0]) : undefined;
 }
 
-export function getUserById(id: string): User | undefined {
-  const r = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as Row | undefined;
-  return r ? toUser(r) : undefined;
+export async function getUserById(id: string): Promise<User | undefined> {
+  const rows = await sql`SELECT * FROM users WHERE id = ${id}`;
+  return rows[0] ? toUser(rows[0]) : undefined;
 }
 
-export function verifyUser(token: string): User | null {
-  const r = db.prepare("SELECT * FROM users WHERE verification_token = ?").get(token) as Row | undefined;
-  if (!r) return null;
-  db.prepare("UPDATE users SET verified = 1, verification_token = NULL WHERE id = ?").run(str(r.id));
-  return getUserById(str(r.id))!;
+export async function verifyUser(token: string): Promise<User | null> {
+  const rows = await sql`SELECT * FROM users WHERE verification_token = ${token}`;
+  if (!rows[0]) return null;
+  const id = str(rows[0].id);
+  await sql`UPDATE users SET verified = true, verification_token = NULL WHERE id = ${id}`;
+  return (await getUserById(id))!;
 }
 
 /** Marks a user verified without a token — used by demo seeding. */
-export function markUserVerified(userId: string): void {
-  db.prepare("UPDATE users SET verified = 1, verification_token = NULL WHERE id = ?").run(userId);
+export async function markUserVerified(userId: string): Promise<void> {
+  await sql`UPDATE users SET verified = true, verification_token = NULL WHERE id = ${userId}`;
 }
 
-export function setBrandArticles(userId: string, articles: string[]): void {
-  db.prepare("UPDATE users SET brand_articles = ? WHERE id = ?").run(JSON.stringify(articles), userId);
+export async function setBrandArticles(userId: string, articles: string[]): Promise<void> {
+  await sql`UPDATE users SET brand_articles = ${JSON.stringify(articles)} WHERE id = ${userId}`;
 }
 
 /* ------------------------------------------------------------- creators */
 
-export function getCreatorByUserId(userId: string): Creator | undefined {
-  const r = db.prepare("SELECT * FROM creators WHERE user_id = ?").get(userId) as Row | undefined;
-  return r ? toCreator(r) : undefined;
+export async function getCreatorByUserId(userId: string): Promise<Creator | undefined> {
+  const rows = await sql`SELECT * FROM creators WHERE user_id = ${userId}`;
+  return rows[0] ? toCreator(rows[0]) : undefined;
 }
 
-export function getCreatorBySlug(slug: string): Creator | undefined {
-  const r = db.prepare("SELECT * FROM creators WHERE slug = ?").get(slug) as Row | undefined;
-  return r ? toCreator(r) : undefined;
+export async function getCreatorBySlug(slug: string): Promise<Creator | undefined> {
+  const rows = await sql`SELECT * FROM creators WHERE slug = ${slug}`;
+  return rows[0] ? toCreator(rows[0]) : undefined;
 }
 
-export function getCreatorById(id: string): Creator | undefined {
-  const r = db.prepare("SELECT * FROM creators WHERE id = ?").get(id) as Row | undefined;
-  return r ? toCreator(r) : undefined;
+export async function getCreatorById(id: string): Promise<Creator | undefined> {
+  const rows = await sql`SELECT * FROM creators WHERE id = ${id}`;
+  return rows[0] ? toCreator(rows[0]) : undefined;
 }
 
-export function updateCreator(
+export async function updateCreator(
   creatorId: string,
   patch: { displayName?: string; bio?: string; avatarUrl?: string; slug?: string }
-): Creator | undefined {
-  const current = getCreatorById(creatorId);
+): Promise<Creator | undefined> {
+  const current = await getCreatorById(creatorId);
   if (!current) return undefined;
 
   const nextName = patch.displayName ?? current.displayName;
-  db.prepare(
-    `UPDATE creators SET display_name = ?, display_name_lower = ?, bio = ?, avatar_url = ?, slug = ? WHERE id = ?`
-  ).run(
-    nextName,
-    nextName.toLowerCase(),
-    patch.bio ?? current.bio ?? null,
-    patch.avatarUrl ?? current.avatarUrl ?? null,
-    patch.slug ?? current.slug,
-    creatorId
-  );
+  await sql`
+    UPDATE creators
+    SET display_name = ${nextName},
+        display_name_lower = ${nextName.toLowerCase()},
+        bio = ${patch.bio ?? current.bio ?? null},
+        avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null},
+        slug = ${patch.slug ?? current.slug}
+    WHERE id = ${creatorId}
+  `;
 
   return getCreatorById(creatorId);
 }
 
 /** Paginated creator directory — the landing and /curators must never load all 500. */
-export function listCreators(opts: { limit?: number; offset?: number; query?: string } = {}): Creator[] {
+export async function listCreators(
+  opts: { limit?: number; offset?: number; query?: string } = {}
+): Promise<Creator[]> {
   const limit = Math.min(opts.limit ?? 24, 100);
   const offset = opts.offset ?? 0;
 
   if (opts.query?.trim()) {
     const q = `%${opts.query.trim().toLowerCase()}%`;
-    return (
-      db
-        .prepare(
-          `SELECT * FROM creators
-           WHERE display_name_lower LIKE ? OR slug LIKE ?
-           ORDER BY display_name LIMIT ? OFFSET ?`
-        )
-        .all(q, q, limit, offset) as Row[]
-    ).map(toCreator);
+    const rows = await sql`
+      SELECT * FROM creators
+      WHERE display_name_lower LIKE ${q} OR slug LIKE ${q}
+      ORDER BY display_name LIMIT ${limit} OFFSET ${offset}
+    `;
+    return rows.map(toCreator);
   }
 
-  return (
-    db.prepare("SELECT * FROM creators ORDER BY created_at DESC LIMIT ? OFFSET ?").all(limit, offset) as Row[]
-  ).map(toCreator);
+  const rows = await sql`SELECT * FROM creators ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+  return rows.map(toCreator);
 }
 
-export function countCreators(query?: string): number {
+export async function countCreators(query?: string): Promise<number> {
   if (query?.trim()) {
     const q = `%${query.trim().toLowerCase()}%`;
-    const r = db
-      .prepare("SELECT COUNT(*) AS c FROM creators WHERE display_name_lower LIKE ? OR slug LIKE ?")
-      .get(q, q) as { c: number };
-    return Number(r.c);
+    const rows = await sql`
+      SELECT COUNT(*) AS c FROM creators WHERE display_name_lower LIKE ${q} OR slug LIKE ${q}
+    `;
+    return Number(rows[0].c);
   }
-  const r = db.prepare("SELECT COUNT(*) AS c FROM creators").get() as { c: number };
-  return Number(r.c);
+  const rows = await sql`SELECT COUNT(*) AS c FROM creators`;
+  return Number(rows[0].c);
 }
 
 /* ---------------------------------------------------------------- links */
 
-export function addLink(input: Omit<Link, "id" | "createdAt">): Link {
+export async function addLink(input: Omit<Link, "id" | "createdAt">): Promise<Link> {
   const id = randomUUID();
   const now = new Date().toISOString();
-  db.prepare(
-    `INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, created_at, seq)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    input.creatorId,
-    input.title,
-    input.title.toLowerCase(),
-    input.imageUrl ?? null,
-    input.price ?? null,
-    input.category,
-    input.targetUrl,
-    input.marketplace ?? null,
-    input.articleId ?? null,
-    now,
-    nextSeq()
-  );
-  return getLink(id)!;
+  const seq = await nextSeq();
+  await sql`
+    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, created_at, seq)
+    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${now}, ${seq})
+  `;
+  return (await getLink(id))!;
 }
 
-export function getLink(id: string): Link | undefined {
-  const r = db.prepare("SELECT * FROM links WHERE id = ?").get(id) as Row | undefined;
-  return r ? toLink(r) : undefined;
+export async function getLink(id: string): Promise<Link | undefined> {
+  const rows = await sql`SELECT * FROM links WHERE id = ${id}`;
+  return rows[0] ? toLink(rows[0]) : undefined;
 }
 
-export function updateLink(
+export async function updateLink(
   id: string,
   patch: { title?: string; category?: Link["category"]; price?: number | null; imageUrl?: string | null }
-): Link | undefined {
-  const current = getLink(id);
+): Promise<Link | undefined> {
+  const current = await getLink(id);
   if (!current) return undefined;
 
   const title = patch.title ?? current.title;
-  db.prepare(`UPDATE links SET title = ?, title_lower = ?, category = ?, price = ?, image_url = ? WHERE id = ?`).run(
-    title,
-    title.toLowerCase(),
-    patch.category ?? current.category,
-    patch.price === undefined ? (current.price ?? null) : patch.price,
-    patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl,
-    id
-  );
+  await sql`
+    UPDATE links
+    SET title = ${title},
+        title_lower = ${title.toLowerCase()},
+        category = ${patch.category ?? current.category},
+        price = ${patch.price === undefined ? (current.price ?? null) : patch.price},
+        image_url = ${patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl}
+    WHERE id = ${id}
+  `;
 
   return getLink(id);
 }
 
-export function deleteLink(id: string): boolean {
-  const res = db.prepare("DELETE FROM links WHERE id = ?").run(id);
-  return Number(res.changes) > 0;
+export async function deleteLink(id: string): Promise<boolean> {
+  const rows = await sql`DELETE FROM links WHERE id = ${id} RETURNING id`;
+  return rows.length > 0;
 }
 
-export function listLinksByCreator(creatorId: string, opts: { limit?: number; offset?: number } = {}): Link[] {
+export async function listLinksByCreator(
+  creatorId: string,
+  opts: { limit?: number; offset?: number } = {}
+): Promise<Link[]> {
   const limit = Math.min(opts.limit ?? 200, 500);
   const offset = opts.offset ?? 0;
-  return (
-    db
-      .prepare("SELECT * FROM links WHERE creator_id = ? ORDER BY seq DESC LIMIT ? OFFSET ?")
-      .all(creatorId, limit, offset) as Row[]
-  ).map(toLink);
+  const rows = await sql`
+    SELECT * FROM links WHERE creator_id = ${creatorId} ORDER BY seq DESC LIMIT ${limit} OFFSET ${offset}
+  `;
+  return rows.map(toLink);
 }
 
-export function countLinksByCreator(creatorId: string): number {
-  const r = db.prepare("SELECT COUNT(*) AS c FROM links WHERE creator_id = ?").get(creatorId) as { c: number };
-  return Number(r.c);
+export async function countLinksByCreator(creatorId: string): Promise<number> {
+  const rows = await sql`SELECT COUNT(*) AS c FROM links WHERE creator_id = ${creatorId}`;
+  return Number(rows[0].c);
 }
 
 function hostnameOf(url: string): string | null {
@@ -321,70 +310,62 @@ function hostnameOf(url: string): string | null {
   }
 }
 
-export function listLinksByDomain(domain: string, opts: { limit?: number } = {}): Link[] {
+export async function listLinksByDomain(domain: string, opts: { limit?: number } = {}): Promise<Link[]> {
   const normalized = domain.replace(/^www\./, "").toLowerCase();
   const limit = Math.min(opts.limit ?? 200, 500);
-  // SQLite has no URL parser, so filter host in JS — but only over rows
-  // whose target_url contains the domain, so this never scans everything.
-  return (
-    db
-      .prepare("SELECT * FROM links WHERE target_url LIKE ? ORDER BY seq DESC LIMIT ?")
-      .all(`%${normalized}%`, limit) as Row[]
-  )
-    .map(toLink)
-    .filter((l) => hostnameOf(l.targetUrl) === normalized);
+  // Postgres has no URL parser either, so filter host in JS — but only
+  // over rows whose target_url contains the domain, so this never scans
+  // everything.
+  const rows = await sql`
+    SELECT * FROM links WHERE target_url LIKE ${`%${normalized}%`} ORDER BY seq DESC LIMIT ${limit}
+  `;
+  return rows.map(toLink).filter((l) => hostnameOf(l.targetUrl) === normalized);
 }
 
-export function listLinksByArticles(articles: string[], opts: { limit?: number } = {}): Link[] {
+export async function listLinksByArticles(articles: string[], opts: { limit?: number } = {}): Promise<Link[]> {
   if (articles.length === 0) return [];
   const limit = Math.min(opts.limit ?? 200, 500);
-  const placeholders = articles.map(() => "?").join(",");
-  return (
-    db
-      .prepare(`SELECT * FROM links WHERE article_id IN (${placeholders}) ORDER BY seq DESC LIMIT ?`)
-      .all(...articles, limit) as Row[]
-  ).map(toLink);
+  const rows = await sql`
+    SELECT * FROM links WHERE article_id IN ${sql(articles)} ORDER BY seq DESC LIMIT ${limit}
+  `;
+  return rows.map(toLink);
 }
 
-export function listLinksByCategory(
+export async function listLinksByCategory(
   category: Link["category"],
   opts: { limit?: number; offset?: number } = {}
-): Link[] {
+): Promise<Link[]> {
   const limit = Math.min(opts.limit ?? 48, 100);
   const offset = opts.offset ?? 0;
-  return (
-    db
-      .prepare("SELECT * FROM links WHERE category = ? ORDER BY seq DESC LIMIT ? OFFSET ?")
-      .all(category, limit, offset) as Row[]
-  ).map(toLink);
+  const rows = await sql`
+    SELECT * FROM links WHERE category = ${category} ORDER BY seq DESC LIMIT ${limit} OFFSET ${offset}
+  `;
+  return rows.map(toLink);
 }
 
-export function countLinksByCategory(category: Link["category"]): number {
-  const r = db.prepare("SELECT COUNT(*) AS c FROM links WHERE category = ?").get(category) as { c: number };
-  return Number(r.c);
+export async function countLinksByCategory(category: Link["category"]): Promise<number> {
+  const rows = await sql`SELECT COUNT(*) AS c FROM links WHERE category = ${category}`;
+  return Number(rows[0].c);
 }
 
 export type LinkSearchResult = Link & { creatorSlug: string; creatorName: string };
 
-export function searchLinks(query: string, opts: { limit?: number } = {}): LinkSearchResult[] {
+export async function searchLinks(query: string, opts: { limit?: number } = {}): Promise<LinkSearchResult[]> {
   const limit = Math.min(opts.limit ?? 24, 100);
   const q = `%${query.trim().toLowerCase()}%`;
-  return (
-    db
-      .prepare(
-        `SELECT links.*, creators.slug AS creator_slug, creators.display_name AS creator_name
-         FROM links JOIN creators ON creators.id = links.creator_id
-         WHERE links.title_lower LIKE ?
-         ORDER BY links.seq DESC LIMIT ?`
-      )
-      .all(q, limit) as (Row & { creator_slug: string; creator_name: string })[]
-  ).map((r) => ({ ...toLink(r), creatorSlug: str(r.creator_slug), creatorName: str(r.creator_name) }));
+  const rows = await sql`
+    SELECT links.*, creators.slug AS creator_slug, creators.display_name AS creator_name
+    FROM links JOIN creators ON creators.id = links.creator_id
+    WHERE links.title_lower LIKE ${q}
+    ORDER BY links.seq DESC LIMIT ${limit}
+  `;
+  return rows.map((r) => ({ ...toLink(r), creatorSlug: str(r.creator_slug), creatorName: str(r.creator_name) }));
 }
 
-export function listDistinctBrandDomains(limit = 12): { domain: string; linkCount: number }[] {
-  // Grouping happens in SQL; only the host extraction is done in JS, over
-  // the grouped result rather than over every link.
-  const rows = db.prepare("SELECT target_url FROM links").all() as Row[];
+export async function listDistinctBrandDomains(limit = 12): Promise<{ domain: string; linkCount: number }[]> {
+  // Grouping happens in JS here (as it did over SQLite), since extracting
+  // a hostname needs a real URL parser, not a SQL string function.
+  const rows = await sql`SELECT target_url FROM links`;
   const counts = new Map<string, number>();
   for (const r of rows) {
     const host = hostnameOf(str(r.target_url));
@@ -399,7 +380,7 @@ export function listDistinctBrandDomains(limit = 12): { domain: string; linkCoun
 
 /* --------------------------------------------------------------- clicks */
 
-export function recordClick(
+export async function recordClick(
   linkId: string,
   meta: {
     referrer?: string;
@@ -409,21 +390,13 @@ export function recordClick(
     /** Only set by seeding, to spread demo history over past days. */
     clickedAt?: string;
   } = {}
-): Click {
+): Promise<Click> {
   const id = randomUUID();
   const now = meta.clickedAt ?? new Date().toISOString();
-  db.prepare(
-    `INSERT INTO clicks (id, link_id, clicked_at, referrer, user_agent, is_bot, fingerprint)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    linkId,
-    now,
-    meta.referrer ?? null,
-    meta.userAgent ?? null,
-    meta.isBot ? 1 : 0,
-    meta.fingerprint ?? null
-  );
+  await sql`
+    INSERT INTO clicks (id, link_id, clicked_at, referrer, user_agent, is_bot, fingerprint)
+    VALUES (${id}, ${linkId}, ${now}, ${meta.referrer ?? null}, ${meta.userAgent ?? null}, ${Boolean(meta.isBot)}, ${meta.fingerprint ?? null})
+  `;
   return {
     id,
     linkId,
@@ -435,12 +408,28 @@ export function recordClick(
   };
 }
 
-export function countClicksForLink(linkId: string, opts: { humanOnly?: boolean } = {}): number {
-  const sql = opts.humanOnly
-    ? "SELECT COUNT(*) AS c FROM clicks WHERE link_id = ? AND is_bot = 0"
-    : "SELECT COUNT(*) AS c FROM clicks WHERE link_id = ?";
-  const r = db.prepare(sql).get(linkId) as { c: number };
-  return Number(r.c);
+/** Bulk-inserts clicks in one round trip per chunk — only used by the scale-seed script. */
+export async function recordClicksBulk(
+  rows: { linkId: string; clickedAt: string; userAgent?: string; isBot: boolean; fingerprint: string; referrer?: string }[]
+): Promise<void> {
+  if (rows.length === 0) return;
+  const values = rows.map((r) => ({
+    id: randomUUID(),
+    link_id: r.linkId,
+    clicked_at: r.clickedAt,
+    referrer: r.referrer ?? null,
+    user_agent: r.userAgent ?? null,
+    is_bot: r.isBot,
+    fingerprint: r.fingerprint,
+  }));
+  await sql`INSERT INTO clicks ${sql(values)}`;
+}
+
+export async function countClicksForLink(linkId: string, opts: { humanOnly?: boolean } = {}): Promise<number> {
+  const rows = opts.humanOnly
+    ? await sql`SELECT COUNT(*) AS c FROM clicks WHERE link_id = ${linkId} AND is_bot = false`
+    : await sql`SELECT COUNT(*) AS c FROM clicks WHERE link_id = ${linkId}`;
+  return Number(rows[0].c);
 }
 
 /**
@@ -448,19 +437,16 @@ export function countClicksForLink(linkId: string, opts: { humanOnly?: boolean }
  * loop is an N+1 query, which is what breaks first at a few hundred
  * creators.
  */
-export function countClicksForLinks(linkIds: string[]): Map<string, { total: number; human: number }> {
+export async function countClicksForLinks(linkIds: string[]): Promise<Map<string, { total: number; human: number }>> {
   const result = new Map<string, { total: number; human: number }>();
   if (linkIds.length === 0) return result;
 
-  const placeholders = linkIds.map(() => "?").join(",");
-  const rows = db
-    .prepare(
-      `SELECT link_id,
-              COUNT(*) AS total,
-              SUM(CASE WHEN is_bot = 0 THEN 1 ELSE 0 END) AS human
-       FROM clicks WHERE link_id IN (${placeholders}) GROUP BY link_id`
-    )
-    .all(...linkIds) as Row[];
+  const rows = await sql`
+    SELECT link_id,
+           COUNT(*) AS total,
+           SUM(CASE WHEN is_bot = false THEN 1 ELSE 0 END) AS human
+    FROM clicks WHERE link_id IN ${sql(linkIds)} GROUP BY link_id
+  `;
 
   for (const id of linkIds) result.set(id, { total: 0, human: 0 });
   for (const r of rows) {
@@ -470,122 +456,107 @@ export function countClicksForLinks(linkIds: string[]): Map<string, { total: num
 }
 
 /** True when this visitor already opened this link inside the window. */
-export function hasRecentClick(linkId: string, fingerprint: string, withinMinutes = 30): boolean {
+export async function hasRecentClick(linkId: string, fingerprint: string, withinMinutes = 30): Promise<boolean> {
   const since = new Date(Date.now() - withinMinutes * 60_000).toISOString();
-  const r = db
-    .prepare("SELECT 1 AS x FROM clicks WHERE link_id = ? AND fingerprint = ? AND clicked_at > ? LIMIT 1")
-    .get(linkId, fingerprint, since) as Row | undefined;
-  return Boolean(r);
+  const rows = await sql`
+    SELECT 1 AS x FROM clicks WHERE link_id = ${linkId} AND fingerprint = ${fingerprint} AND clicked_at > ${since} LIMIT 1
+  `;
+  return rows.length > 0;
 }
 
-export function creatorClickStats(
+export async function creatorClickStats(
   creatorId: string,
   sinceISO?: string
-): { total: number; human: number; byDay: { day: string; human: number }[] } {
+): Promise<{ total: number; human: number; byDay: { day: string; human: number }[] }> {
   const since = sinceISO ?? new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
 
-  const totals = db
-    .prepare(
-      `SELECT COUNT(*) AS total, SUM(CASE WHEN c.is_bot = 0 THEN 1 ELSE 0 END) AS human
-       FROM clicks c JOIN links l ON l.id = c.link_id
-       WHERE l.creator_id = ? AND c.clicked_at > ?`
-    )
-    .get(creatorId, since) as Row;
+  const totalsRows = await sql`
+    SELECT COUNT(*) AS total, SUM(CASE WHEN c.is_bot = false THEN 1 ELSE 0 END) AS human
+    FROM clicks c JOIN links l ON l.id = c.link_id
+    WHERE l.creator_id = ${creatorId} AND c.clicked_at > ${since}
+  `;
+  const totals = totalsRows[0];
 
-  const byDay = (
-    db
-      .prepare(
-        `SELECT substr(c.clicked_at, 1, 10) AS day,
-                SUM(CASE WHEN c.is_bot = 0 THEN 1 ELSE 0 END) AS human
-         FROM clicks c JOIN links l ON l.id = c.link_id
-         WHERE l.creator_id = ? AND c.clicked_at > ?
-         GROUP BY day ORDER BY day`
-      )
-      .all(creatorId, since) as Row[]
-  ).map((r) => ({ day: str(r.day), human: Number(r.human ?? 0) }));
+  const byDayRows = await sql`
+    SELECT substr(c.clicked_at, 1, 10) AS day,
+           SUM(CASE WHEN c.is_bot = false THEN 1 ELSE 0 END) AS human
+    FROM clicks c JOIN links l ON l.id = c.link_id
+    WHERE l.creator_id = ${creatorId} AND c.clicked_at > ${since}
+    GROUP BY day ORDER BY day
+  `;
+  const byDay = byDayRows.map((r) => ({ day: str(r.day), human: Number(r.human ?? 0) }));
 
   return { total: Number(totals.total ?? 0), human: Number(totals.human ?? 0), byDay };
 }
 
 /* ------------------------------------------------------------ favorites */
 
-export function addFavorite(userId: string, linkId: string): void {
-  db.prepare("INSERT OR IGNORE INTO favorites (user_id, link_id) VALUES (?, ?)").run(userId, linkId);
+export async function addFavorite(userId: string, linkId: string): Promise<void> {
+  await sql`
+    INSERT INTO favorites (user_id, link_id) VALUES (${userId}, ${linkId})
+    ON CONFLICT DO NOTHING
+  `;
 }
 
-export function removeFavorite(userId: string, linkId: string): void {
-  db.prepare("DELETE FROM favorites WHERE user_id = ? AND link_id = ?").run(userId, linkId);
+export async function removeFavorite(userId: string, linkId: string): Promise<void> {
+  await sql`DELETE FROM favorites WHERE user_id = ${userId} AND link_id = ${linkId}`;
 }
 
-export function listFavoriteLinks(userId: string): Link[] {
-  return (
-    db
-      .prepare(
-        `SELECT l.* FROM links l JOIN favorites f ON f.link_id = l.id
-         WHERE f.user_id = ? ORDER BY l.seq DESC`
-      )
-      .all(userId) as Row[]
-  ).map(toLink);
+export async function listFavoriteLinks(userId: string): Promise<Link[]> {
+  const rows = await sql`
+    SELECT l.* FROM links l JOIN favorites f ON f.link_id = l.id
+    WHERE f.user_id = ${userId} ORDER BY l.seq DESC
+  `;
+  return rows.map(toLink);
 }
 
-export function isFavorite(userId: string, linkId: string): boolean {
-  const r = db
-    .prepare("SELECT 1 AS x FROM favorites WHERE user_id = ? AND link_id = ?")
-    .get(userId, linkId) as Row | undefined;
-  return Boolean(r);
+export async function isFavorite(userId: string, linkId: string): Promise<boolean> {
+  const rows = await sql`SELECT 1 AS x FROM favorites WHERE user_id = ${userId} AND link_id = ${linkId}`;
+  return rows.length > 0;
 }
 
-export function listFavoriteIds(userId: string, linkIds: string[]): Set<string> {
+export async function listFavoriteIds(userId: string, linkIds: string[]): Promise<Set<string>> {
   if (linkIds.length === 0) return new Set();
-  const placeholders = linkIds.map(() => "?").join(",");
-  const rows = db
-    .prepare(`SELECT link_id FROM favorites WHERE user_id = ? AND link_id IN (${placeholders})`)
-    .all(userId, ...linkIds) as Row[];
+  const rows = await sql`
+    SELECT link_id FROM favorites WHERE user_id = ${userId} AND link_id IN ${sql(linkIds)}
+  `;
   return new Set(rows.map((r) => str(r.link_id)));
 }
 
 /* ---------------------------------------------------------------- follows */
 
-export function followCreator(userId: string, creatorId: string): void {
-  db.prepare(
-    "INSERT OR IGNORE INTO follows (user_id, creator_id, created_at) VALUES (?, ?, ?)"
-  ).run(userId, creatorId, new Date().toISOString());
+export async function followCreator(userId: string, creatorId: string): Promise<void> {
+  await sql`
+    INSERT INTO follows (user_id, creator_id, created_at) VALUES (${userId}, ${creatorId}, ${new Date().toISOString()})
+    ON CONFLICT DO NOTHING
+  `;
 }
 
-export function unfollowCreator(userId: string, creatorId: string): void {
-  db.prepare("DELETE FROM follows WHERE user_id = ? AND creator_id = ?").run(userId, creatorId);
+export async function unfollowCreator(userId: string, creatorId: string): Promise<void> {
+  await sql`DELETE FROM follows WHERE user_id = ${userId} AND creator_id = ${creatorId}`;
 }
 
-export function isFollowing(userId: string, creatorId: string): boolean {
-  const r = db
-    .prepare("SELECT 1 AS x FROM follows WHERE user_id = ? AND creator_id = ?")
-    .get(userId, creatorId) as Row | undefined;
-  return Boolean(r);
+export async function isFollowing(userId: string, creatorId: string): Promise<boolean> {
+  const rows = await sql`SELECT 1 AS x FROM follows WHERE user_id = ${userId} AND creator_id = ${creatorId}`;
+  return rows.length > 0;
 }
 
-export function countFollowers(creatorId: string): number {
-  const r = db.prepare("SELECT COUNT(*) AS c FROM follows WHERE creator_id = ?").get(creatorId) as {
-    c: number;
-  };
-  return Number(r.c);
+export async function countFollowers(creatorId: string): Promise<number> {
+  const rows = await sql`SELECT COUNT(*) AS c FROM follows WHERE creator_id = ${creatorId}`;
+  return Number(rows[0].c);
 }
 
-export function listFollowedCreators(userId: string): Creator[] {
-  return (
-    db
-      .prepare(
-        `SELECT c.* FROM creators c JOIN follows f ON f.creator_id = c.id
-         WHERE f.user_id = ? ORDER BY f.created_at DESC`
-      )
-      .all(userId) as Row[]
-  ).map(toCreator);
+export async function listFollowedCreators(userId: string): Promise<Creator[]> {
+  const rows = await sql`
+    SELECT c.* FROM creators c JOIN follows f ON f.creator_id = c.id
+    WHERE f.user_id = ${userId} ORDER BY f.created_at DESC
+  `;
+  return rows.map(toCreator);
 }
 
-export function countFollowedCreators(userId: string): number {
-  const r = db.prepare("SELECT COUNT(*) AS c FROM follows WHERE user_id = ?").get(userId) as {
-    c: number;
-  };
-  return Number(r.c);
+export async function countFollowedCreators(userId: string): Promise<number> {
+  const rows = await sql`SELECT COUNT(*) AS c FROM follows WHERE user_id = ${userId}`;
+  return Number(rows[0].c);
 }
 
 /**
@@ -593,46 +564,33 @@ export function countFollowedCreators(userId: string): number {
  * newest first — the one blended stream Circles is actually for, instead
  * of checking each storefront in turn.
  */
-export function circleFeed(userId: string, opts: { limit?: number } = {}): Link[] {
+export async function circleFeed(userId: string, opts: { limit?: number } = {}): Promise<Link[]> {
   const limit = Math.min(opts.limit ?? 60, 200);
-  return (
-    db
-      .prepare(
-        `SELECT l.* FROM links l JOIN follows f ON f.creator_id = l.creator_id
-         WHERE f.user_id = ? ORDER BY l.seq DESC LIMIT ?`
-      )
-      .all(userId, limit) as Row[]
-  ).map(toLink);
+  const rows = await sql`
+    SELECT l.* FROM links l JOIN follows f ON f.creator_id = l.creator_id
+    WHERE f.user_id = ${userId} ORDER BY l.seq DESC LIMIT ${limit}
+  `;
+  return rows.map(toLink);
 }
 
 /* ------------------------------------------------------------- sessions */
 
-export function createSessionRow(token: string, userId: string): void {
-  db.prepare("INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)").run(
-    token,
-    userId,
-    new Date().toISOString()
-  );
+export async function createSessionRow(token: string, userId: string): Promise<void> {
+  await sql`INSERT INTO sessions (token, user_id, created_at) VALUES (${token}, ${userId}, ${new Date().toISOString()})`;
 }
 
-export function getSessionUserId(token: string): string | null {
-  const r = db.prepare("SELECT user_id FROM sessions WHERE token = ?").get(token) as Row | undefined;
-  return r ? str(r.user_id) : null;
+export async function getSessionUserId(token: string): Promise<string | null> {
+  const rows = await sql`SELECT user_id FROM sessions WHERE token = ${token}`;
+  return rows[0] ? str(rows[0].user_id) : null;
 }
 
-export function deleteSessionRow(token: string): void {
-  db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+export async function deleteSessionRow(token: string): Promise<void> {
+  await sql`DELETE FROM sessions WHERE token = ${token}`;
 }
 
 /* ----------------------------------------------------------------- test */
 
-export function __resetStoreForTests() {
-  db.exec(`
-    DELETE FROM sessions;
-    DELETE FROM favorites;
-    DELETE FROM clicks;
-    DELETE FROM links;
-    DELETE FROM creators;
-    DELETE FROM users;
-  `);
+export async function __resetStoreForTests(): Promise<void> {
+  await sql`TRUNCATE sessions, favorites, follows, clicks, links, creators, users CASCADE`;
+  await sql`ALTER SEQUENCE links_seq_counter RESTART WITH 1`;
 }

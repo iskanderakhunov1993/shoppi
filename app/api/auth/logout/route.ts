@@ -3,7 +3,7 @@ import { destroySession, SESSION_COOKIE } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  destroySession(token);
+  await destroySession(token);
 
   const response = NextResponse.json({ ok: true });
   response.cookies.delete(SESSION_COOKIE);

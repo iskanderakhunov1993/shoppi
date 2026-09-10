@@ -3,12 +3,13 @@ import { requireUser } from "@/lib/require-user";
 import { addFavorite, getLink, listFavoriteLinks, removeFavorite } from "@/lib/store";
 
 export async function GET(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
     return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
   }
 
-  const favorites = listFavoriteLinks(user.id).map((link) => ({
+  const links = await listFavoriteLinks(user.id);
+  const favorites = links.map((link) => ({
     ...link,
     wrappedUrl: `/r/${link.id}`,
   }));
@@ -16,23 +17,23 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
     return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);
   const linkId = body?.linkId as string | undefined;
-  if (!linkId || !getLink(linkId)) {
+  if (!linkId || !(await getLink(linkId))) {
     return NextResponse.json({ error: "Unknown linkId" }, { status: 400 });
   }
 
-  addFavorite(user.id, linkId);
+  await addFavorite(user.id, linkId);
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 
 export async function DELETE(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
     return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
   }
@@ -42,6 +43,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "linkId query param is required" }, { status: 400 });
   }
 
-  removeFavorite(user.id, linkId);
+  await removeFavorite(user.id, linkId);
   return NextResponse.json({ ok: true });
 }

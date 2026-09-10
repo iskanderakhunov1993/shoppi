@@ -23,9 +23,9 @@ const ITEMS = [
   },
 ];
 
-export default function BrandsPage() {
-  seedDemoAccounts();
-  const domains = listDistinctBrandDomains();
+export default async function BrandsPage() {
+  await seedDemoAccounts();
+  const domains = await listDistinctBrandDomains();
 
   return (
     <main className="flex-1 flex flex-col">

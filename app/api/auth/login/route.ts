@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "email and password are required" }, { status: 400 });
   }
 
-  const user = getUserByEmail(email);
+  const user = await getUserByEmail(email);
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email not verified" }, { status: 403 });
   }
 
-  const token = createSession(user.id);
+  const token = await createSession(user.id);
   const response = NextResponse.json({ email: user.email });
   response.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,

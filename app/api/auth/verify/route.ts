@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "token query param is required" }, { status: 400 });
   }
 
-  const user = verifyUser(token);
+  const user = await verifyUser(token);
   if (!user) {
     return NextResponse.json({ error: "Invalid or already-used token" }, { status: 400 });
   }

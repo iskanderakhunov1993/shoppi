@@ -9,7 +9,7 @@ type Column = { title: string; links: { label: string; href: string }[] };
  * intentional rather than as the page simply running out of content.
  */
 export async function LandingFooter() {
-  const slug = getDemoCreatorSlug();
+  const slug = await getDemoCreatorSlug();
   const example = slug ? `/${slug}` : "/curators";
   const exampleStats = slug ? `/${slug}/stats` : "/curators";
 

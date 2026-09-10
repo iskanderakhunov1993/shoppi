@@ -18,19 +18,19 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 
 // Sessions live in the database so a server restart no longer signs
 // everyone out.
-export function createSession(userId: string): string {
+export async function createSession(userId: string): Promise<string> {
   const token = randomUUID();
-  createSessionRow(token, userId);
+  await createSessionRow(token, userId);
   return token;
 }
 
-export function getUserIdForSession(token: string | undefined): string | null {
+export async function getUserIdForSession(token: string | undefined): Promise<string | null> {
   if (!token) return null;
   return getSessionUserId(token);
 }
 
-export function destroySession(token: string | undefined) {
-  if (token) deleteSessionRow(token);
+export async function destroySession(token: string | undefined): Promise<void> {
+  if (token) await deleteSessionRow(token);
 }
 
 export const SESSION_COOKIE = "session";

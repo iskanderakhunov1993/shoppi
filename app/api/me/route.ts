@@ -4,13 +4,13 @@ import { getCreatorByUserId, setBrandArticles, updateCreator } from "@/lib/store
 import { parseArticleInput } from "@/lib/marketplace";
 
 export async function GET(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   if (user.role === "creator") {
-    const creator = getCreatorByUserId(user.id);
+    const creator = await getCreatorByUserId(user.id);
     return NextResponse.json({
       role: user.role,
       email: user.email,
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
   const body = await request.json().catch(() => null);
 
   if (user.role === "creator") {
-    const creator = getCreatorByUserId(user.id);
+    const creator = await getCreatorByUserId(user.id);
     if (!creator) {
       return NextResponse.json({ error: "Creator profile missing" }, { status: 404 });
     }
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Имя не может быть пустым" }, { status: 400 });
     }
 
-    const updated = updateCreator(creator.id, {
+    const updated = await updateCreator(creator.id, {
       displayName: body?.displayName?.trim(),
       bio: body?.bio,
       avatarUrl: body?.avatarUrl,
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
   if (user.role === "brand") {
     const raw = String(body?.articles ?? "");
     const { articles, unrecognized } = parseArticleInput(raw);
-    setBrandArticles(user.id, articles);
+    await setBrandArticles(user.id, articles);
     return NextResponse.json({ brandArticles: articles, unrecognized });
   }
 

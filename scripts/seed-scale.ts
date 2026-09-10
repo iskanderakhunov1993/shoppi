@@ -17,7 +17,7 @@ import {
   createUser,
   getUserByEmail,
   markUserVerified,
-  recordClick,
+  recordClicksBulk,
   setBrandArticles,
   updateCreator,
   type Link,
@@ -82,135 +82,168 @@ function isoDaysAgo(days: number): string {
   return new Date(Date.now() - days * 24 * 3600_000 - randomInt(0, 86_400_000)).toISOString();
 }
 
-console.log("Наполняю базу…");
-const started = Date.now();
-const sharedHash = hashPassword("demo1234");
+/** Runs `fn` over `items` with at most `concurrency` in flight at once — a
+ * real Postgres connection has round-trip latency a local SQLite file never
+ * did, so a plain sequential loop over thousands of rows would be very slow. */
+async function pool<T>(items: T[], concurrency: number, fn: (item: T) => Promise<void>): Promise<void> {
+  let i = 0;
+  async function worker() {
+    while (i < items.length) {
+      const item = items[i++];
+      await fn(item);
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, worker));
+}
 
-/* ---------------------------------------------------------- creators */
+async function main() {
+  console.log("Наполняю базу…");
+  const started = Date.now();
+  const sharedHash = hashPassword("demo1234");
 
-const allLinks: { id: string; creatorId: string }[] = [];
-const allArticles: string[] = [];
+  /* -------------------------------------------------------- creators */
 
-let createdCreators = 0;
-for (let i = 0; i < CREATORS; i++) {
-  const email = `creator${i}@shoppi.dev`;
-  if (getUserByEmail(email)) continue;
+  const allLinks: { id: string; creatorId: string }[] = [];
+  const allArticles: string[] = [];
 
-  const { user, creator } = createUser(email, sharedHash, "creator");
-  markUserVerified(user.id);
-  if (!creator) continue;
+  let createdCreators = 0;
+  await pool(Array.from({ length: CREATORS }, (_, i) => i), 20, async (i) => {
+    const email = `creator${i}@shoppi.dev`;
+    if (await getUserByEmail(email)) return;
 
-  const name = `${pick(FIRST)} ${pick(LAST)}`;
-  updateCreator(creator.id, {
-    displayName: name,
-    bio: pick(BIOS),
-    avatarUrl: placeholderAvatar(creator.slug),
-  });
+    const { user, creator } = await createUser(email, sharedHash, "creator");
+    await markUserVerified(user.id);
+    if (!creator) return;
 
-  const linkCount = randomInt(4, 25);
-  for (let j = 0; j < linkCount; j++) {
-    const category = pick(CATEGORIES);
-    const article = String(randomInt(100_000_00, 999_999_99));
-    const mp = pick(MARKETPLACES);
-
-    const link = addLink({
-      creatorId: creator.id,
-      title: pick(TITLES[category]),
-      category,
-      targetUrl: `https://${mp.host}${mp.path(article)}`,
-      price: randomInt(390, 24_900),
-      // Placeholder product shots: nonsense images, but they show the real
-      // shape of a populated storefront, which an empty grid does not.
-      imageUrl: `https://picsum.photos/seed/p${article}/600/450`,
-      marketplace: mp.host.includes("wildberries") ? "wildberries" : "ozon",
-      articleId: article,
+    const name = `${pick(FIRST)} ${pick(LAST)}`;
+    await updateCreator(creator.id, {
+      displayName: name,
+      bio: pick(BIOS),
+      avatarUrl: placeholderAvatar(creator.slug),
     });
 
-    allLinks.push({ id: link.id, creatorId: creator.id });
-    allArticles.push(article);
-  }
+    const linkCount = randomInt(4, 25);
+    for (let j = 0; j < linkCount; j++) {
+      const category = pick(CATEGORIES);
+      const article = String(randomInt(100_000_00, 999_999_99));
+      const mp = pick(MARKETPLACES);
 
-  createdCreators++;
-  if (createdCreators % 100 === 0) console.log(`  кураторов: ${createdCreators}`);
-}
-console.log(`Кураторы: ${createdCreators}, ссылок: ${allLinks.length}`);
+      const link = await addLink({
+        creatorId: creator.id,
+        title: pick(TITLES[category]),
+        category,
+        targetUrl: `https://${mp.host}${mp.path(article)}`,
+        price: randomInt(390, 24_900),
+        // Placeholder product shots: nonsense images, but they show the real
+        // shape of a populated storefront, which an empty grid does not.
+        imageUrl: `https://picsum.photos/seed/p${article}/600/450`,
+        marketplace: mp.host.includes("wildberries") ? "wildberries" : "ozon",
+        articleId: article,
+      });
 
-/* ------------------------------------------------------------ brands */
+      allLinks.push({ id: link.id, creatorId: creator.id });
+      allArticles.push(article);
+    }
 
-let createdBrands = 0;
-for (let i = 0; i < BRANDS; i++) {
-  const email = `brand${i}@shoppi.dev`;
-  if (getUserByEmail(email)) continue;
-
-  const { user } = createUser(email, sharedHash, "brand", "wildberries.ru");
-  markUserVerified(user.id);
-
-  // Each brand claims a slice of real articles, so its dashboard is not
-  // empty and every brand sees a different set.
-  const claimed: string[] = [];
-  for (let k = 0; k < randomInt(3, 15); k++) claimed.push(pick(allArticles));
-  setBrandArticles(user.id, [...new Set(claimed)]);
-
-  createdBrands++;
-}
-console.log(`Бренды: ${createdBrands}`);
-
-/* ---------------------------------------------------------- shoppers */
-
-const shopperIds: string[] = [];
-let createdShoppers = 0;
-for (let i = 0; i < SHOPPERS; i++) {
-  const email = `shopper${i}@shoppi.dev`;
-  const existing = getUserByEmail(email);
-  if (existing) {
-    shopperIds.push(existing.id);
-    continue;
-  }
-
-  const { user } = createUser(email, sharedHash, "shopper");
-  markUserVerified(user.id);
-  shopperIds.push(user.id);
-  createdShoppers++;
-
-  if (createdShoppers % 500 === 0) console.log(`  шопперов: ${createdShoppers}`);
-}
-console.log(`Шопперы: ${createdShoppers}`);
-
-/* ------------------------------------------------------ favourites */
-
-let favorites = 0;
-for (const userId of shopperIds.slice(0, Math.floor(shopperIds.length * 0.4))) {
-  for (let k = 0; k < randomInt(1, 8); k++) {
-    addFavorite(userId, pick(allLinks).id);
-    favorites++;
-  }
-}
-console.log(`Избранное: ${favorites}`);
-
-/* ---------------------------------------------------------- clicks */
-
-// Roughly a fifth of hits are link previews from messengers — that is the
-// whole reason the product separates live traffic from raw totals.
-let clicks = 0;
-for (let i = 0; i < CLICK_BATCHES; i++) {
-  const link = pick(allLinks);
-  const isBot = Math.random() < 0.2;
-  recordClick(link.id, {
-    userAgent: isBot ? "TelegramBot (like TwitterBot)" : "Mozilla/5.0 (iPhone) Safari/604.1",
-    isBot,
-    fingerprint: `fp-${randomInt(1, 5000)}`,
-    referrer: isBot ? undefined : "https://t.me/",
-    // Spread across the last 30 days so the daily chart has a real shape
-    // instead of one tall bar on the seeding date.
-    clickedAt: isoDaysAgo(randomInt(0, 29)),
+    createdCreators++;
+    if (createdCreators % 100 === 0) console.log(`  кураторов: ${createdCreators}`);
   });
-  clicks++;
-  if (clicks % 5000 === 0) console.log(`  кликов: ${clicks}`);
-}
-console.log(`Клики: ${clicks}`);
+  console.log(`Кураторы: ${createdCreators}, ссылок: ${allLinks.length}`);
 
-console.log(`\nГотово за ${((Date.now() - started) / 1000).toFixed(1)} с`);
-console.log("Логин любого сгенерированного аккаунта: пароль demo1234");
-console.log("  куратор:  creator0@shoppi.dev");
-console.log("  бренд:    brand0@shoppi.dev");
-console.log("  шоппер:   shopper0@shoppi.dev");
+  /* ---------------------------------------------------------- brands */
+
+  let createdBrands = 0;
+  await pool(Array.from({ length: BRANDS }, (_, i) => i), 20, async (i) => {
+    const email = `brand${i}@shoppi.dev`;
+    if (await getUserByEmail(email)) return;
+
+    const { user } = await createUser(email, sharedHash, "brand", "wildberries.ru");
+    await markUserVerified(user.id);
+
+    // Each brand claims a slice of real articles, so its dashboard is not
+    // empty and every brand sees a different set.
+    const claimed: string[] = [];
+    for (let k = 0; k < randomInt(3, 15); k++) claimed.push(pick(allArticles));
+    await setBrandArticles(user.id, [...new Set(claimed)]);
+
+    createdBrands++;
+  });
+  console.log(`Бренды: ${createdBrands}`);
+
+  /* -------------------------------------------------------- shoppers */
+
+  const shopperIds: string[] = [];
+  let createdShoppers = 0;
+  await pool(Array.from({ length: SHOPPERS }, (_, i) => i), 30, async (i) => {
+    const email = `shopper${i}@shoppi.dev`;
+    const existing = await getUserByEmail(email);
+    if (existing) {
+      shopperIds.push(existing.id);
+      return;
+    }
+
+    const { user } = await createUser(email, sharedHash, "shopper");
+    await markUserVerified(user.id);
+    shopperIds.push(user.id);
+    createdShoppers++;
+
+    if (createdShoppers % 500 === 0) console.log(`  шопперов: ${createdShoppers}`);
+  });
+  console.log(`Шопперы: ${createdShoppers}`);
+
+  /* ---------------------------------------------------- favourites */
+
+  let favorites = 0;
+  const favoriteShoppers = shopperIds.slice(0, Math.floor(shopperIds.length * 0.4));
+  await pool(favoriteShoppers, 30, async (userId) => {
+    for (let k = 0; k < randomInt(1, 8); k++) {
+      await addFavorite(userId, pick(allLinks).id);
+      favorites++;
+    }
+  });
+  console.log(`Избранное: ${favorites}`);
+
+  /* -------------------------------------------------------- clicks */
+
+  // Roughly a fifth of hits are link previews from messengers — that is
+  // the whole reason the product separates live traffic from raw totals.
+  // Inserted in bulk chunks rather than one row per round trip — 20,000
+  // individual inserts over a real network connection would take far
+  // longer than generating them does.
+  const CHUNK = 1000;
+  let clicks = 0;
+  for (let start = 0; start < CLICK_BATCHES; start += CHUNK) {
+    const chunkSize = Math.min(CHUNK, CLICK_BATCHES - start);
+    const rows = Array.from({ length: chunkSize }, () => {
+      const link = pick(allLinks);
+      const isBot = Math.random() < 0.2;
+      return {
+        linkId: link.id,
+        userAgent: isBot ? "TelegramBot (like TwitterBot)" : "Mozilla/5.0 (iPhone) Safari/604.1",
+        isBot,
+        fingerprint: `fp-${randomInt(1, 5000)}`,
+        referrer: isBot ? undefined : "https://t.me/",
+        // Spread across the last 30 days so the daily chart has a real
+        // shape instead of one tall bar on the seeding date.
+        clickedAt: isoDaysAgo(randomInt(0, 29)),
+      };
+    });
+    await recordClicksBulk(rows);
+    clicks += rows.length;
+    console.log(`  кликов: ${clicks}`);
+  }
+  console.log(`Клики: ${clicks}`);
+
+  console.log(`\nГотово за ${((Date.now() - started) / 1000).toFixed(1)} с`);
+  console.log("Логин любого сгенерированного аккаунта: пароль demo1234");
+  console.log("  куратор:  creator0@shoppi.dev");
+  console.log("  бренд:    brand0@shoppi.dev");
+  console.log("  шоппер:   shopper0@shoppi.dev");
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

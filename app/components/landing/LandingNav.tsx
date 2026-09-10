@@ -13,7 +13,7 @@ import { MegaNav } from "./MegaNav";
  */
 export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const signedIn = Boolean(token && getSessionUserId(token));
+  const signedIn = Boolean(token && (await getSessionUserId(token)));
 
-  return <MegaNav signedIn={signedIn} demoSlug={getDemoCreatorSlug()} overlay={overlay} />;
+  return <MegaNav signedIn={signedIn} demoSlug={await getDemoCreatorSlug()} overlay={overlay} />;
 }

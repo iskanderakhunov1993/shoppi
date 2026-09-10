@@ -24,14 +24,14 @@ export default async function MediaKitPage({
   params: Promise<{ creatorSlug: string }>;
 }) {
   const { creatorSlug } = await params;
-  seedDemoAccounts();
+  await seedDemoAccounts();
 
-  const creator = getCreatorBySlug(creatorSlug);
+  const creator = await getCreatorBySlug(creatorSlug);
   if (!creator) notFound();
 
-  const stats = creatorClickStats(creator.id);
-  const links = listLinksByCreator(creator.id);
-  const counts = countClicksForLinks(links.map((l) => l.id));
+  const stats = await creatorClickStats(creator.id);
+  const links = await listLinksByCreator(creator.id);
+  const counts = await countClicksForLinks(links.map((l) => l.id));
 
   const top = links
     .map((l) => ({ ...l, human: counts.get(l.id)?.human ?? 0 }))

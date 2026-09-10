@@ -14,10 +14,10 @@ import { LandingFooter } from "@/app/components/landing/LandingFooter";
 // request — must not be statically prerendered at build time.
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  seedDemoAccounts();
-  const creators = listLandingCreators();
-  const domains = listDistinctBrandDomains();
+export default async function Home() {
+  await seedDemoAccounts();
+  const creators = await listLandingCreators();
+  const domains = await listDistinctBrandDomains();
 
   return (
     <main className="flex-1 flex flex-col">

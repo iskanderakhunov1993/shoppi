@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/require-user";
 import { countClicksForLinks, getCreatorById, listLinksByArticles } from "@/lib/store";
 
 export async function GET(request: NextRequest) {
-  const user = requireUser(request);
+  const user = await requireUser(request);
   if (!user || user.role !== "brand") {
     return NextResponse.json({ error: "Brands only" }, { status: 403 });
   }
@@ -15,16 +15,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ brandDomain: user.brandDomain, articles: [], links: [] });
   }
 
-  const rows = listLinksByArticles(articles);
-  const counts = countClicksForLinks(rows.map((l) => l.id));
+  const rows = await listLinksByArticles(articles);
+  const counts = await countClicksForLinks(rows.map((l) => l.id));
 
-  const links = rows.map((link) => ({
-    ...link,
-    clicks: counts.get(link.id)?.human ?? 0,
-    clicksTotal: counts.get(link.id)?.total ?? 0,
-    creatorName: getCreatorById(link.creatorId)?.displayName,
-    creatorSlug: getCreatorById(link.creatorId)?.slug,
-  }));
+  const links = await Promise.all(
+    rows.map(async (link) => {
+      const creator = await getCreatorById(link.creatorId);
+      return {
+        ...link,
+        clicks: counts.get(link.id)?.human ?? 0,
+        clicksTotal: counts.get(link.id)?.total ?? 0,
+        creatorName: creator?.displayName,
+        creatorSlug: creator?.slug,
+      };
+    })
+  );
 
   return NextResponse.json({ brandDomain: user.brandDomain, articles, links });
 }

@@ -3,8 +3,8 @@ import { getLink, hasRecentClick, recordClick } from "@/lib/store";
 import { isBotUserAgent, clientIpFrom } from "@/lib/bot-detection";
 import { visitorFingerprint } from "@/lib/auth";
 
-export function resolveRedirectTarget(linkId: string): string | null {
-  const link = getLink(linkId);
+export async function resolveRedirectTarget(linkId: string): Promise<string | null> {
+  const link = await getLink(linkId);
   return link?.targetUrl ?? null;
 }
 
@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ linkId: string }> }
 ) {
   const { linkId } = await params;
-  const targetUrl = resolveRedirectTarget(linkId);
+  const targetUrl = await resolveRedirectTarget(linkId);
 
   if (!targetUrl) {
     return NextResponse.json({ error: "Link not found" }, { status: 404 });
@@ -25,10 +25,10 @@ export async function GET(
 
   // A reader refreshing or coming back within the window is one visit,
   // not several. Bot hits are always recorded so the raw total stays true.
-  const isRepeat = !isBot && hasRecentClick(linkId, fingerprint, 30);
+  const isRepeat = !isBot && (await hasRecentClick(linkId, fingerprint, 30));
 
   if (!isRepeat) {
-    recordClick(linkId, {
+    await recordClick(linkId, {
       referrer: request.headers.get("referer") ?? undefined,
       userAgent: userAgent ?? undefined,
       isBot,
