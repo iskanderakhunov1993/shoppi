@@ -18,6 +18,7 @@ export async function GET(
     imageUrl: link.imageUrl,
     price: link.price,
     category: link.category,
+    promoCode: link.promoCode,
     wrappedUrl: `/r/${link.id}`,
   }));
 

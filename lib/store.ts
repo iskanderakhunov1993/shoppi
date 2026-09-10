@@ -16,6 +16,11 @@ export type User = {
   // on marketplaces — every WB seller shares wildberries.ru — so a brand
   // is matched to links by article instead.
   brandArticles?: string[];
+  // A CPA-network deep-link template, e.g. "https://ad.admitad.com/g/xxx/?ulp={url}".
+  // When set, the redirect wraps the target URL in it instead of linking
+  // straight to the marketplace, so the brand's network can attribute
+  // the sale. Only meaningful for role === "brand".
+  affiliateTemplate?: string;
 };
 
 export type Creator = {
@@ -69,6 +74,7 @@ function toUser(r: Row): User {
     role: str(r.role) as Role,
     brandDomain: opt(r.brand_domain),
     brandArticles: r.brand_articles ? (JSON.parse(str(r.brand_articles)) as string[]) : undefined,
+    affiliateTemplate: opt(r.affiliate_template),
   };
 }
 
@@ -170,6 +176,20 @@ export async function setBrandArticles(userId: string, articles: string[]): Prom
   await sql`UPDATE users SET brand_articles = ${JSON.stringify(articles)} WHERE id = ${userId}`;
 }
 
+export async function setAffiliateTemplate(userId: string, template: string | null): Promise<void> {
+  await sql`UPDATE users SET affiliate_template = ${template} WHERE id = ${userId}`;
+}
+
+/** The affiliate template of whichever brand has claimed this article, if any. */
+export async function getAffiliateTemplateForArticle(articleId: string): Promise<string | undefined> {
+  const rows = await sql`
+    SELECT affiliate_template FROM users
+    WHERE role = 'brand' AND affiliate_template IS NOT NULL AND brand_articles LIKE ${`%"${articleId}"%`}
+    LIMIT 1
+  `;
+  return rows[0] ? opt(rows[0].affiliate_template) : undefined;
+}
+
 /* ------------------------------------------------------------- creators */
 
 export async function getCreatorByUserId(userId: string): Promise<Creator | undefined> {
@@ -248,8 +268,8 @@ export async function addLink(input: Omit<Link, "id" | "createdAt">): Promise<Li
   const now = new Date().toISOString();
   const seq = await nextSeq();
   await sql`
-    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, created_at, seq)
-    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${now}, ${seq})
+    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, promo_code, created_at, seq)
+    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${input.promoCode ?? null}, ${now}, ${seq})
   `;
   return (await getLink(id))!;
 }
@@ -261,7 +281,13 @@ export async function getLink(id: string): Promise<Link | undefined> {
 
 export async function updateLink(
   id: string,
-  patch: { title?: string; category?: Link["category"]; price?: number | null; imageUrl?: string | null }
+  patch: {
+    title?: string;
+    category?: Link["category"];
+    price?: number | null;
+    imageUrl?: string | null;
+    promoCode?: string | null;
+  }
 ): Promise<Link | undefined> {
   const current = await getLink(id);
   if (!current) return undefined;
@@ -273,7 +299,8 @@ export async function updateLink(
         title_lower = ${title.toLowerCase()},
         category = ${patch.category ?? current.category},
         price = ${patch.price === undefined ? (current.price ?? null) : patch.price},
-        image_url = ${patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl}
+        image_url = ${patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl},
+        promo_code = ${patch.promoCode === undefined ? (current.promoCode ?? null) : patch.promoCode}
     WHERE id = ${id}
   `;
 
@@ -588,9 +615,136 @@ export async function deleteSessionRow(token: string): Promise<void> {
   await sql`DELETE FROM sessions WHERE token = ${token}`;
 }
 
+/* ----------------------------------------------------------- opportunities */
+
+export type Opportunity = {
+  id: string;
+  brandUserId: string;
+  title: string;
+  description: string;
+  compensation?: string;
+  category?: Link["category"];
+  status: "open" | "closed";
+  createdAt: string;
+};
+
+export type OpportunityApplication = {
+  id: string;
+  opportunityId: string;
+  creatorId: string;
+  message?: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: string;
+};
+
+function toOpportunity(r: Row): Opportunity {
+  return {
+    id: str(r.id),
+    brandUserId: str(r.brand_user_id),
+    title: str(r.title),
+    description: str(r.description),
+    compensation: opt(r.compensation),
+    category: opt(r.category) as Opportunity["category"],
+    status: str(r.status) as Opportunity["status"],
+    createdAt: str(r.created_at),
+  };
+}
+
+function toApplication(r: Row): OpportunityApplication {
+  return {
+    id: str(r.id),
+    opportunityId: str(r.opportunity_id),
+    creatorId: str(r.creator_id),
+    message: opt(r.message),
+    status: str(r.status) as OpportunityApplication["status"],
+    createdAt: str(r.created_at),
+  };
+}
+
+export async function createOpportunity(input: {
+  brandUserId: string;
+  title: string;
+  description: string;
+  compensation?: string;
+  category?: Link["category"];
+}): Promise<Opportunity> {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  await sql`
+    INSERT INTO opportunities (id, brand_user_id, title, description, compensation, category, status, created_at)
+    VALUES (${id}, ${input.brandUserId}, ${input.title}, ${input.description}, ${input.compensation ?? null}, ${input.category ?? null}, 'open', ${now})
+  `;
+  return (await getOpportunity(id))!;
+}
+
+export async function getOpportunity(id: string): Promise<Opportunity | undefined> {
+  const rows = await sql`SELECT * FROM opportunities WHERE id = ${id}`;
+  return rows[0] ? toOpportunity(rows[0]) : undefined;
+}
+
+export async function listOpenOpportunities(opts: { limit?: number } = {}): Promise<Opportunity[]> {
+  const limit = Math.min(opts.limit ?? 50, 100);
+  const rows = await sql`
+    SELECT * FROM opportunities WHERE status = 'open' ORDER BY created_at DESC LIMIT ${limit}
+  `;
+  return rows.map(toOpportunity);
+}
+
+export async function listOpportunitiesByBrand(brandUserId: string): Promise<Opportunity[]> {
+  const rows = await sql`
+    SELECT * FROM opportunities WHERE brand_user_id = ${brandUserId} ORDER BY created_at DESC
+  `;
+  return rows.map(toOpportunity);
+}
+
+export async function closeOpportunity(id: string, brandUserId: string): Promise<void> {
+  await sql`UPDATE opportunities SET status = 'closed' WHERE id = ${id} AND brand_user_id = ${brandUserId}`;
+}
+
+export async function applyToOpportunity(
+  opportunityId: string,
+  creatorId: string,
+  message?: string
+): Promise<OpportunityApplication> {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  await sql`
+    INSERT INTO opportunity_applications (id, opportunity_id, creator_id, message, status, created_at)
+    VALUES (${id}, ${opportunityId}, ${creatorId}, ${message ?? null}, 'pending', ${now})
+    ON CONFLICT (opportunity_id, creator_id) DO NOTHING
+  `;
+  const rows = await sql`
+    SELECT * FROM opportunity_applications WHERE opportunity_id = ${opportunityId} AND creator_id = ${creatorId}
+  `;
+  return toApplication(rows[0]);
+}
+
+export async function listApplicationsForOpportunity(opportunityId: string): Promise<OpportunityApplication[]> {
+  const rows = await sql`
+    SELECT * FROM opportunity_applications WHERE opportunity_id = ${opportunityId} ORDER BY created_at ASC
+  `;
+  return rows.map(toApplication);
+}
+
+export async function listApplicationsByCreator(creatorId: string): Promise<OpportunityApplication[]> {
+  const rows = await sql`
+    SELECT * FROM opportunity_applications WHERE creator_id = ${creatorId} ORDER BY created_at DESC
+  `;
+  return rows.map(toApplication);
+}
+
+export async function setApplicationStatus(
+  id: string,
+  status: "accepted" | "declined"
+): Promise<OpportunityApplication | undefined> {
+  await sql`UPDATE opportunity_applications SET status = ${status} WHERE id = ${id}`;
+  const rows = await sql`SELECT * FROM opportunity_applications WHERE id = ${id}`;
+  return rows[0] ? toApplication(rows[0]) : undefined;
+}
+
 /* ----------------------------------------------------------------- test */
 
 export async function __resetStoreForTests(): Promise<void> {
-  await sql`TRUNCATE sessions, favorites, follows, clicks, links, creators, users CASCADE`;
+  await sql`TRUNCATE sessions, favorites, follows, opportunity_applications, opportunities, clicks, links, creators, users CASCADE`;
   await sql`ALTER SEQUENCE links_seq_counter RESTART WITH 1`;
 }

@@ -6,6 +6,7 @@ import { DashboardHeader } from "./DashboardHeader";
 import { ProfileEditor } from "./ProfileEditor";
 import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
+import { OpportunitiesFeed } from "./OpportunitiesFeed";
 
 type Category = "cosmetics" | "mens" | "clothing";
 
@@ -15,6 +16,7 @@ type LinkRow = {
   category: Category;
   imageUrl?: string;
   price?: number;
+  promoCode?: string;
   clicks: number;
   clicksTotal: number;
   wrappedUrl: string;
@@ -39,6 +41,7 @@ export function CreatorDashboard({
   const [category, setCategory] = useState<Category>("cosmetics");
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export function CreatorDashboard({
   const [editCategory, setEditCategory] = useState<Category>("cosmetics");
   const [editPrice, setEditPrice] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editPromoCode, setEditPromoCode] = useState("");
   const [origin, setOrigin] = useState("");
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -73,6 +77,7 @@ export function CreatorDashboard({
         category,
         imageUrl: imageUrl.trim() || undefined,
         price: price.trim() ? Number(price) : undefined,
+        promoCode: promoCode.trim() || undefined,
       }),
     });
     const data = await res.json();
@@ -87,6 +92,7 @@ export function CreatorDashboard({
     setTargetUrl("");
     setImageUrl("");
     setPrice("");
+    setPromoCode("");
     await loadLinks();
   }
 
@@ -96,6 +102,7 @@ export function CreatorDashboard({
     setEditCategory(link.category);
     setEditPrice(link.price ? String(link.price) : "");
     setEditImage(link.imageUrl ?? "");
+    setEditPromoCode(link.promoCode ?? "");
   }
 
   async function saveEdit(id: string) {
@@ -107,6 +114,7 @@ export function CreatorDashboard({
         category: editCategory,
         price: editPrice.trim() ? Number(editPrice) : null,
         imageUrl: editImage.trim() || null,
+        promoCode: editPromoCode.trim() || null,
       }),
     });
     if (res.ok) {
@@ -213,6 +221,12 @@ export function CreatorDashboard({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
+              <input
+                placeholder="Промокод от бренда (необязательно)"
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+              />
               {error && <p className="text-error text-sm">{error}</p>}
               <button type="submit" disabled={submitting} className={buttonClass}>
                 {submitting ? "Добавляем…" : "Добавить"}
@@ -267,6 +281,12 @@ export function CreatorDashboard({
                         placeholder="Цена"
                         onChange={(e) => setEditPrice(e.target.value)}
                       />
+                      <input
+                        className={`${inputClass} border border-line px-3 py-2`}
+                        value={editPromoCode}
+                        placeholder="Промокод"
+                        onChange={(e) => setEditPromoCode(e.target.value)}
+                      />
                       <div className="flex gap-2">
                         <button
                           onClick={() => saveEdit(link.id)}
@@ -288,6 +308,11 @@ export function CreatorDashboard({
                         <div className="text-[14px] font-medium">{link.title}</div>
                         <span className="text-[10.5px] uppercase tracking-wide text-stone">
                           {CATEGORY_LABEL[link.category]}
+                          {link.promoCode && (
+                            <span className="ml-2 text-ink border border-line px-1.5 py-0.5 normal-case">
+                              промокод {link.promoCode}
+                            </span>
+                          )}
                         </span>
                         <div className="flex gap-3 mt-2">
                           <button
@@ -318,6 +343,10 @@ export function CreatorDashboard({
             </ul>
           )}
         </div>
+      </div>
+
+      <div className="px-8 py-8 border-t border-line">
+        <OpportunitiesFeed />
       </div>
     </main>
   );

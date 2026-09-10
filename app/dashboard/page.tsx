@@ -13,6 +13,7 @@ type Me = {
   bio?: string;
   brandDomain?: string;
   brandArticles?: string[];
+  affiliateTemplate?: string;
 };
 
 export default function DashboardPage() {

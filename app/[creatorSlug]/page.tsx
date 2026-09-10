@@ -17,6 +17,7 @@ type StorefrontLink = {
   imageUrl?: string;
   price?: number;
   category: string;
+  promoCode?: string;
   wrappedUrl: string;
 };
 
@@ -101,6 +102,11 @@ export default async function StorefrontPage({
                 {link.price && (
                   <div className="text-[13.5px] text-stone">
                     {link.price.toLocaleString("ru-RU")} ₽
+                  </div>
+                )}
+                {link.promoCode && (
+                  <div className="text-[11.5px] text-ink border border-line w-fit px-2 py-0.5">
+                    Промокод: {link.promoCode}
                   </div>
                 )}
               </a>

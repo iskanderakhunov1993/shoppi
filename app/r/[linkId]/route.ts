@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLink, hasRecentClick, recordClick } from "@/lib/store";
+import { getAffiliateTemplateForArticle, getLink, hasRecentClick, recordClick } from "@/lib/store";
 import { isBotUserAgent, clientIpFrom } from "@/lib/bot-detection";
 import { visitorFingerprint } from "@/lib/auth";
 
+/**
+ * Wraps the raw marketplace URL in a brand's CPA-network deep link when one
+ * is on file for this article — the one point where that swap can happen
+ * without the storefront or the creator ever knowing about it.
+ */
 export async function resolveRedirectTarget(linkId: string): Promise<string | null> {
   const link = await getLink(linkId);
-  return link?.targetUrl ?? null;
+  if (!link) return null;
+
+  if (link.articleId) {
+    const template = await getAffiliateTemplateForArticle(link.articleId);
+    if (template) return template.replace("{url}", encodeURIComponent(link.targetUrl));
+  }
+
+  return link.targetUrl;
 }
 
 export async function GET(

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { inputClass } from "@/app/components/Field";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
+import { BrandOpportunities } from "./BrandOpportunities";
 
 type BrandLink = {
   id: string;
@@ -30,13 +31,20 @@ export function BrandDashboard({
   me,
   onProfileSaved,
 }: {
-  me: { displayName: string; brandDomain?: string; brandArticles?: string[] };
+  me: {
+    displayName: string;
+    brandDomain?: string;
+    brandArticles?: string[];
+    affiliateTemplate?: string;
+  };
   onProfileSaved: () => void;
 }) {
   const [links, setLinks] = useState<BrandLink[] | null>(null);
   const [articlesInput, setArticlesInput] = useState((me.brandArticles ?? []).join("\n"));
+  const [affiliateTemplate, setAffiliateTemplate] = useState(me.affiliateTemplate ?? "");
   const [saving, setSaving] = useState(false);
   const [unrecognized, setUnrecognized] = useState<string[]>([]);
+  const [affiliateError, setAffiliateError] = useState<string | null>(null);
   const [newSinceLastVisit, setNewSinceLastVisit] = useState(0);
 
   const load = useCallback(async () => {
@@ -66,20 +74,24 @@ export function BrandDashboard({
   async function saveArticles(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setAffiliateError(null);
 
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ articles: articlesInput }),
+      body: JSON.stringify({ articles: articlesInput, affiliateTemplate }),
     });
     const data = await res.json();
     setSaving(false);
 
-    if (res.ok) {
-      setUnrecognized(data.unrecognized ?? []);
-      onProfileSaved();
-      await load();
+    if (!res.ok) {
+      setAffiliateError(data.error ?? "Не удалось сохранить");
+      return;
     }
+
+    setUnrecognized(data.unrecognized ?? []);
+    onProfileSaved();
+    await load();
   }
 
   const totalHuman = links?.reduce((s, l) => s + l.clicks, 0) ?? 0;
@@ -104,6 +116,22 @@ export function BrandDashboard({
               value={articlesInput}
               onChange={(e) => setArticlesInput(e.target.value)}
             />
+            <div className="flex flex-col gap-2 pt-2 border-t border-line">
+              <label className="text-[11px] uppercase tracking-wider text-stone">
+                Партнёрская ссылка (CPA-сеть, необязательно)
+              </label>
+              <input
+                className={`${inputClass} border border-line px-3 py-2.5 font-mono text-[12.5px]`}
+                placeholder="https://ad.admitad.com/g/xxx/?ulp={url}"
+                value={affiliateTemplate}
+                onChange={(e) => setAffiliateTemplate(e.target.value)}
+              />
+              <p className="text-stone text-[12px] leading-relaxed">
+                Если у вас есть партнёрская ссылка из CPA-сети (Admitad, ePN и т.п.), вставьте её
+                шаблон с плейсхолдером <code>{"{url}"}</code> вместо адреса товара — переходы по
+                вашим товарам пойдут через неё вместо прямой ссылки на маркетплейс.
+              </p>
+            </div>
             <button
               type="submit"
               disabled={saving}
@@ -119,6 +147,7 @@ export function BrandDashboard({
               карточку WB либо Ozon.
             </p>
           )}
+          {affiliateError && <p className="text-[12.5px] text-error leading-relaxed">{affiliateError}</p>}
         </div>
 
         <div className="px-8 py-8">
@@ -188,6 +217,10 @@ export function BrandDashboard({
             </ul>
           )}
         </div>
+      </div>
+
+      <div className="px-8 py-8 border-t border-line">
+        <BrandOpportunities />
       </div>
     </main>
   );

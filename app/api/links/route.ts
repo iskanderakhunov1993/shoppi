@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
     category: category as (typeof CATEGORIES)[number],
     imageUrl: body?.imageUrl || undefined,
     price: typeof body?.price === "number" ? body.price : undefined,
+    promoCode: body?.promoCode || undefined,
     marketplace,
     articleId,
   });

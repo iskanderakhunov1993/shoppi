@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/require-user";
-import { getCreatorByUserId, setBrandArticles, updateCreator } from "@/lib/store";
+import { getCreatorByUserId, setAffiliateTemplate, setBrandArticles, updateCreator } from "@/lib/store";
 import { parseArticleInput } from "@/lib/marketplace";
 
 export async function GET(request: NextRequest) {
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       displayName: user.brandDomain ?? user.email,
       brandDomain: user.brandDomain,
       brandArticles: user.brandArticles ?? [],
+      affiliateTemplate: user.affiliateTemplate ?? "",
     });
   }
 
@@ -73,6 +74,18 @@ export async function PUT(request: NextRequest) {
     const raw = String(body?.articles ?? "");
     const { articles, unrecognized } = parseArticleInput(raw);
     await setBrandArticles(user.id, articles);
+
+    if (body?.affiliateTemplate !== undefined) {
+      const template = String(body.affiliateTemplate).trim();
+      if (template && !template.includes("{url}")) {
+        return NextResponse.json(
+          { error: "Шаблон должен содержать {url} — место, куда подставится ссылка на товар" },
+          { status: 400 }
+        );
+      }
+      await setAffiliateTemplate(user.id, template || null);
+    }
+
     return NextResponse.json({ brandArticles: articles, unrecognized });
   }
 

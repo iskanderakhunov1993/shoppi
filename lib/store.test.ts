@@ -25,6 +25,19 @@ import {
   countFollowers,
   listFollowedCreators,
   circleFeed,
+  updateLink,
+  setBrandArticles,
+  setAffiliateTemplate,
+  getAffiliateTemplateForArticle,
+  createOpportunity,
+  getOpportunity,
+  listOpenOpportunities,
+  listOpportunitiesByBrand,
+  closeOpportunity,
+  applyToOpportunity,
+  listApplicationsForOpportunity,
+  listApplicationsByCreator,
+  setApplicationStatus,
   __resetStoreForTests,
 } from "./store";
 
@@ -286,5 +299,100 @@ describe("follows (circles)", () => {
     await followCreator(shopper.id, followed.id);
 
     expect(await circleFeed(shopper.id)).toEqual([]);
+  });
+});
+
+describe("promo codes", () => {
+  it("stores and updates a link's promo code", async () => {
+    const { creator } = await createCreator("anna@example.com");
+    const link = await addLink({
+      creatorId: creator.id,
+      title: "Serum",
+      category: "cosmetics",
+      targetUrl: "https://example.com/serum",
+      promoCode: "ANNA10",
+    });
+    expect(link.promoCode).toBe("ANNA10");
+
+    const updated = await updateLink(link.id, { promoCode: "ANNA20" });
+    expect(updated?.promoCode).toBe("ANNA20");
+  });
+});
+
+describe("affiliate templates (CPA network)", () => {
+  it("finds the template of the brand that claimed the article", async () => {
+    const { creator } = await createCreator("anna@example.com");
+    const { user: brand } = await createUser("brand@example.com", "hashed", "brand", "wildberries.ru");
+    await setBrandArticles(brand.id, ["172247725"]);
+    await setAffiliateTemplate(brand.id, "https://ad.admitad.com/g/xxx/?ulp={url}");
+
+    await addLink({
+      creatorId: creator.id,
+      title: "Serum",
+      category: "cosmetics",
+      targetUrl: "https://www.wildberries.ru/catalog/172247725/detail.aspx",
+      articleId: "172247725",
+    });
+
+    const template = await getAffiliateTemplateForArticle("172247725");
+    expect(template).toBe("https://ad.admitad.com/g/xxx/?ulp={url}");
+  });
+
+  it("returns undefined when no brand has claimed the article or set a template", async () => {
+    expect(await getAffiliateTemplateForArticle("000000")).toBeUndefined();
+  });
+});
+
+describe("opportunities", () => {
+  it("lets a brand publish an opportunity and a creator apply", async () => {
+    const { creator } = await createCreator("anna@example.com");
+    const { user: brand } = await createUser("brand@example.com", "hashed", "brand", "wildberries.ru");
+
+    const opportunity = await createOpportunity({
+      brandUserId: brand.id,
+      title: "Обзор нового крема",
+      description: "Ищем куратора для честного обзора.",
+      compensation: "Продукт + 3000₽",
+      category: "cosmetics",
+    });
+    expect(opportunity.status).toBe("open");
+    expect((await listOpenOpportunities()).map((o) => o.id)).toContain(opportunity.id);
+    expect((await listOpportunitiesByBrand(brand.id)).map((o) => o.id)).toEqual([opportunity.id]);
+
+    const application = await applyToOpportunity(opportunity.id, creator.id, "Готова взять на следующей неделе");
+    expect(application.status).toBe("pending");
+    expect((await listApplicationsForOpportunity(opportunity.id)).map((a) => a.id)).toEqual([application.id]);
+    expect((await listApplicationsByCreator(creator.id)).map((a) => a.id)).toEqual([application.id]);
+
+    const accepted = await setApplicationStatus(application.id, "accepted");
+    expect(accepted?.status).toBe("accepted");
+  });
+
+  it("does not double-apply the same creator to the same opportunity", async () => {
+    const { creator } = await createCreator("anna@example.com");
+    const { user: brand } = await createUser("brand@example.com", "hashed", "brand", "wildberries.ru");
+    const opportunity = await createOpportunity({
+      brandUserId: brand.id,
+      title: "Test",
+      description: "Test",
+    });
+
+    await applyToOpportunity(opportunity.id, creator.id, "first");
+    await applyToOpportunity(opportunity.id, creator.id, "second");
+
+    expect(await listApplicationsForOpportunity(opportunity.id)).toHaveLength(1);
+  });
+
+  it("closed opportunities no longer show up in the open list", async () => {
+    const { user: brand } = await createUser("brand@example.com", "hashed", "brand", "wildberries.ru");
+    const opportunity = await createOpportunity({
+      brandUserId: brand.id,
+      title: "Test",
+      description: "Test",
+    });
+
+    await closeOpportunity(opportunity.id, brand.id);
+    expect((await getOpportunity(opportunity.id))?.status).toBe("closed");
+    expect(await listOpenOpportunities()).toEqual([]);
   });
 });

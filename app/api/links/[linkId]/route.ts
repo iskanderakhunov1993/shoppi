@@ -44,6 +44,7 @@ export async function PUT(
     category: category as (typeof CATEGORIES)[number] | undefined,
     price: body?.price === null ? null : typeof body?.price === "number" ? body.price : undefined,
     imageUrl: body?.imageUrl === null ? null : body?.imageUrl,
+    promoCode: body?.promoCode === null ? null : body?.promoCode,
   });
 
   return NextResponse.json({ ...updated, wrappedUrl: `/r/${linkId}` });
