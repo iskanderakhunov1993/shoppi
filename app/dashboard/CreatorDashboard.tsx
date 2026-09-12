@@ -51,6 +51,7 @@ export function CreatorDashboard({
   const [editImage, setEditImage] = useState("");
   const [editPromoCode, setEditPromoCode] = useState("");
   const [origin, setOrigin] = useState("");
+  const [tab, setTab] = useState<"products" | "earnings" | "profile">("products");
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -176,178 +177,218 @@ export function CreatorDashboard({
         }
       />
 
-      <div className="grid md:grid-cols-[300px_1fr] flex-1">
-        <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8 flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
-            <form onSubmit={handleAdd} className="flex flex-col gap-3">
-              <input
-                placeholder="Название товара"
-                required
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <input
-                placeholder="Ссылка на товар"
-                type="url"
-                required
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
-              />
-              <select
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
-              >
-                <option value="cosmetics">Косметика</option>
-                <option value="mens">Мужские товары</option>
-                <option value="clothing">Одежда</option>
-              </select>
-              <input
-                placeholder="Ссылка на фото (необязательно)"
-                type="url"
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-              <input
-                placeholder="Цена в рублях (необязательно)"
-                type="number"
-                min="0"
-                step="1"
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-              <input
-                placeholder="Промокод от бренда (необязательно)"
-                className={`${inputClass} border border-line px-3 py-2.5`}
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
-              {error && <p className="text-error text-sm">{error}</p>}
-              <button type="submit" disabled={submitting} className={buttonClass}>
-                {submitting ? "Добавляем…" : "Добавить"}
-              </button>
-            </form>
+      <div className="flex gap-6 px-8 pt-6 border-b border-line">
+        {(
+          [
+            ["products", "Товары"],
+            ["earnings", "Заработок"],
+            ["profile", "Профиль и медиакит"],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px transition-colors cursor-pointer ${
+              tab === key ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "products" && (
+        <div className="grid md:grid-cols-[300px_1fr] flex-1">
+          <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8">
+            <div className="flex flex-col gap-4">
+              <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
+              <form onSubmit={handleAdd} className="flex flex-col gap-3">
+                <input
+                  placeholder="Название товара"
+                  required
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <input
+                  placeholder="Ссылка на товар"
+                  type="url"
+                  required
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={targetUrl}
+                  onChange={(e) => setTargetUrl(e.target.value)}
+                />
+                <select
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as Category)}
+                >
+                  <option value="cosmetics">Косметика</option>
+                  <option value="mens">Мужские товары</option>
+                  <option value="clothing">Одежда</option>
+                </select>
+                <input
+                  placeholder="Ссылка на фото (необязательно)"
+                  type="url"
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+                <input
+                  placeholder="Цена в рублях (необязательно)"
+                  type="number"
+                  min="0"
+                  step="1"
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+                <input
+                  placeholder="Промокод от бренда (необязательно)"
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                />
+                {error && <p className="text-error text-sm">{error}</p>}
+                <button type="submit" disabled={submitting} className={buttonClass}>
+                  {submitting ? "Добавляем…" : "Добавить"}
+                </button>
+              </form>
+            </div>
           </div>
 
-          <ProfileEditor me={me} onSaved={onProfileSaved} />
-        </div>
+          <div className="px-8 py-8">
+            <div className="flex justify-between items-baseline mb-6 flex-wrap gap-2">
+              <h3 className="text-[11px] uppercase tracking-wider text-stone">Мои ссылки</h3>
+              <span className="text-xs text-stone">
+                {links.length} ссылок · <b className="text-ink font-medium">{totalHuman}</b> живых
+                переходов из {totalAll}
+              </span>
+            </div>
 
-        <div className="px-8 py-8">
-          <div className="flex justify-between items-baseline mb-6 flex-wrap gap-2">
-            <h3 className="text-[11px] uppercase tracking-wider text-stone">Мои ссылки</h3>
-            <span className="text-xs text-stone">
-              {links.length} ссылок · <b className="text-ink font-medium">{totalHuman}</b> живых
-              переходов из {totalAll}
-            </span>
-          </div>
-
-          {links.length === 0 ? (
-            <EmptyState title="Ваша витрина пока пуста — добавьте первый товар в форме выше." />
-          ) : (
-            <ul className="flex flex-col">
-              {links.map((link) => (
-                <li key={link.id} className="py-4 border-b border-line last:border-b-0">
-                  {editingId === link.id ? (
-                    <div className="flex flex-col gap-2 max-w-md">
-                      <input
-                        className={`${inputClass} border border-line px-3 py-2`}
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                      />
-                      <select
-                        className={`${inputClass} border border-line px-3 py-2`}
-                        value={editCategory}
-                        onChange={(e) => setEditCategory(e.target.value as Category)}
-                      >
-                        <option value="cosmetics">Косметика</option>
-                        <option value="mens">Мужские товары</option>
-                        <option value="clothing">Одежда</option>
-                      </select>
-                      <input
-                        className={`${inputClass} border border-line px-3 py-2`}
-                        value={editImage}
-                        placeholder="Ссылка на фото"
-                        onChange={(e) => setEditImage(e.target.value)}
-                      />
-                      <input
-                        className={`${inputClass} border border-line px-3 py-2`}
-                        value={editPrice}
-                        type="number"
-                        placeholder="Цена"
-                        onChange={(e) => setEditPrice(e.target.value)}
-                      />
-                      <input
-                        className={`${inputClass} border border-line px-3 py-2`}
-                        value={editPromoCode}
-                        placeholder="Промокод"
-                        onChange={(e) => setEditPromoCode(e.target.value)}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => saveEdit(link.id)}
-                          className="text-[12px] uppercase tracking-wide text-paper bg-ink px-4 py-2 cursor-pointer"
+            {links.length === 0 ? (
+              <EmptyState title="Ваша витрина пока пуста — добавьте первый товар в форме выше." />
+            ) : (
+              <ul className="flex flex-col">
+                {links.map((link) => (
+                  <li key={link.id} className="py-4 border-b border-line last:border-b-0">
+                    {editingId === link.id ? (
+                      <div className="flex flex-col gap-2 max-w-md">
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                        />
+                        <select
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editCategory}
+                          onChange={(e) => setEditCategory(e.target.value as Category)}
                         >
-                          Сохранить
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-[12px] uppercase tracking-wide border border-line px-4 py-2 cursor-pointer"
-                        >
-                          Отмена
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-[1fr_auto] items-start gap-4">
-                      <div>
-                        <div className="text-[14px] font-medium">{link.title}</div>
-                        <span className="text-[10.5px] uppercase tracking-wide text-stone">
-                          {CATEGORY_LABEL[link.category]}
-                          {link.promoCode && (
-                            <span className="ml-2 text-ink border border-line px-1.5 py-0.5 normal-case">
-                              промокод {link.promoCode}
-                            </span>
-                          )}
-                        </span>
-                        <div className="flex gap-3 mt-2">
+                          <option value="cosmetics">Косметика</option>
+                          <option value="mens">Мужские товары</option>
+                          <option value="clothing">Одежда</option>
+                        </select>
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editImage}
+                          placeholder="Ссылка на фото"
+                          onChange={(e) => setEditImage(e.target.value)}
+                        />
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editPrice}
+                          type="number"
+                          placeholder="Цена"
+                          onChange={(e) => setEditPrice(e.target.value)}
+                        />
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editPromoCode}
+                          placeholder="Промокод"
+                          onChange={(e) => setEditPromoCode(e.target.value)}
+                        />
+                        <div className="flex gap-2">
                           <button
-                            onClick={() => startEditing(link)}
-                            className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+                            onClick={() => saveEdit(link.id)}
+                            className="text-[12px] uppercase tracking-wide text-paper bg-ink px-4 py-2 cursor-pointer"
                           >
-                            Изменить
+                            Сохранить
                           </button>
                           <button
-                            onClick={() => handleDelete(link)}
-                            className="text-[11px] uppercase tracking-wide text-stone hover:text-error transition-colors cursor-pointer"
+                            onClick={() => setEditingId(null)}
+                            className="text-[12px] uppercase tracking-wide border border-line px-4 py-2 cursor-pointer"
                           >
-                            Удалить
+                            Отмена
                           </button>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-[22px] font-medium leading-none">{link.clicks}</div>
-                        <div className="text-[11px] text-stone mt-1">живых</div>
-                        {link.clicksTotal > link.clicks && (
-                          <div className="text-[11px] text-stone">из {link.clicksTotal}</div>
-                        )}
+                    ) : (
+                      <div className="grid grid-cols-[1fr_auto] items-start gap-4">
+                        <div>
+                          <div className="text-[14px] font-medium">{link.title}</div>
+                          <span className="text-[10.5px] uppercase tracking-wide text-stone">
+                            {CATEGORY_LABEL[link.category]}
+                            {link.promoCode && (
+                              <span className="ml-2 text-ink border border-line px-1.5 py-0.5 normal-case">
+                                промокод {link.promoCode}
+                              </span>
+                            )}
+                          </span>
+                          <div className="flex gap-3 mt-2">
+                            <button
+                              onClick={() => startEditing(link)}
+                              className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+                            >
+                              Изменить
+                            </button>
+                            <button
+                              onClick={() => handleDelete(link)}
+                              className="text-[11px] uppercase tracking-wide text-stone hover:text-error transition-colors cursor-pointer"
+                            >
+                              Удалить
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[22px] font-medium leading-none">{link.clicks}</div>
+                          <div className="text-[11px] text-stone mt-1">живых</div>
+                          {link.clicksTotal > link.clicks && (
+                            <div className="text-[11px] text-stone">из {link.clicksTotal}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="px-8 py-8 border-t border-line">
-        <OpportunitiesFeed />
-      </div>
+      {tab === "earnings" && (
+        <div className="px-8 py-8 flex-1">
+          <div className="max-w-xl mb-10 flex flex-col gap-2">
+            <h3 className="text-[11px] uppercase tracking-wider text-stone">Как вы зарабатываете</h3>
+            <p className="text-stone text-[13px] leading-relaxed">
+              Три независимых способа, можно использовать любой или все сразу: добавьте{" "}
+              <b className="text-ink font-medium">промокод</b> к товару на вкладке «Товары» — он
+              появится у вас на витрине рядом с ценой; если бренд подключил{" "}
+              <b className="text-ink font-medium">партнёрскую сеть</b>, переходы по его товарам
+              будут учитываться автоматически, без каких-либо действий с вашей стороны; а ниже —{" "}
+              <b className="text-ink font-medium">прямые предложения</b> от брендов, на которые
+              можно откликнуться.
+            </p>
+          </div>
+          <OpportunitiesFeed />
+        </div>
+      )}
+
+      {tab === "profile" && (
+        <div className="px-8 py-8 max-w-md">
+          <ProfileEditor me={me} onSaved={onProfileSaved} defaultOpen />
+        </div>
+      )}
     </main>
   );
 }

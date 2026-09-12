@@ -7,11 +7,13 @@ import { placeholderAvatar } from "@/lib/avatar";
 export function ProfileEditor({
   me,
   onSaved,
+  defaultOpen = false,
 }: {
   me: { displayName: string; bio?: string; avatarUrl?: string; slug?: string };
   onSaved: () => void;
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
