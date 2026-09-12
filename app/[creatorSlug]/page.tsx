@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
 import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
+import { LandingNav } from "@/app/components/landing/LandingNav";
+import { LandingFooter } from "@/app/components/landing/LandingFooter";
 
 function pluralizeShoppers(n: number): string {
   const mod10 = n % 10;
@@ -79,8 +81,10 @@ export default async function StorefrontPage({
   if (!creator) notFound();
 
   return (
-    <main className="flex-1">
-      <div className="text-center px-8 pt-14 pb-10 border-b border-line">
+    <main className="flex-1 flex flex-col">
+      <LandingNav />
+
+      <div className="text-center px-8 pt-32 pb-10 border-b border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={creator.avatarUrl || placeholderAvatar(creatorSlug)}
@@ -128,6 +132,8 @@ export default async function StorefrontPage({
       </div>
 
       <StorefrontGrid links={creator.links} />
+
+      <LandingFooter />
     </main>
   );
 }

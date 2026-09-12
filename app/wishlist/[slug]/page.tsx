@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
+import { LandingNav } from "@/app/components/landing/LandingNav";
+import { LandingFooter } from "@/app/components/landing/LandingFooter";
 
 const CATEGORY_LABEL: Record<string, string> = {
   cosmetics: "Косметика",
@@ -47,8 +49,10 @@ export default async function WishlistPage({
   if (!wishlist) notFound();
 
   return (
-    <main className="flex-1">
-      <div className="text-center px-8 pt-14 pb-10 border-b border-line">
+    <main className="flex-1 flex flex-col">
+      <LandingNav />
+
+      <div className="text-center px-8 pt-32 pb-10 border-b border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={wishlist.avatarUrl || placeholderAvatar(slug)}
@@ -97,6 +101,8 @@ export default async function WishlistPage({
           ))}
         </div>
       )}
+
+      <LandingFooter />
     </main>
   );
 }
