@@ -33,6 +33,7 @@ export function CreatorDashboard({
     avatarUrl?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    categories?: Category[];
   };
   onProfileSaved: () => void;
 }) {

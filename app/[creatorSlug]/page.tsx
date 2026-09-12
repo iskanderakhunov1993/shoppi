@@ -5,7 +5,7 @@ import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
-import type { Category } from "@/lib/categories";
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 function pluralizeShoppers(n: number): string {
   const mod10 = n % 10;
@@ -44,6 +44,7 @@ async function getStorefront(slug: string) {
     avatarUrl?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    categories?: Category[];
     followers: number;
   }>;
 }
@@ -96,6 +97,18 @@ export default async function StorefrontPage({
         <h1 className="font-display text-4xl mb-3">{creator.displayName}</h1>
         {creator.bio && (
           <p className="text-stone text-sm max-w-md mx-auto mb-6">{creator.bio}</p>
+        )}
+        {creator.categories && creator.categories.length > 0 && (
+          <div className="flex justify-center flex-wrap gap-2 mb-6">
+            {creator.categories.map((c) => (
+              <span
+                key={c}
+                className="text-[10.5px] uppercase tracking-wide text-stone border border-line px-2.5 py-1"
+              >
+                {CATEGORY_LABEL[c]}
+              </span>
+            ))}
+          </div>
         )}
         <div className="flex justify-center mb-5">
           <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
