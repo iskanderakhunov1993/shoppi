@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
+import { CircleOnboarding } from "./CircleOnboarding";
 import { placeholderAvatar } from "@/lib/avatar";
 
 type FavoriteLink = {
@@ -35,6 +36,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
   const [tab, setTab] = useState<"saved" | "circle">("saved");
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const loadFavorites = useCallback(async () => {
     const res = await fetch("/api/favorites");
@@ -154,25 +156,41 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
           {circle === null ? (
             <p className="text-stone text-sm">Загрузка…</p>
           ) : circle.creators.length === 0 ? (
-            <EmptyState
-              icon={
-                <div className="w-12 h-12 grid grid-cols-2 gap-1 p-2 border border-line">
-                  <span className="bg-line" />
-                  <span className="bg-line" />
-                  <span className="bg-line" />
-                  <span className="bg-line" />
-                </div>
-              }
-              title="Пока нет кураторов"
-              description="Добавьте кураторов, чьему вкусу доверяете — их находки соберутся в одну ленту, вместо того чтобы проверять каждую витрину по отдельности."
-              cta={{ label: "Найти кураторов", href: "/curators" }}
-            />
+            <div className="max-w-md flex flex-col gap-4 items-start">
+              <div className="w-12 h-12 grid grid-cols-2 gap-1 p-2 border border-line">
+                <span className="bg-line" />
+                <span className="bg-line" />
+                <span className="bg-line" />
+                <span className="bg-line" />
+              </div>
+              <p className="font-display italic text-base text-stone">Пока нет кураторов</p>
+              <p className="text-stone text-sm leading-relaxed">
+                Соберите первый круг кураторов, чьему вкусу доверяете — их находки соберутся в одну
+                ленту, вместо того чтобы проверять каждую витрину по отдельности.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowOnboarding(true)}
+                className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                Собрать первый круг
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col gap-10">
               <div>
-                <h3 className="text-[11px] uppercase tracking-wider text-stone mb-4">
-                  В ваших кураторах
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[11px] uppercase tracking-wider text-stone">
+                    В ваших кураторах
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowOnboarding(true)}
+                    className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+                  >
+                    + Добавить ещё
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {circle.creators.map((c) => (
                     <div
@@ -245,6 +263,16 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
             </div>
           )}
         </div>
+      )}
+
+      {showOnboarding && (
+        <CircleOnboarding
+          onClose={() => setShowOnboarding(false)}
+          onDone={async () => {
+            setShowOnboarding(false);
+            await loadCircle();
+          }}
+        />
       )}
     </main>
   );
