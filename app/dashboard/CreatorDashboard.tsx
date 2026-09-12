@@ -7,6 +7,7 @@ import { ProfileEditor } from "./ProfileEditor";
 import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { OpportunitiesFeed } from "./OpportunitiesFeed";
+import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
 
 type Category = "cosmetics" | "mens" | "clothing";
 
@@ -42,6 +43,7 @@ export function CreatorDashboard({
   };
   onProfileSaved: () => void;
 }) {
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [links, setLinks] = useState<LinkRow[] | null>(null);
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
@@ -182,6 +184,22 @@ export function CreatorDashboard({
 
   const totalHuman = links.reduce((s, l) => s + l.clicks, 0);
   const totalAll = links.reduce((s, l) => s + l.clicksTotal, 0);
+
+  // A brand-new account (no bio, no products yet) gets the guided
+  // onboarding instead of dropping straight into the full dashboard.
+  const isNewAccount = !me.bio?.trim() && links.length === 0;
+  if (isNewAccount && !onboardingDismissed) {
+    return (
+      <CreatorOnboardingWizard
+        me={me}
+        onDone={async () => {
+          onProfileSaved();
+          setOnboardingDismissed(true);
+          await loadLinks();
+        }}
+      />
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col">

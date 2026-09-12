@@ -6,16 +6,42 @@ import { Field, inputClass, buttonClass } from "@/app/components/Field";
 
 type Role = "shopper" | "creator" | "brand";
 
-const ROLE_LABEL: Record<Role, string> = {
-  shopper: "Шоппер — покупаю по рекомендациям",
-  creator: "Куратор — веду витрину и зарабатываю",
-  brand: "Бренд — отслеживаю, кто меня продвигает",
+const ROLE_CARDS: {
+  role: Role;
+  title: string;
+  tagline: string;
+  imageSeed: string;
+}[] = [
+  {
+    role: "shopper",
+    title: "Шоппер",
+    tagline: "Покупай у своих людей, не у алгоритма.",
+    imageSeed: "shoppi-shoppers",
+  },
+  {
+    role: "creator",
+    title: "Куратор",
+    tagline: "Твой вкус — теперь витрина.",
+    imageSeed: "shoppi-creators",
+  },
+  {
+    role: "brand",
+    title: "Бренд",
+    tagline: "Смотрите, кто вас продвигает.",
+    imageSeed: "shoppi-brands",
+  },
+];
+
+const ROLE_TITLE: Record<Role, string> = {
+  shopper: "Шоппер",
+  creator: "Куратор",
+  brand: "Бренд",
 };
 
 export default function SignupPage() {
+  const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<Role>("shopper");
   const [brandDomain, setBrandDomain] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -24,6 +50,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!role) return;
     setError(null);
     setSubmitting(true);
 
@@ -67,6 +94,51 @@ export default function SignupPage() {
     );
   }
 
+  // Step 1: pick a role as a visual choice, not a dropdown buried in a form.
+  if (!role) {
+    return (
+      <main className="flex-1 flex flex-col">
+        <div className="text-center pt-14 pb-8 px-6">
+          <div className="text-[11px] uppercase tracking-widest text-stone mb-3">Shoppi</div>
+          <h1 className="font-display text-3xl md:text-4xl mb-2">Кто вы?</h1>
+          <p className="text-stone text-sm">
+            Уже есть аккаунт?{" "}
+            <Link href="/login" className="text-ink underline underline-offset-4">
+              Войти
+            </Link>
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 flex-1">
+          {ROLE_CARDS.map((card) => (
+            <button
+              key={card.role}
+              onClick={() => setRole(card.role)}
+              className="group relative flex flex-col justify-end min-h-[420px] md:min-h-[520px] p-8 text-left overflow-hidden cursor-pointer border-b md:border-b-0 md:border-r border-line last:border-none"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://picsum.photos/seed/${card.imageSeed}/900/1100`}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black via-black/45 to-black/10" />
+              <div className="relative flex flex-col gap-3">
+                <h2 className="font-display text-white text-3xl">{card.title}</h2>
+                <p className="text-white/80 text-sm max-w-[22ch]">{card.tagline}</p>
+                <span className="mt-2 w-fit text-[12px] font-semibold uppercase tracking-wide text-black bg-white px-5 py-3 group-hover:opacity-85 transition-opacity">
+                  Зарегистрироваться
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
+  // Step 2: email/password — the role is already decided, so it's shown
+  // as a fact with a way back, not another field to fill in.
   return (
     <main className="grid md:grid-cols-2 flex-1">
       <div className="border-b md:border-b-0 md:border-r border-line flex flex-col justify-center px-8 py-14 md:px-16">
@@ -79,7 +151,15 @@ export default function SignupPage() {
       </div>
       <div className="flex flex-col justify-center gap-6 px-8 py-14 md:px-16">
         <div>
-          <h1 className="font-display text-2xl mb-1">Создать аккаунт</h1>
+          <button
+            onClick={() => setRole(null)}
+            className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer mb-3"
+          >
+            ← другая роль
+          </button>
+          <h1 className="font-display text-2xl mb-1">
+            Создать аккаунт: {ROLE_TITLE[role]}
+          </h1>
           <p className="text-stone text-sm">
             Уже есть аккаунт?{" "}
             <Link href="/login" className="text-ink underline underline-offset-4">
@@ -88,23 +168,11 @@ export default function SignupPage() {
           </p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <Field label="Я регистрируюсь как">
-            <select
-              className={inputClass}
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-            >
-              {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABEL[r]}
-                </option>
-              ))}
-            </select>
-          </Field>
           <Field label="Email">
             <input
               type="email"
               required
+              autoFocus
               className={inputClass}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
