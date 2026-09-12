@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -12,6 +12,15 @@ const fraunces = Fraunces({
 const inter = Inter({
   variable: "--font-body",
   subsets: ["latin", "cyrillic"],
+});
+
+// Utility face for the home hero's "receipt" — line items, prices, the
+// running total — anywhere a real Russian receipt sets figures in a
+// fixed-width face rather than the display serif.
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ru"
-      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
