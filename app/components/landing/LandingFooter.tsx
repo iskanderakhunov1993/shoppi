@@ -35,6 +35,7 @@ export async function LandingFooter() {
     {
       title: "Покупателям",
       links: [
+        { label: "Обзор", href: "/shoppers" },
         { label: "Все кураторы", href: "/curators" },
         { label: "Косметика", href: "/category/cosmetics" },
         { label: "Мужские товары", href: "/category/mens" },

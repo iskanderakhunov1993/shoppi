@@ -8,7 +8,7 @@ import { Field, inputClass, buttonClass } from "@/app/components/Field";
 type Role = "shopper" | "creator" | "brand";
 
 const DEMO_LABEL: Record<Role, string> = {
-  shopper: "Демо: Шоппер",
+  shopper: "Демо: Покупатель",
   creator: "Демо: Куратор",
   brand: "Демо: Бренд",
 };

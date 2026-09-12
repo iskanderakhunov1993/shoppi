@@ -14,7 +14,7 @@ const ROLE_CARDS: {
 }[] = [
   {
     role: "shopper",
-    title: "Шоппер",
+    title: "Покупатель",
     tagline: "Покупай у своих людей, не у алгоритма.",
     imageSeed: "shoppi-shoppers",
   },
@@ -33,7 +33,7 @@ const ROLE_CARDS: {
 ];
 
 const ROLE_TITLE: Record<Role, string> = {
-  shopper: "Шоппер",
+  shopper: "Покупатель",
   creator: "Куратор",
   brand: "Бренд",
 };

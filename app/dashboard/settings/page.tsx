@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
 
 const ROLE_LABEL: Record<string, string> = {
-  shopper: "Шоппер",
+  shopper: "Покупатель",
   creator: "Куратор",
   brand: "Бренд",
 };
