@@ -45,6 +45,7 @@ export function CreatorOnboardingWizard({
   const [category, setCategory] = useState<Category>("cosmetics");
   const [savingProduct, setSavingProduct] = useState(false);
   const [productError, setProductError] = useState<string | null>(null);
+  const [addedCount, setAddedCount] = useState(0);
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -81,7 +82,14 @@ export function CreatorOnboardingWizard({
       setProductError((await res.json()).error ?? "Не удалось добавить товар");
       return;
     }
-    onDone();
+
+    // A single product leaves an almost-empty storefront, so the flow
+    // pauses here instead of exiting straight to the dashboard — the
+    // creator explicitly chooses to add another or wrap up.
+    setAddedCount((n) => n + 1);
+    setTitle("");
+    setTargetUrl("");
+    setProductError(null);
   }
 
   return (
@@ -186,7 +194,7 @@ export function CreatorOnboardingWizard({
           </form>
         )}
 
-        {step === 2 && (
+        {step === 2 && addedCount === 0 && (
           <form onSubmit={addProduct} className="flex flex-col gap-4">
             <div>
               <h1 className="font-display text-2xl mb-1">Добавьте первый товар</h1>
@@ -224,16 +232,72 @@ export function CreatorOnboardingWizard({
 
             {productError && <p className="text-error text-sm">{productError}</p>}
             <button type="submit" disabled={savingProduct} className={buttonClass}>
-              {savingProduct ? "Добавляем…" : "Готово"}
+              {savingProduct ? "Добавляем…" : "Добавить товар"}
             </button>
             <button
               type="button"
               onClick={onDone}
               className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
             >
-              Добавлю позже
+              Пропустить, заполню позже
             </button>
           </form>
+        )}
+
+        {step === 2 && addedCount > 0 && (
+          <div className="flex flex-col gap-5">
+            <div>
+              <h1 className="font-display text-2xl mb-1">
+                {addedCount === 1 ? "Товар добавлен" : `Добавлено товаров: ${addedCount}`}
+              </h1>
+              <p className="text-stone text-sm leading-relaxed">
+                {addedCount === 1
+                  ? "Одного товара достаточно для старта, но витрина выглядит убедительнее с 3–5. Добавите ещё?"
+                  : "Отличная витрина складывается. Можно продолжить или перейти в кабинет прямо сейчас."}
+              </p>
+            </div>
+
+            <form onSubmit={addProduct} className="flex flex-col gap-4">
+              <input
+                placeholder="Название товара"
+                required
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <input
+                placeholder="Ссылка на товар"
+                type="url"
+                required
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={targetUrl}
+                onChange={(e) => setTargetUrl(e.target.value)}
+              />
+              <select
+                className={`${inputClass} border border-line px-3 py-2.5`}
+                value={category}
+                onChange={(e) => setCategory(e.target.value as Category)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_LABEL[c]}
+                  </option>
+                ))}
+              </select>
+              {productError && <p className="text-error text-sm">{productError}</p>}
+              <button type="submit" disabled={savingProduct} className={buttonClass}>
+                {savingProduct ? "Добавляем…" : "Добавить ещё один"}
+              </button>
+            </form>
+
+            <button
+              type="button"
+              onClick={onDone}
+              className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+            >
+              Готово, перейти в кабинет
+            </button>
+          </div>
         )}
       </div>
     </main>

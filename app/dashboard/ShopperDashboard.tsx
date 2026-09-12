@@ -81,7 +81,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             >
               Все кураторы
             </Link>
-            {me.slug && (
+            {me.slug && favorites && favorites.length > 0 && (
               <a
                 href={`/wishlist/${me.slug}`}
                 target="_blank"
