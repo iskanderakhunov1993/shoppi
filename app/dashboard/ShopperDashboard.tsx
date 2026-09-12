@@ -32,11 +32,14 @@ const CATEGORY_LABEL: Record<FavoriteLink["category"], string> = {
   clothing: "Одежда",
 };
 
-export function ShopperDashboard({ me }: { me: { displayName: string } }) {
+export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
   const [tab, setTab] = useState<"saved" | "circle">("saved");
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => setOrigin(window.location.origin), []);
 
   const loadFavorites = useCallback(async () => {
     const res = await fetch("/api/favorites");
@@ -83,6 +86,16 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
             >
               Все кураторы
             </Link>
+            {me.slug && (
+              <a
+                href={`/wishlist/${me.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[12.5px] text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+              >
+                {origin ? origin.replace(/^https?:\/\//, "") : ""}/wishlist/{me.slug}
+              </a>
+            )}
           </div>
         }
       />
