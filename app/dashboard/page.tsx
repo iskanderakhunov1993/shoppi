@@ -11,6 +11,7 @@ type Me = {
   displayName: string;
   slug?: string;
   bio?: string;
+  avatarUrl?: string;
   brandDomain?: string;
   brandArticles?: string[];
   affiliateTemplate?: string;
