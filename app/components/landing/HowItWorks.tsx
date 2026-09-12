@@ -26,10 +26,15 @@ export function HowItWorks() {
         <h2 className="font-display text-2xl md:text-3xl mt-3 mb-12 max-w-lg">
           Три шага от находки куратора до вашей покупки.
         </h2>
-        <div className="grid md:grid-cols-3 gap-10 md:gap-8">
-          {STEPS.map((step) => (
-            <div key={step.n}>
-              <span className="font-display text-3xl text-stone">{step.n}</span>
+        <div className="grid md:grid-cols-3 gap-10 md:gap-0">
+          {STEPS.map((step, i) => (
+            <div
+              key={step.n}
+              className={
+                i > 0 ? "md:pl-8 md:border-l md:border-dashed md:border-line" : "md:pr-8"
+              }
+            >
+              <span className="font-mono text-3xl text-stone">{step.n}</span>
               <h3 className="text-[15px] font-medium mt-4 mb-2">{step.title}</h3>
               <p className="text-stone text-sm leading-relaxed">{step.body}</p>
             </div>

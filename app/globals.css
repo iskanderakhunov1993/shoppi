@@ -8,6 +8,15 @@
   --line: #e7e5e2;
   --stone: #737066;
   --error: #b42318;
+  /* Signal orange — the home hero's one accent (a receipt stamp), used
+     nowhere else in the product so it stays a genuine signature. */
+  --signal: #ff5a1f;
+  /* The receipt is a printed physical object, not a themed UI surface —
+     it stays the same warm off-white/near-black in both site themes,
+     the way real thermal paper doesn't flip to "dark mode". */
+  --receipt-paper: #f3efe4;
+  --receipt-ink: #17140f;
+  --receipt-line: #d9d2bf;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,12 +47,76 @@
   --color-line: var(--line);
   --color-stone: var(--stone);
   --color-error: var(--error);
+  --color-signal: var(--signal);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------- home hero: receipt */
+
+.receipt-zigzag {
+  height: 14px;
+  background-image: linear-gradient(45deg, var(--receipt-paper) 50%, transparent 50%),
+    linear-gradient(-45deg, var(--receipt-paper) 50%, transparent 50%);
+  background-size: 14px 14px;
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+.receipt-zigzag-top {
+  transform: scaleY(-1);
+}
+
+.barcode {
+  height: 32px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--receipt-ink) 0,
+    var(--receipt-ink) 2px,
+    transparent 2px,
+    transparent 3px,
+    var(--receipt-ink) 3px,
+    var(--receipt-ink) 4px,
+    transparent 4px,
+    transparent 6px,
+    var(--receipt-ink) 6px,
+    var(--receipt-ink) 9px,
+    transparent 9px,
+    transparent 11px
+  );
+}
+
+.signal-stamp {
+  display: inline-block;
+  border: 1.5px solid var(--signal);
+  color: var(--signal);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  transform: rotate(-4deg);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .receipt-print {
+    animation: receipt-feed 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top center;
+  }
+  @keyframes receipt-feed {
+    from {
+      opacity: 0;
+      transform: translateY(-16px) scaleY(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scaleY(1);
+    }
+  }
 }
