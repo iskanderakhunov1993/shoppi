@@ -36,7 +36,7 @@ export async function GET(
 
   return NextResponse.json({
     slug: user.slug,
-    displayName: user.displayName ?? user.email.split("@")[0],
+    displayName: user.displayName ?? "Покупатель",
     avatarUrl: user.avatarUrl,
     links,
   });

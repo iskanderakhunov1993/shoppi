@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     role: user.role,
     email: user.email,
-    displayName: user.displayName ?? user.email.split("@")[0],
+    displayName: user.displayName ?? "Покупатель",
     avatarUrl: user.avatarUrl ?? "",
     slug,
   });
