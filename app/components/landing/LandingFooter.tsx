@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDemoCreatorSlug } from "@/lib/seed";
+import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Column = { title: string; links: { label: string; href: string }[] };
 
@@ -24,14 +25,18 @@ export async function LandingFooter() {
         { label: "Войти в кабинет", href: "/login" },
       ],
     },
-    {
-      title: "Брендам",
-      links: [
-        { label: "Обзор", href: "/brands" },
-        { label: "Подключить домен", href: "/signup" },
-        { label: "Войти в аналитику", href: "/login" },
-      ],
-    },
+    ...(BRANDS_ENABLED
+      ? [
+          {
+            title: "Брендам",
+            links: [
+              { label: "Обзор", href: "/brands" },
+              { label: "Подключить домен", href: "/signup" },
+              { label: "Войти в аналитику", href: "/login" },
+            ],
+          },
+        ]
+      : []),
     {
       title: "Покупателям",
       links: [
@@ -48,7 +53,7 @@ export async function LandingFooter() {
       title: "Разделы",
       links: [
         { label: "Как это устроено", href: "/#how" },
-        { label: "По магазину", href: "/#brands-catalog" },
+        ...(BRANDS_ENABLED ? [{ label: "По магазину", href: "/#brands-catalog" }] : []),
         { label: "Вопросы", href: "/#faq" },
       ],
     },
@@ -57,7 +62,7 @@ export async function LandingFooter() {
   return (
     <footer className="bg-[#0d0d0c] text-white px-6 md:px-10 pt-20 pb-14">
       <div className="max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
+        <div className={`grid grid-cols-2 ${BRANDS_ENABLED ? "md:grid-cols-4" : "md:grid-cols-3"} gap-x-8 gap-y-12`}>
           {columns.map((column) => (
             <div key={column.title}>
               <h4 className="text-[12px] font-semibold uppercase tracking-[0.12em] mb-6">

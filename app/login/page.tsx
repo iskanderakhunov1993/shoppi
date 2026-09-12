@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
+import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Role = "shopper" | "creator" | "brand";
 
@@ -12,6 +13,10 @@ const DEMO_LABEL: Record<Role, string> = {
   creator: "Демо: Куратор",
   brand: "Демо: Бренд",
 };
+
+const DEMO_ROLES = (Object.keys(DEMO_LABEL) as Role[]).filter(
+  (role) => BRANDS_ENABLED || role !== "brand"
+);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -102,7 +107,7 @@ export default function LoginPage() {
             Быстрый вход для демо
           </span>
           <div className="flex gap-2">
-            {(Object.keys(DEMO_LABEL) as Role[]).map((role) => (
+            {DEMO_ROLES.map((role) => (
               <button
                 key={role}
                 type="button"
