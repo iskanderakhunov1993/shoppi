@@ -52,6 +52,9 @@ export function CreatorDashboard({
   const [editPromoCode, setEditPromoCode] = useState("");
   const [origin, setOrigin] = useState("");
   const [tab, setTab] = useState<"products" | "earnings" | "profile">("products");
+  // Paused while the monetization approach (promo codes / CPA / opportunities)
+  // is still being decided — set back to true to bring the tab back.
+  const EARNINGS_TAB_ENABLED = false;
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -181,7 +184,7 @@ export function CreatorDashboard({
         {(
           [
             ["products", "Товары"],
-            ["earnings", "Заработок"],
+            ...(EARNINGS_TAB_ENABLED ? ([["earnings", "Заработок"]] as const) : []),
             ["profile", "Профиль и медиакит"],
           ] as const
         ).map(([key, label]) => (
