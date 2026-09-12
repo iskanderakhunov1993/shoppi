@@ -10,16 +10,25 @@ type Category = "cosmetics" | "mens" | "clothing";
  * Shown once, right after registration, instead of the full tabbed
  * dashboard: welcome → fill in the profile → add the first product.
  * Modeled on the reference onboarding flow, minus the parts that don't
- * apply here — no social-account linking (no such integration exists),
- * no discoverability tags or trust tiers (nothing to back them with
- * yet), no product-catalog search (WB/Ozon block server-side scraping,
- * see the PRD) — just the two steps that are actually real for us.
+ * apply here — no discoverability tags or trust tiers (nothing to back
+ * them with yet), no product-catalog search (WB/Ozon block server-side
+ * scraping, see the PRD) — just the steps that are actually real for us.
+ * Instagram/TikTok handles are optional here since a creator may not
+ * have them at hand yet — they can always add them later from Профиль
+ * и медиакит.
  */
 export function CreatorOnboardingWizard({
   me,
   onDone,
 }: {
-  me: { displayName: string; bio?: string; avatarUrl?: string; slug?: string };
+  me: {
+    displayName: string;
+    bio?: string;
+    avatarUrl?: string;
+    slug?: string;
+    instagramHandle?: string;
+    tiktokHandle?: string;
+  };
   onDone: () => void;
 }) {
   const [step, setStep] = useState<0 | 1 | 2>(0);
@@ -27,6 +36,8 @@ export function CreatorOnboardingWizard({
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
+  const [instagramHandle, setInstagramHandle] = useState(me.instagramHandle ?? "");
+  const [tiktokHandle, setTiktokHandle] = useState(me.tiktokHandle ?? "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -44,7 +55,7 @@ export function CreatorOnboardingWizard({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, avatarUrl }),
+      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle }),
     });
     setSavingProfile(false);
 
@@ -149,6 +160,25 @@ export function CreatorOnboardingWizard({
                 onChange={(e) => setAvatarUrl(e.target.value)}
               />
             </div>
+
+            <label className="text-[11px] uppercase tracking-wider text-stone pt-2 border-t border-line">
+              Соцсети (необязательно)
+            </label>
+            <p className="text-stone text-[12px] leading-relaxed -mt-2">
+              Появятся значками на витрине рядом с именем.
+            </p>
+            <input
+              className={`${inputClass} border border-line px-3 py-2.5`}
+              value={instagramHandle}
+              placeholder="Instagram: имя_аккаунта"
+              onChange={(e) => setInstagramHandle(e.target.value)}
+            />
+            <input
+              className={`${inputClass} border border-line px-3 py-2.5`}
+              value={tiktokHandle}
+              placeholder="TikTok: имя_аккаунта"
+              onChange={(e) => setTiktokHandle(e.target.value)}
+            />
 
             {profileError && <p className="text-error text-sm">{profileError}</p>}
             <button type="submit" disabled={savingProfile} className={buttonClass}>
