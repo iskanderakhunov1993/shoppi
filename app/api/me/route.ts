@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       role: user.role,
       email: user.email,
-      displayName: user.brandDomain ?? user.email,
+      displayName: user.displayName ?? user.brandDomain ?? user.email,
       brandDomain: user.brandDomain,
       brandArticles: user.brandArticles ?? [],
       affiliateTemplate: user.affiliateTemplate ?? "",
@@ -97,9 +97,21 @@ export async function PUT(request: NextRequest) {
   }
 
   if (user.role === "brand") {
-    const raw = String(body?.articles ?? "");
-    const { articles, unrecognized } = parseArticleInput(raw);
-    await setBrandArticles(user.id, articles);
+    if (body?.displayName !== undefined && !String(body.displayName).trim()) {
+      return NextResponse.json({ error: "Имя не может быть пустым" }, { status: 400 });
+    }
+    if (body?.displayName !== undefined) {
+      await updateUserProfile(user.id, { displayName: body.displayName.trim() });
+    }
+
+    let articles = user.brandArticles ?? [];
+    let unrecognized: string[] = [];
+    if (body?.articles !== undefined) {
+      const parsed = parseArticleInput(String(body.articles));
+      articles = parsed.articles;
+      unrecognized = parsed.unrecognized;
+      await setBrandArticles(user.id, articles);
+    }
 
     if (body?.affiliateTemplate !== undefined) {
       const template = String(body.affiliateTemplate).trim();

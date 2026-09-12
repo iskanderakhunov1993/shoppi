@@ -34,6 +34,12 @@ export function DashboardHeader({
       </div>
       <div className="flex items-center gap-3">
         {action}
+        <Link
+          href="/dashboard/settings"
+          className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+        >
+          Настройки
+        </Link>
         <ThemeToggle className="text-stone hover:text-ink border border-line" />
         <button
           type="button"
