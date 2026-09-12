@@ -32,6 +32,7 @@ export async function GET(
     avatarUrl: creator.avatarUrl,
     instagramHandle: creator.instagramHandle,
     tiktokHandle: creator.tiktokHandle,
+    categories: creator.categories ?? [],
     followers: await countFollowers(creator.id),
     links,
   });

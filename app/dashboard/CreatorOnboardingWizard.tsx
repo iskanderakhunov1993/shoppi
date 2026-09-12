@@ -27,10 +27,11 @@ export function CreatorOnboardingWizard({
     slug?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    categories?: Category[];
   };
   onDone: () => void;
 }) {
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
 
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
@@ -40,12 +41,31 @@ export function CreatorOnboardingWizard({
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
+  const [niche, setNiche] = useState<Category[]>(me.categories ?? []);
+  const [savingNiche, setSavingNiche] = useState(false);
+
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
   const [category, setCategory] = useState<Category>("cosmetics");
   const [savingProduct, setSavingProduct] = useState(false);
   const [productError, setProductError] = useState<string | null>(null);
   const [addedCount, setAddedCount] = useState(0);
+
+  function toggleNiche(c: Category) {
+    setNiche((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  }
+
+  async function saveNiche() {
+    setSavingNiche(true);
+    await fetch("/api/me", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categories: niche }),
+    });
+    setSavingNiche(false);
+    if (niche[0]) setCategory(niche[0]);
+    setStep(3);
+  }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +85,8 @@ export function CreatorOnboardingWizard({
     }
     setStep(2);
   }
+
+
 
   async function addProduct(e: React.FormEvent) {
     e.preventDefault();
@@ -96,7 +118,7 @@ export function CreatorOnboardingWizard({
     <main className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm flex flex-col gap-8">
         <div className="flex gap-1.5">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <span
               key={i}
               className={`h-1 flex-1 ${i <= step ? "bg-ink" : "bg-line"}`}
@@ -194,7 +216,52 @@ export function CreatorOnboardingWizard({
           </form>
         )}
 
-        {step === 2 && addedCount === 0 && (
+        {step === 2 && (
+          <div className="flex flex-col gap-4">
+            <div>
+              <h1 className="font-display text-2xl mb-1">О чём ваша витрина?</h1>
+              <p className="text-stone text-sm leading-relaxed">
+                Выберите одну или несколько категорий — покажем их на витрине, чтобы покупатели
+                сразу понимали, чего от вас ждать. Можно изменить позже.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => toggleNiche(c)}
+                  className={`text-left px-4 py-3 border transition-colors cursor-pointer ${
+                    niche.includes(c) ? "border-ink bg-ink text-paper" : "border-line hover:border-ink"
+                  }`}
+                >
+                  {CATEGORY_LABEL[c]}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={saveNiche}
+                disabled={savingNiche || niche.length === 0}
+                className={`${buttonClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                {savingNiche ? "Сохраняем…" : "Далее"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+              >
+                Пропустить
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && addedCount === 0 && (
           <form onSubmit={addProduct} className="flex flex-col gap-4">
             <div>
               <h1 className="font-display text-2xl mb-1">Добавьте первый товар</h1>
@@ -244,7 +311,7 @@ export function CreatorOnboardingWizard({
           </form>
         )}
 
-        {step === 2 && addedCount > 0 && (
+        {step === 3 && addedCount > 0 && (
           <div className="flex flex-col gap-5">
             <div>
               <h1 className="font-display text-2xl mb-1">

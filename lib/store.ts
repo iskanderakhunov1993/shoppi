@@ -40,6 +40,10 @@ export type Creator = {
   avatarUrl?: string;
   instagramHandle?: string;
   tiktokHandle?: string;
+  // What the creator says they mostly post about — set once during
+  // onboarding, shown on the storefront as a light orientation cue.
+  // Not a claim of expertise or a ranking signal, just a filter hint.
+  categories?: Category[];
 };
 
 export type Link = {
@@ -101,6 +105,7 @@ function toCreator(r: Row): Creator {
     avatarUrl: opt(r.avatar_url),
     instagramHandle: opt(r.instagram_handle),
     tiktokHandle: opt(r.tiktok_handle),
+    categories: r.categories ? (JSON.parse(str(r.categories)) as Category[]) : undefined,
   };
 }
 
@@ -269,12 +274,15 @@ export async function updateCreator(
     slug?: string;
     instagramHandle?: string | null;
     tiktokHandle?: string | null;
+    categories?: Category[] | null;
   }
 ): Promise<Creator | undefined> {
   const current = await getCreatorById(creatorId);
   if (!current) return undefined;
 
   const nextName = patch.displayName ?? current.displayName;
+  const nextCategories =
+    patch.categories === undefined ? (current.categories ?? null) : patch.categories;
   await sql`
     UPDATE creators
     SET display_name = ${nextName},
@@ -283,7 +291,8 @@ export async function updateCreator(
         avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null},
         slug = ${patch.slug ?? current.slug},
         instagram_handle = ${patch.instagramHandle === undefined ? (current.instagramHandle ?? null) : patch.instagramHandle},
-        tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle}
+        tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle},
+        categories = ${nextCategories ? JSON.stringify(nextCategories) : null}
     WHERE id = ${creatorId}
   `;
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CreatorDashboard } from "./CreatorDashboard";
 import { ShopperDashboard } from "./ShopperDashboard";
 import { BrandDashboard } from "./BrandDashboard";
+import type { Category } from "@/lib/categories";
 
 type Me = {
   role: "shopper" | "creator" | "brand";
@@ -17,6 +18,7 @@ type Me = {
   affiliateTemplate?: string;
   instagramHandle?: string;
   tiktokHandle?: string;
+  categories?: Category[];
 };
 
 export default function DashboardPage() {

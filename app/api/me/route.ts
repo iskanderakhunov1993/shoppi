@@ -9,6 +9,7 @@ import {
   updateUserProfile,
 } from "@/lib/store";
 import { parseArticleInput } from "@/lib/marketplace";
+import { isCategory } from "@/lib/categories";
 
 /** Accepts a bare handle, an @handle, or a full profile URL — a person
  * copying from their bio shouldn't have to think about which one to paste. */
@@ -37,6 +38,7 @@ export async function GET(request: NextRequest) {
       avatarUrl: creator?.avatarUrl ?? "",
       instagramHandle: creator?.instagramHandle ?? "",
       tiktokHandle: creator?.tiktokHandle ?? "",
+      categories: creator?.categories ?? [],
     });
   }
 
@@ -84,6 +86,7 @@ export async function PUT(request: NextRequest) {
       avatarUrl: body?.avatarUrl,
       instagramHandle: body?.instagramHandle !== undefined ? normalizeHandle(body.instagramHandle) : undefined,
       tiktokHandle: body?.tiktokHandle !== undefined ? normalizeHandle(body.tiktokHandle) : undefined,
+      categories: Array.isArray(body?.categories) ? body.categories.filter(isCategory) : undefined,
     });
 
     return NextResponse.json({
@@ -93,6 +96,7 @@ export async function PUT(request: NextRequest) {
       slug: updated?.slug,
       instagramHandle: updated?.instagramHandle ?? "",
       tiktokHandle: updated?.tiktokHandle ?? "",
+      categories: updated?.categories ?? [],
     });
   }
 
