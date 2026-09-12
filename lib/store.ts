@@ -21,6 +21,13 @@ export type User = {
   // straight to the marketplace, so the brand's network can attribute
   // the sale. Only meaningful for role === "brand".
   affiliateTemplate?: string;
+  // Shopper-facing profile, used for the public wishlist page. Creators
+  // have their own separate profile (see Creator) — these are only set
+  // for shoppers, and lazily on first use rather than at signup, since
+  // most existing accounts predate this feature.
+  displayName?: string;
+  avatarUrl?: string;
+  slug?: string;
 };
 
 export type Creator = {
@@ -77,6 +84,9 @@ function toUser(r: Row): User {
     brandDomain: opt(r.brand_domain),
     brandArticles: r.brand_articles ? (JSON.parse(str(r.brand_articles)) as string[]) : undefined,
     affiliateTemplate: opt(r.affiliate_template),
+    displayName: opt(r.display_name),
+    avatarUrl: opt(r.avatar_url),
+    slug: opt(r.slug),
   };
 }
 
@@ -182,6 +192,40 @@ export async function setBrandArticles(userId: string, articles: string[]): Prom
 
 export async function setAffiliateTemplate(userId: string, template: string | null): Promise<void> {
   await sql`UPDATE users SET affiliate_template = ${template} WHERE id = ${userId}`;
+}
+
+export async function getUserBySlug(slug: string): Promise<User | undefined> {
+  const rows = await sql`SELECT * FROM users WHERE slug = ${slug}`;
+  return rows[0] ? toUser(rows[0]) : undefined;
+}
+
+/**
+ * Shopper accounts predate the public wishlist page, so most don't have
+ * a slug yet. Assigns one lazily, the first time it's needed, instead
+ * of a one-off backfill migration.
+ */
+export async function ensureUserSlug(userId: string): Promise<string> {
+  const user = (await getUserById(userId))!;
+  if (user.slug) return user.slug;
+
+  const base = slugify(user.email.split("@")[0]);
+  const slug = `${base}-${userId.slice(0, 6)}`;
+  await sql`UPDATE users SET slug = ${slug} WHERE id = ${userId}`;
+  return slug;
+}
+
+export async function updateUserProfile(
+  userId: string,
+  patch: { displayName?: string; avatarUrl?: string }
+): Promise<User> {
+  const current = (await getUserById(userId))!;
+  await sql`
+    UPDATE users
+    SET display_name = ${patch.displayName ?? current.displayName ?? null},
+        avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null}
+    WHERE id = ${userId}
+  `;
+  return (await getUserById(userId))!;
 }
 
 /** The affiliate template of whichever brand has claimed this article, if any. */

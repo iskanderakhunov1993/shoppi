@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/require-user";
-import { getCreatorByUserId, setAffiliateTemplate, setBrandArticles, updateCreator } from "@/lib/store";
+import {
+  ensureUserSlug,
+  getCreatorByUserId,
+  setAffiliateTemplate,
+  setBrandArticles,
+  updateCreator,
+  updateUserProfile,
+} from "@/lib/store";
 import { parseArticleInput } from "@/lib/marketplace";
 
 /** Accepts a bare handle, an @handle, or a full profile URL — a person
@@ -44,10 +51,13 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const slug = await ensureUserSlug(user.id);
   return NextResponse.json({
     role: user.role,
     email: user.email,
-    displayName: user.email.split("@")[0],
+    displayName: user.displayName ?? user.email.split("@")[0],
+    avatarUrl: user.avatarUrl ?? "",
+    slug,
   });
 }
 
@@ -103,6 +113,21 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ brandArticles: articles, unrecognized });
+  }
+
+  if (user.role === "shopper") {
+    if (body?.displayName !== undefined && !String(body.displayName).trim()) {
+      return NextResponse.json({ error: "Имя не может быть пустым" }, { status: 400 });
+    }
+    const updated = await updateUserProfile(user.id, {
+      displayName: body?.displayName?.trim(),
+      avatarUrl: body?.avatarUrl,
+    });
+    return NextResponse.json({
+      displayName: updated.displayName,
+      avatarUrl: updated.avatarUrl ?? "",
+      slug: await ensureUserSlug(user.id),
+    });
   }
 
   return NextResponse.json({ error: "Nothing to update for this role" }, { status: 400 });
