@@ -33,6 +33,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [origin, setOrigin] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -82,14 +83,38 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               Все кураторы
             </Link>
             {me.slug && favorites && favorites.length > 0 && (
-              <a
-                href={`/wishlist/${me.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[12.5px] text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
-              >
-                {origin ? origin.replace(/^https?:\/\//, "") : ""}/wishlist/{me.slug}
-              </a>
+              <>
+                <a
+                  href={`/wishlist/${me.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+                >
+                  Мой вишлист
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${origin}/wishlist/${me.slug}`);
+                    setLinkCopied(true);
+                    setTimeout(() => setLinkCopied(false), 1800);
+                  }}
+                  aria-label="Скопировать ссылку на вишлист"
+                  title={`${origin ? origin.replace(/^https?:\/\//, "") : ""}/wishlist/${me.slug}`}
+                  className="w-9 h-9 flex items-center justify-center border border-line text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
+                >
+                  {linkCopied ? (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M3 8.5l3.2 3.2L13 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <rect x="5.5" y="5.5" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
+                      <path d="M3 10.5V3.5a1 1 0 0 1 1-1H10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </button>
+              </>
             )}
           </div>
         }
