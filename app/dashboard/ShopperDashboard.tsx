@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
+import { OnboardingProgress } from "./OnboardingProgress";
 import { placeholderAvatar } from "@/lib/avatar";
 
 type FavoriteLink = {
@@ -66,12 +67,21 @@ export function ShopperDashboard({ me }: { me: { displayName: string } }) {
         label="Мой вкус"
         title={me.displayName}
         action={
-          <Link
-            href="/curators"
-            className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
-          >
-            Все кураторы
-          </Link>
+          <div className="flex items-center gap-2">
+            <OnboardingProgress
+              steps={[
+                { label: "Сохраните первый товар", done: Boolean(favorites && favorites.length > 0) },
+                { label: "Подпишитесь на куратора", done: Boolean(circle && circle.creators.length > 0) },
+                { label: "Посмотрите ленту находок", done: Boolean(circle && circle.feed.length > 0) },
+              ]}
+            />
+            <Link
+              href="/curators"
+              className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+            >
+              Все кураторы
+            </Link>
+          </div>
         }
       />
 
