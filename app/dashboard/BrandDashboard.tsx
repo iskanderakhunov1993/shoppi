@@ -5,6 +5,7 @@ import { inputClass } from "@/app/components/Field";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
 import { BrandOpportunities } from "./BrandOpportunities";
+import { OnboardingProgress } from "./OnboardingProgress";
 
 type BrandLink = {
   id: string;
@@ -46,6 +47,7 @@ export function BrandDashboard({
   const [unrecognized, setUnrecognized] = useState<string[]>([]);
   const [affiliateError, setAffiliateError] = useState<string | null>(null);
   const [newSinceLastVisit, setNewSinceLastVisit] = useState(0);
+  const [hasOpportunity, setHasOpportunity] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/brand/links");
@@ -69,6 +71,9 @@ export function BrandDashboard({
 
   useEffect(() => {
     load();
+    fetch("/api/opportunities/mine")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setHasOpportunity(Boolean(data?.opportunities?.length)));
   }, [load]);
 
   async function saveArticles(e: React.FormEvent) {
@@ -100,7 +105,19 @@ export function BrandDashboard({
 
   return (
     <main className="flex-1 flex flex-col">
-      <DashboardHeader label="Кабинет бренда" title={me.brandDomain ?? me.displayName} />
+      <DashboardHeader
+        label="Кабинет бренда"
+        title={me.brandDomain ?? me.displayName}
+        action={
+          <OnboardingProgress
+            steps={[
+              { label: "Укажите свои товары", done: hasArticles },
+              { label: "Получите первую ссылку от куратора", done: Boolean(links && links.length > 0) },
+              { label: "Опубликуйте предложение куратору", done: hasOpportunity },
+            ]}
+          />
+        }
+      />
 
       <div className="grid md:grid-cols-[320px_1fr] flex-1">
         <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8 flex flex-col gap-4">
