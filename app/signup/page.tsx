@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
+import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Role = "shopper" | "creator" | "brand";
 
@@ -163,8 +164,8 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 flex-1">
-          {ROLE_CARDS.map((card) => (
+        <div className={`grid ${BRANDS_ENABLED ? "md:grid-cols-3" : "md:grid-cols-2"} flex-1`}>
+          {ROLE_CARDS.filter((card) => BRANDS_ENABLED || card.role !== "brand").map((card) => (
             <button
               key={card.role}
               onClick={() => setRole(card.role)}

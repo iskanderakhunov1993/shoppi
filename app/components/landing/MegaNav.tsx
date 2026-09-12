@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Item = { label: string; href: string; description: string };
 type Menu = { key: string; label: string; align: "left" | "center" | "right"; items: Item[] };
@@ -28,11 +29,15 @@ function buildMenus(demoSlug?: string): Menu[] {
           href: "/curators",
           description: "Витрины людей, чьему вкусу вы доверяете, а не лента алгоритма.",
         },
-        {
-          label: "По магазину",
-          href: "/#brands-catalog",
-          description: "Сайты, куда чаще всего ведут ссылки кураторов.",
-        },
+        ...(BRANDS_ENABLED
+          ? [
+              {
+                label: "По магазину",
+                href: "/#brands-catalog",
+                description: "Сайты, куда чаще всего ведут ссылки кураторов.",
+              },
+            ]
+          : []),
         {
           label: "Мой вкус",
           href: "/dashboard",
@@ -145,7 +150,7 @@ export function MegaNav({
   const [searchQuery, setSearchQuery] = useState("");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
-  const menus = buildMenus(demoSlug);
+  const menus = buildMenus(demoSlug).filter((menu) => BRANDS_ENABLED || menu.key !== "brands");
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();

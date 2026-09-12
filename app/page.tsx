@@ -9,6 +9,7 @@ import { ShopByBrand } from "@/app/components/landing/ShopByBrand";
 import { RoleTeasers } from "@/app/components/landing/RoleTeasers";
 import { Faq } from "@/app/components/landing/Faq";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 // Reads mutable in-memory store state (seeded demo creators) on every
 // request — must not be statically prerendered at build time.
@@ -28,7 +29,7 @@ export default async function Home() {
       <HowItWorks />
       <CuratorGrid creators={creators} />
       <ShopByCategory />
-      <ShopByBrand domains={domains} />
+      {BRANDS_ENABLED && <ShopByBrand domains={domains} />}
       <RoleTeasers />
       <Faq />
       <LandingFooter />
