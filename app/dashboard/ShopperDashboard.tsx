@@ -6,6 +6,7 @@ import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { CircleOnboarding } from "./CircleOnboarding";
+import { MyCircles } from "./MyCircles";
 import { placeholderAvatar } from "@/lib/avatar";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
@@ -28,7 +29,7 @@ type FollowedCreator = {
 type FeedLink = FavoriteLink & { wrappedUrl: string; clicks: number; creatorName?: string; creatorSlug?: string };
 
 export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
-  const [tab, setTab] = useState<"saved" | "circle">("saved");
+  const [tab, setTab] = useState<"saved" | "circle" | "circles">("saved");
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -136,6 +137,14 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           }`}
         >
           Мои кураторы{circle ? ` · ${circle.creators.length}` : ""}
+        </button>
+        <button
+          onClick={() => setTab("circles")}
+          className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px transition-colors cursor-pointer ${
+            tab === "circles" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+          }`}
+        >
+          Круги
         </button>
       </div>
 
@@ -295,6 +304,12 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "circles" && (
+        <div className="px-8 py-8">
+          <MyCircles availableCreators={circle?.creators ?? []} />
         </div>
       )}
 
