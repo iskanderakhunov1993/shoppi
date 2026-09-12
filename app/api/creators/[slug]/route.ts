@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { countFollowers, getCreatorBySlug, listLinksByCreator } from "@/lib/store";
+import { countClicksForLinks, countFollowers, getCreatorBySlug, listLinksByCreator } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -12,6 +12,7 @@ export async function GET(
   }
 
   const linkRows = await listLinksByCreator(creator.id);
+  const counts = await countClicksForLinks(linkRows.map((l) => l.id));
   const links = linkRows.map((link) => ({
     id: link.id,
     title: link.title,
@@ -20,6 +21,7 @@ export async function GET(
     category: link.category,
     promoCode: link.promoCode,
     wrappedUrl: `/r/${link.id}`,
+    clicks: counts.get(link.id)?.human ?? 0,
   }));
 
   return NextResponse.json({

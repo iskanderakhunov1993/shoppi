@@ -1,8 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { FollowButton } from "@/app/components/FollowButton";
-import { EmptyState } from "@/app/components/EmptyState";
+import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 
 function pluralizeShoppers(n: number): string {
@@ -13,12 +12,6 @@ function pluralizeShoppers(n: number): string {
   return "покупателей";
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
-
 type StorefrontLink = {
   id: string;
   title: string;
@@ -27,6 +20,7 @@ type StorefrontLink = {
   category: string;
   promoCode?: string;
   wrappedUrl: string;
+  clicks: number;
 };
 
 async function getStorefront(slug: string) {
@@ -133,50 +127,7 @@ export default async function StorefrontPage({
         )}
       </div>
 
-      {creator.links.length === 0 ? (
-        <div className="py-16 flex justify-center">
-          <EmptyState title="Куратор пока не добавил товары." />
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3">
-          {creator.links.map((link, i) => (
-            <div
-              key={link.id}
-              className={`flex flex-col gap-2 p-5 border-b border-line ${
-                (i + 1) % 3 !== 0 ? "md:border-r" : ""
-              } ${(i + 1) % 2 !== 0 ? "sm:border-r md:border-r-0" : ""}`}
-            >
-              <a href={link.wrappedUrl} className="flex flex-col gap-2 hover:opacity-85 transition-opacity">
-                {link.imageUrl && (
-                  <div className="aspect-[4/3] bg-line overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={link.imageUrl}
-                      alt={link.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <span className="text-[10px] uppercase tracking-wide text-stone">
-                  {CATEGORY_LABEL[link.category]}
-                </span>
-                <div className="text-sm font-medium leading-snug">{link.title}</div>
-                {link.price && (
-                  <div className="text-[13.5px] text-stone">
-                    {link.price.toLocaleString("ru-RU")} ₽
-                  </div>
-                )}
-                {link.promoCode && (
-                  <div className="text-[11.5px] text-ink border border-line w-fit px-2 py-0.5">
-                    Промокод: {link.promoCode}
-                  </div>
-                )}
-              </a>
-              <FavoriteButton linkId={link.id} />
-            </div>
-          ))}
-        </div>
-      )}
+      <StorefrontGrid links={creator.links} />
     </main>
   );
 }
