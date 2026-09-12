@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Shoppi — Линии</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F1EC; --ink:#1B1B18; --stone:#84806F; --line:#DCDACE; --card:#FCFCF9;
+    --shopper:#3457D5; --creator:#C77D2C; --brand:#1F6F5C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#171713; --ink:#F1EFE6; --stone:#8F8B7C; --line:#2C2B24; --card:#1E1E19;
+      --shopper:#7B93F0; --creator:#E3A35E; --brand:#4FAE93;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171713; --ink:#F1EFE6; --stone:#8F8B7C; --line:#2C2B24; --card:#1E1E19;
+    --shopper:#7B93F0; --creator:#E3A35E; --brand:#4FAE93;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:26px 0;}
+  .wordmark{font-family:'Newsreader',serif;font-style:italic;font-size:23px;}
+  .roles{display:flex;gap:0;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:12.5px;}
+  .roles a{padding:9px 18px;text-decoration:none;color:var(--stone);border-right:1px solid var(--line);display:flex;align-items:center;gap:7px;}
+  .roles a:last-child{border-right:none;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .dot.shopper{background:var(--shopper);} .dot.creator{background:var(--creator);} .dot.brand{background:var(--brand);}
+
+  header.hero{padding:80px 0 60px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin:0 0 20px;}
+  h1{font-family:'Newsreader',serif;font-weight:500;font-size:clamp(38px,6.4vw,68px);line-height:1.04;letter-spacing:-0.01em;margin:0 0 26px;max-width:16ch;}
+  h1 i{font-style:italic;color:var(--creator);}
+  .sub{font-size:16.5px;line-height:1.6;color:var(--stone);max-width:48ch;margin:0 0 32px;}
+
+  .rail{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:64px;}
+  .rail > div{background:var(--card);padding:26px 24px;border-top:3px solid var(--line);}
+  .rail > div.shopper{border-top-color:var(--shopper);}
+  .rail > div.creator{border-top-color:var(--creator);}
+  .rail > div.brand{border-top-color:var(--brand);}
+  .rail h4{margin:0 0 8px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:14px;}
+  .rail p{margin:0;font-size:13px;color:var(--stone);line-height:1.5;}
+  .rail .tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:block;}
+  .rail > div.shopper .tag{color:var(--shopper);} .rail > div.creator .tag{color:var(--creator);} .rail > div.brand .tag{color:var(--brand);}
+
+  section.creators{padding:0 0 72px;}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:32px;gap:20px;flex-wrap:wrap;}
+  .section-head h2{font-family:'Newsreader',serif;font-weight:500;font-size:30px;margin:0;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:22px;position:relative;}
+  .card::before{content:"";position:absolute;left:22px;top:0;width:28px;height:3px;background:var(--creator);}
+  .card h3{font-family:'Newsreader',serif;font-size:20px;font-weight:500;margin:16px 0 8px;}
+  .card p{font-size:13px;color:var(--stone);line-height:1.5;margin:0 0 14px;}
+  .card .price-row{display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--stone);border-top:1px solid var(--line);padding-top:12px;}
+  .card .price-row b{color:var(--ink);font-size:14px;font-variant-numeric:tabular-nums;}
+  footer{padding:36px 0;color:var(--stone);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="wordmark">Shoppi</div>
+      <div class="roles">
+        <a href="#"><span class="dot shopper"></span>Покупателям</a>
+        <a href="#"><span class="dot creator"></span>Кураторам</a>
+        <a href="#"><span class="dot brand"></span>Брендам</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">Направление B · Три линии</p>
+      <h1>Один продукт, <i>три роли</i>, у каждой — свой цвет.</h1>
+      <p class="sub">Шоппер, куратор и бренд — как три линии метро на одной карте: разные маршруты, общая честная статистика.</p>
+
+      <div class="rail">
+        <div class="shopper"><span class="tag">Шоппер</span><h4>Мой вкус</h4><p>Сохранённые товары и кураторы, за которыми следите — в одной ленте.</p></div>
+        <div class="creator"><span class="tag">Куратор</span><h4>Витрина</h4><p>Добавляйте товары, получайте промокоды и предложения от брендов.</p></div>
+        <div class="brand"><span class="tag">Бренд</span><h4>Аналитика</h4><p>Кто ссылается на ваши товары и сколько живых переходов это даёт.</p></div>
+      </div>
+    </header>
+
+    <section class="creators">
+      <div class="section-head"><h2>По куратору</h2></div>
+      <div class="grid">
+        <div class="card"><h3>Белла</h3><p>Уход, который правда работает — то, что покупаю не первый раз.</p>
+          <div class="price-row"><span>Крем для рук</span><b>690 ₽</b></div>
+        </div>
+        <div class="card"><h3>Максим</h3><p>Инструменты и снаряжение, которые проверил сам — ничего лишнего.</p>
+          <div class="price-row"><span>Складной нож</span><b>4 200 ₽</b></div>
+        </div>
+        <div class="card"><h3>Соня</h3><p>Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.</p>
+          <div class="price-row"><span>Пальто из шерсти</span><b>14 900 ₽</b></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Shoppi © 2026 — макет для сравнения, не боевой код</footer>
+  </div>
+</body>
+</html>
