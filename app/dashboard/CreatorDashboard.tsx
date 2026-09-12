@@ -249,6 +249,10 @@ export function CreatorDashboard({
                   value={targetUrl}
                   onChange={(e) => setTargetUrl(e.target.value)}
                   onBlur={(e) => lookupProduct(e.target.value)}
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData("text");
+                    if (pasted) lookupProduct(pasted);
+                  }}
                 />
                 {lookingUp && (
                   <p className="text-stone text-[12px]">Загружаем данные с Wildberries…</p>
