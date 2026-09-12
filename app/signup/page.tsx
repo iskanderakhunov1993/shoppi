@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
 
@@ -46,7 +46,17 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+  const [resendNote, setResendNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,23 +82,67 @@ export default function SignupPage() {
       return;
     }
 
-    // MVP has no email provider wired up: show the verify link directly
-    // instead of sending it by mail.
-    setVerifyUrl(`/verify?token=${data.verificationToken}`);
+    setEmailed(Boolean(data.emailed));
+    // Falls back to the link directly only when no email provider is
+    // configured (RESEND_API_KEY missing) — real sends never expose it.
+    setVerifyUrl(data.verificationToken ? `/verify?token=${data.verificationToken}` : null);
+    if (data.emailed) setResendCooldown(30);
   }
 
-  if (verifyUrl) {
+  async function handleResend() {
+    setResending(true);
+    setResendNote(null);
+    const res = await fetch("/api/auth/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    setResending(false);
+    setResendCooldown(30);
+    setResendNote(
+      data.emailed ? "Письмо отправлено ещё раз." : "Не смогли отправить письмо — попробуйте позже."
+    );
+  }
+
+  if (emailed || verifyUrl) {
     return (
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-md text-center flex flex-col gap-4">
           <h1 className="font-display text-2xl">Проверьте почту</h1>
-          <p className="text-stone text-sm">
-            Мы бы отправили письмо со ссылкой подтверждения — в MVP её можно
-            открыть прямо здесь.
-          </p>
-          <a href={verifyUrl} className="underline underline-offset-4 text-sm">
-            Подтвердить email
-          </a>
+          {emailed ? (
+            <p className="text-stone text-sm">
+              Мы отправили письмо со ссылкой подтверждения на <strong>{email}</strong>.
+              Если не видите его через пару минут — проверьте папку "Спам".
+            </p>
+          ) : (
+            <p className="text-stone text-sm">
+              Мы бы отправили письмо со ссылкой подтверждения — в MVP без настроенной
+              почты её можно открыть прямо здесь.
+            </p>
+          )}
+          {verifyUrl && (
+            <a href={verifyUrl} className="underline underline-offset-4 text-sm">
+              Подтвердить email
+            </a>
+          )}
+          {emailed && (
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending || resendCooldown > 0}
+                className="text-[12px] uppercase tracking-wide text-stone underline underline-offset-4 disabled:no-underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {resending
+                  ? "Отправляем…"
+                  : resendCooldown > 0
+                    ? `Отправить снова через ${resendCooldown}с`
+                    : "Письмо не пришло? Отправить снова"}
+              </button>
+              {resendNote && <p className="text-stone text-[12px]">{resendNote}</p>}
+            </div>
+          )}
         </div>
       </main>
     );

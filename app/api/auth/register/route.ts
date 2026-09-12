@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUser, getUserByEmail, type Role } from "@/lib/store";
 import { hashPassword } from "@/lib/auth";
+import { sendVerificationEmail } from "@/lib/email";
 
 const ROLES: Role[] = ["shopper", "creator", "brand"];
 
@@ -41,8 +42,13 @@ export async function POST(request: NextRequest) {
     brandDomain?.trim()
   );
 
-  // MVP has no email provider wired up yet: the verification token is
-  // returned directly instead of emailed, so /api/auth/verify is testable
+  const host = request.headers.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  const verifyUrl = `${protocol}://${host}/verify?token=${user.verificationToken}`;
+  const emailed = await sendVerificationEmail(user.email, verifyUrl);
+
+  // Without RESEND_API_KEY configured (local dev, or the key missing),
+  // the token is returned directly so /api/auth/verify stays testable
   // end-to-end without external infra.
   return NextResponse.json(
     {
@@ -50,7 +56,8 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       creatorSlug: creator?.slug,
-      verificationToken: user.verificationToken,
+      emailed,
+      verificationToken: emailed ? undefined : user.verificationToken,
     },
     { status: 201 }
   );
