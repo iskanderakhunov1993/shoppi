@@ -44,6 +44,8 @@ export function CreatorDashboard({
   const [promoCode, setPromoCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
+  const [lookupNote, setLookupNote] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editCategory, setEditCategory] = useState<Category>("cosmetics");
@@ -66,6 +68,31 @@ export function CreatorDashboard({
   useEffect(() => {
     loadLinks();
   }, [loadLinks]);
+
+  async function lookupProduct(url: string) {
+    if (!url.trim()) return;
+    try {
+      new URL(url);
+    } catch {
+      return;
+    }
+
+    setLookingUp(true);
+    setLookupNote(null);
+    const res = await fetch(`/api/marketplace/lookup?url=${encodeURIComponent(url)}`);
+    const data = await res.json().catch(() => null);
+    setLookingUp(false);
+
+    if (!data?.found) {
+      setLookupNote("Не смогли подтянуть данные по этой ссылке — заполните вручную.");
+      return;
+    }
+
+    if (data.title && !title.trim()) setTitle(data.title);
+    if (data.price && !price.trim()) setPrice(String(data.price));
+    if (data.imageUrl && !imageUrl.trim()) setImageUrl(data.imageUrl);
+    setLookupNote("Подтянули название, фото и цену с Wildberries — можно поправить перед сохранением.");
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -97,6 +124,7 @@ export function CreatorDashboard({
     setImageUrl("");
     setPrice("");
     setPromoCode("");
+    setLookupNote(null);
     await loadLinks();
   }
 
@@ -220,7 +248,14 @@ export function CreatorDashboard({
                   className={`${inputClass} border border-line px-3 py-2.5`}
                   value={targetUrl}
                   onChange={(e) => setTargetUrl(e.target.value)}
+                  onBlur={(e) => lookupProduct(e.target.value)}
                 />
+                {lookingUp && (
+                  <p className="text-stone text-[12px]">Загружаем данные с Wildberries…</p>
+                )}
+                {lookupNote && !lookingUp && (
+                  <p className="text-stone text-[12px] leading-relaxed">{lookupNote}</p>
+                )}
                 <select
                   className={`${inputClass} border border-line px-3 py-2.5`}
                   value={category}
