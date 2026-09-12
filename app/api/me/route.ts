@@ -3,6 +3,16 @@ import { requireUser } from "@/lib/require-user";
 import { getCreatorByUserId, setAffiliateTemplate, setBrandArticles, updateCreator } from "@/lib/store";
 import { parseArticleInput } from "@/lib/marketplace";
 
+/** Accepts a bare handle, an @handle, or a full profile URL — a person
+ * copying from their bio shouldn't have to think about which one to paste. */
+function normalizeHandle(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const fromUrl = trimmed.match(/(?:instagram\.com|tiktok\.com)\/@?([\w.]+)/i);
+  if (fromUrl) return fromUrl[1];
+  return trimmed.replace(/^@/, "");
+}
+
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
@@ -18,6 +28,8 @@ export async function GET(request: NextRequest) {
       slug: creator?.slug,
       bio: creator?.bio ?? "",
       avatarUrl: creator?.avatarUrl ?? "",
+      instagramHandle: creator?.instagramHandle ?? "",
+      tiktokHandle: creator?.tiktokHandle ?? "",
     });
   }
 
@@ -60,6 +72,8 @@ export async function PUT(request: NextRequest) {
       displayName: body?.displayName?.trim(),
       bio: body?.bio,
       avatarUrl: body?.avatarUrl,
+      instagramHandle: body?.instagramHandle !== undefined ? normalizeHandle(body.instagramHandle) : undefined,
+      tiktokHandle: body?.tiktokHandle !== undefined ? normalizeHandle(body.tiktokHandle) : undefined,
     });
 
     return NextResponse.json({
@@ -67,6 +81,8 @@ export async function PUT(request: NextRequest) {
       bio: updated?.bio ?? "",
       avatarUrl: updated?.avatarUrl ?? "",
       slug: updated?.slug,
+      instagramHandle: updated?.instagramHandle ?? "",
+      tiktokHandle: updated?.tiktokHandle ?? "",
     });
   }
 

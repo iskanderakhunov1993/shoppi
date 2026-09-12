@@ -9,7 +9,14 @@ export function ProfileEditor({
   onSaved,
   defaultOpen = false,
 }: {
-  me: { displayName: string; bio?: string; avatarUrl?: string; slug?: string };
+  me: {
+    displayName: string;
+    bio?: string;
+    avatarUrl?: string;
+    slug?: string;
+    instagramHandle?: string;
+    tiktokHandle?: string;
+  };
   onSaved: () => void;
   defaultOpen?: boolean;
 }) {
@@ -17,6 +24,8 @@ export function ProfileEditor({
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
+  const [instagramHandle, setInstagramHandle] = useState(me.instagramHandle ?? "");
+  const [tiktokHandle, setTiktokHandle] = useState(me.tiktokHandle ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +38,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, avatarUrl }),
+      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle }),
     });
     const data = await res.json();
     setSaving(false);
@@ -92,6 +101,25 @@ export function ProfileEditor({
           <p className="text-stone text-[12px] leading-relaxed">
             Пусто — покажем нарисованный портрет, одинаковый при каждом заходе.
           </p>
+
+          <label className="text-[11px] uppercase tracking-wider text-stone pt-2 border-t border-line">
+            Соцсети (необязательно)
+          </label>
+          <p className="text-stone text-[12px] leading-relaxed -mt-2">
+            Появятся значками на витрине рядом с именем.
+          </p>
+          <input
+            className={`${inputClass} border border-line px-3 py-2.5`}
+            value={instagramHandle}
+            placeholder="Instagram: имя_аккаунта"
+            onChange={(e) => setInstagramHandle(e.target.value)}
+          />
+          <input
+            className={`${inputClass} border border-line px-3 py-2.5`}
+            value={tiktokHandle}
+            placeholder="TikTok: имя_аккаунта"
+            onChange={(e) => setTiktokHandle(e.target.value)}
+          />
 
           {error && <p className="text-error text-sm">{error}</p>}
           <button

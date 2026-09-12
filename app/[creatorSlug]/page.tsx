@@ -5,6 +5,14 @@ import { FollowButton } from "@/app/components/FollowButton";
 import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
 
+function pluralizeShoppers(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "покупатель";
+  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return "покупателя";
+  return "покупателей";
+}
+
 const CATEGORY_LABEL: Record<string, string> = {
   cosmetics: "Косметика",
   mens: "Мужские товары",
@@ -37,8 +45,34 @@ async function getStorefront(slug: string) {
     bio?: string;
     links: StorefrontLink[];
     avatarUrl?: string;
+    instagramHandle?: string;
+    tiktokHandle?: string;
     followers: number;
   }>;
+}
+
+function InstagramIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TiktokIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M14 3v10.6a3.4 3.4 0 1 1-2.6-3.3M14 3c.4 2.2 2 3.9 4.2 4.2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 export default async function StorefrontPage({
@@ -52,23 +86,51 @@ export default async function StorefrontPage({
 
   return (
     <main className="flex-1">
-      <div className="text-center px-8 py-12 border-b border-line">
+      <div className="text-center px-8 pt-14 pb-10 border-b border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={creator.avatarUrl || placeholderAvatar(creatorSlug)}
           alt={creator.displayName}
-          className="w-24 h-24 rounded-full object-cover mx-auto mb-5 bg-raise"
+          className="w-28 h-28 rounded-full object-cover mx-auto mb-6 bg-raise"
         />
-        <div className="text-[11px] uppercase tracking-wider text-stone">
-          Витрина куратора
-        </div>
-        <h1 className="font-display text-3xl mt-2 mb-2">{creator.displayName}</h1>
+        <span className="font-display italic text-stone text-base block mb-1">Курирует</span>
+        <h1 className="font-display text-4xl mb-3">{creator.displayName}</h1>
         {creator.bio && (
           <p className="text-stone text-sm max-w-md mx-auto mb-6">{creator.bio}</p>
         )}
-        <div className="flex justify-center mt-2">
+        <div className="flex justify-center mb-5">
           <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
         </div>
+        <p className="font-display italic text-stone text-sm mb-4">
+          Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
+          {pluralizeShoppers(creator.followers)}
+        </p>
+        {(creator.instagramHandle || creator.tiktokHandle) && (
+          <div className="flex justify-center gap-3">
+            {creator.instagramHandle && (
+              <a
+                href={`https://instagram.com/${creator.instagramHandle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors"
+              >
+                <InstagramIcon />
+              </a>
+            )}
+            {creator.tiktokHandle && (
+              <a
+                href={`https://tiktok.com/@${creator.tiktokHandle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors"
+              >
+                <TiktokIcon />
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
       {creator.links.length === 0 ? (
