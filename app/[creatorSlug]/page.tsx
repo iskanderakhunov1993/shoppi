@@ -5,6 +5,7 @@ import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import type { Category } from "@/lib/categories";
 
 function pluralizeShoppers(n: number): string {
   const mod10 = n % 10;
@@ -19,7 +20,7 @@ type StorefrontLink = {
   title: string;
   imageUrl?: string;
   price?: number;
-  category: string;
+  category: Category;
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;

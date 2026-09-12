@@ -9,14 +9,9 @@ import {
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { placeholderAvatar } from "@/lib/avatar";
+import { CATEGORY_LABEL } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
 
 export default async function MediaKitPage({
   params,
@@ -162,7 +157,7 @@ export default async function MediaKitPage({
                   key={cat}
                   className="flex justify-between items-baseline gap-4 py-3 border-b border-line last:border-b-0"
                 >
-                  <span className="text-[13.5px]">{CATEGORY_LABEL[cat] ?? cat}</span>
+                  <span className="text-[13.5px]">{(CATEGORY_LABEL as Record<string, string>)[cat] ?? cat}</span>
                   <span className="text-[15px] font-medium tabular-nums">{count}</span>
                 </li>
               ))}

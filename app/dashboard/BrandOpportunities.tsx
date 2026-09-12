@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { inputClass } from "@/app/components/Field";
 import { EmptyState } from "@/app/components/EmptyState";
-
-type Category = "cosmetics" | "mens" | "clothing";
+import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type Opportunity = {
   id: string;
@@ -21,12 +20,6 @@ type Application = {
   message?: string;
   status: "pending" | "accepted" | "declined";
   creator?: { id: string; slug: string; displayName: string };
-};
-
-const CATEGORY_LABEL: Record<Category, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
 };
 
 const STATUS_LABEL: Record<Application["status"], string> = {
@@ -131,9 +124,11 @@ export function BrandOpportunities() {
             value={category}
             onChange={(e) => setCategory(e.target.value as Category)}
           >
-            <option value="cosmetics">Косметика</option>
-            <option value="mens">Мужские товары</option>
-            <option value="clothing">Одежда</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORY_LABEL[c]}
+              </option>
+            ))}
           </select>
           <input
             placeholder="Оплата или бартер (необязательно)"

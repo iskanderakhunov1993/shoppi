@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { inputClass, buttonClass } from "@/app/components/Field";
 import { placeholderAvatar } from "@/lib/avatar";
-
-type Category = "cosmetics" | "mens" | "clothing";
+import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 /**
  * Shown once, right after registration, instead of the full tabbed
@@ -216,9 +215,11 @@ export function CreatorOnboardingWizard({
               value={category}
               onChange={(e) => setCategory(e.target.value as Category)}
             >
-              <option value="cosmetics">Косметика</option>
-              <option value="mens">Мужские товары</option>
-              <option value="clothing">Одежда</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORY_LABEL[c]}
+                </option>
+              ))}
             </select>
 
             {productError && <p className="text-error text-sm">{productError}</p>}

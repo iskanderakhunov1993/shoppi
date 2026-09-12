@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/require-user";
-import { countFollowers, getCreatorById, listLinksByCategory, type Link } from "@/lib/store";
-
-const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
-
-function isCategory(value: string): value is Link["category"] {
-  return (CATEGORIES as readonly string[]).includes(value);
-}
+import { countFollowers, getCreatorById, listLinksByCategory } from "@/lib/store";
+import { isCategory } from "@/lib/categories";
 
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);

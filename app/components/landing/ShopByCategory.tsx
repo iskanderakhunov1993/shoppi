@@ -2,6 +2,7 @@ const CATEGORIES = [
   { slug: "cosmetics", label: "Косметика", seed: "shoppi-tile-cosmetics" },
   { slug: "mens", label: "Мужские товары", seed: "shoppi-tile-mens" },
   { slug: "clothing", label: "Одежда", seed: "shoppi-tile-clothing" },
+  { slug: "tools", label: "Инструменты", seed: "shoppi-tile-tools" },
 ] as const;
 
 export function ShopByCategory() {

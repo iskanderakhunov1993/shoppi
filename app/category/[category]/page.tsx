@@ -4,27 +4,16 @@ import { listLinksByCategory, getCreatorById, type Link as ShopLink } from "@/li
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { EmptyState } from "@/app/components/EmptyState";
+import { CATEGORY_LABEL, isCategory, type Category } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
-
-const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
-type Category = (typeof CATEGORIES)[number];
-
-const CATEGORY_LABEL: Record<Category, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
 
 const CATEGORY_SEED: Record<Category, string> = {
   cosmetics: "shoppi-cat-cosmetics",
   mens: "shoppi-cat-mens",
   clothing: "shoppi-cat-clothing",
+  tools: "shoppi-cat-tools",
 };
-
-function isCategory(value: string): value is Category {
-  return (CATEGORIES as readonly string[]).includes(value);
-}
 
 export default async function CategoryPage({
   params,

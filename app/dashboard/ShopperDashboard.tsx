@@ -7,11 +7,12 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { CircleOnboarding } from "./CircleOnboarding";
 import { placeholderAvatar } from "@/lib/avatar";
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type FavoriteLink = {
   id: string;
   title: string;
-  category: "cosmetics" | "mens" | "clothing";
+  category: Category;
   price?: number;
   wrappedUrl: string;
 };
@@ -25,12 +26,6 @@ type FollowedCreator = {
 };
 
 type FeedLink = FavoriteLink & { wrappedUrl: string; clicks: number; creatorName?: string; creatorSlug?: string };
-
-const CATEGORY_LABEL: Record<FavoriteLink["category"], string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
 
 export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
   const [tab, setTab] = useState<"saved" | "circle">("saved");

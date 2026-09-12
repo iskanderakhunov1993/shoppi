@@ -6,8 +6,7 @@ import {
   listApplicationsByCreator,
   listOpenOpportunities,
 } from "@/lib/store";
-
-const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
+import { CATEGORIES } from "@/lib/categories";
 
 export async function GET(request: NextRequest) {
   const opportunities = await listOpenOpportunities();

@@ -39,6 +39,7 @@ export async function LandingFooter() {
         { label: "Косметика", href: "/category/cosmetics" },
         { label: "Мужские товары", href: "/category/mens" },
         { label: "Одежда", href: "/category/clothing" },
+        { label: "Инструменты", href: "/category/tools" },
         { label: "Мой вкус", href: "/dashboard" },
       ],
     },

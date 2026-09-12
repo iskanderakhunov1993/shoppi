@@ -12,6 +12,7 @@ import {
 } from "./store.ts";
 import { parseMarketplaceItem } from "./marketplace.ts";
 import { placeholderAvatar } from "./avatar.ts";
+import type { Category } from "./categories.ts";
 
 // Seeds a handful of already-verified accounts so the login page can offer
 // one-click demo logins and the landing page has real storefronts to link
@@ -27,7 +28,7 @@ const LANDING_CREATORS = ["landing-maxim@shoppi.dev", "landing-sonya@shoppi.dev"
 
 type SeedLink = {
   title: string;
-  category: "cosmetics" | "mens" | "clothing";
+  category: Category;
   url: string;
   price: number;
   image?: string;

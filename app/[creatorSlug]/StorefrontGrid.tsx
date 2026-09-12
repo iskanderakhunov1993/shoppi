@@ -3,22 +3,17 @@
 import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { EmptyState } from "@/app/components/EmptyState";
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type StorefrontLink = {
   id: string;
   title: string;
   imageUrl?: string;
   price?: number;
-  category: string;
+  category: Category;
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
 };
 
 type Tab = "latest" | "popular" | string;

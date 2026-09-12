@@ -5,14 +5,9 @@ import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { EmptyState } from "@/app/components/EmptyState";
+import { CATEGORY_LABEL } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
 
 export default async function SearchPage({
   searchParams,

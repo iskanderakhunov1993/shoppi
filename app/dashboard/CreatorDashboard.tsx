@@ -8,8 +8,7 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { OpportunitiesFeed } from "./OpportunitiesFeed";
 import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
-
-type Category = "cosmetics" | "mens" | "clothing";
+import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type LinkRow = {
   id: string;
@@ -21,12 +20,6 @@ type LinkRow = {
   clicks: number;
   clicksTotal: number;
   wrappedUrl: string;
-};
-
-const CATEGORY_LABEL: Record<Category, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
 };
 
 export function CreatorDashboard({
@@ -290,9 +283,11 @@ export function CreatorDashboard({
                   value={category}
                   onChange={(e) => setCategory(e.target.value as Category)}
                 >
-                  <option value="cosmetics">Косметика</option>
-                  <option value="mens">Мужские товары</option>
-                  <option value="clothing">Одежда</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {CATEGORY_LABEL[c]}
+                    </option>
+                  ))}
                 </select>
                 <input
                   placeholder="Ссылка на фото (необязательно)"
@@ -351,9 +346,11 @@ export function CreatorDashboard({
                           value={editCategory}
                           onChange={(e) => setEditCategory(e.target.value as Category)}
                         >
-                          <option value="cosmetics">Косметика</option>
-                          <option value="mens">Мужские товары</option>
-                          <option value="clothing">Одежда</option>
+                          {CATEGORIES.map((c) => (
+                            <option key={c} value={c}>
+                              {CATEGORY_LABEL[c]}
+                            </option>
+                          ))}
                         </select>
                         <input
                           className={`${inputClass} border border-line px-3 py-2`}

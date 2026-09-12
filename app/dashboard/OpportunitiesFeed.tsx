@@ -2,20 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/app/components/EmptyState";
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type Opportunity = {
   id: string;
   title: string;
   description: string;
   compensation?: string;
-  category?: "cosmetics" | "mens" | "clothing";
+  category?: Category;
   myStatus?: "pending" | "accepted" | "declined" | null;
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
 };
 
 const STATUS_LABEL: Record<string, string> = {

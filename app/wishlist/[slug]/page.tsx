@@ -4,19 +4,14 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type WishlistLink = {
   id: string;
   title: string;
   imageUrl?: string;
   price?: number;
-  category: string;
+  category: Category;
   wrappedUrl: string;
   creatorName?: string;
   creatorSlug?: string;

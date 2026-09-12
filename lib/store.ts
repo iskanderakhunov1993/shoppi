@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { sql, nextSeq } from "./db.ts";
+import type { Category } from "./categories.ts";
 
 export type Role = "shopper" | "creator" | "brand";
 
@@ -47,7 +48,7 @@ export type Link = {
   title: string;
   imageUrl?: string;
   price?: number;
-  category: "cosmetics" | "mens" | "clothing";
+  category: Category;
   targetUrl: string;
   marketplace?: string;
   articleId?: string;

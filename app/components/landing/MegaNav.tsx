@@ -41,12 +41,17 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Мужские товары",
           href: "/category/mens",
-          description: "Инструменты, снаряжение и уход — проверенное, а не рекламное.",
+          description: "Снаряжение и уход — проверенное, а не рекламное.",
         },
         {
           label: "Одежда",
           href: "/category/clothing",
           description: "Вещи, которые кураторы носят сезон за сезоном.",
+        },
+        {
+          label: "Инструменты",
+          href: "/category/tools",
+          description: "То, что реально стоит в мастерской, а не пылится в коробке.",
         },
       ],
     },

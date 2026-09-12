@@ -6,11 +6,12 @@ import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
 import { BrandOpportunities } from "./BrandOpportunities";
 import { OnboardingProgress } from "./OnboardingProgress";
+import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type BrandLink = {
   id: string;
   title: string;
-  category: "cosmetics" | "mens" | "clothing";
+  category: Category;
   targetUrl: string;
   articleId?: string;
   createdAt: string;
@@ -21,12 +22,6 @@ type BrandLink = {
 };
 
 const LAST_SEEN_KEY = "shoppi:brand:linksLastSeen";
-
-const CATEGORY_LABEL: Record<BrandLink["category"], string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
 
 export function BrandDashboard({
   me,

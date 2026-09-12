@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { placeholderAvatar } from "@/lib/avatar";
-
-type Category = "cosmetics" | "mens" | "clothing";
-
-const CATEGORY_LABEL: Record<Category, string> = {
-  cosmetics: "Косметика",
-  mens: "Мужские товары",
-  clothing: "Одежда",
-};
-
-const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
+import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type RecommendedCreator = {
   id: string;

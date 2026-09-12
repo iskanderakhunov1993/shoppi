@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireCreator } from "@/lib/require-creator";
 import { addLink, countClicksForLinks, listLinksByCreator } from "@/lib/store";
 import { parseMarketplaceItem } from "@/lib/marketplace";
-
-const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
+import { CATEGORIES } from "@/lib/categories";
 
 export async function GET(request: NextRequest) {
   const creator = await requireCreator(request);

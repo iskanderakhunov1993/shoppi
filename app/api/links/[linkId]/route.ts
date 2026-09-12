@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCreator } from "@/lib/require-creator";
 import { deleteLink, getLink, updateLink } from "@/lib/store";
-
-const CATEGORIES = ["cosmetics", "mens", "clothing"] as const;
+import { CATEGORIES } from "@/lib/categories";
 
 /** Both handlers refuse to touch a link that belongs to someone else. */
 async function authorize(request: NextRequest, linkId: string) {
