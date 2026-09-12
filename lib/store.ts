@@ -662,6 +662,76 @@ export async function circleFeed(userId: string, opts: { limit?: number } = {}):
   return rows.map(toLink);
 }
 
+/* -------------------------------------------------------------- circles */
+
+export type Circle = {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+};
+
+function toCircle(r: Row): Circle {
+  return {
+    id: str(r.id),
+    userId: str(r.user_id),
+    name: str(r.name),
+    createdAt: str(r.created_at),
+  };
+}
+
+export async function createCircle(userId: string, name: string): Promise<Circle> {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  await sql`INSERT INTO circles (id, user_id, name, created_at) VALUES (${id}, ${userId}, ${name}, ${now})`;
+  return { id, userId, name, createdAt: now };
+}
+
+export async function listCirclesByUser(userId: string): Promise<Circle[]> {
+  const rows = await sql`SELECT * FROM circles WHERE user_id = ${userId} ORDER BY created_at ASC`;
+  return rows.map(toCircle);
+}
+
+export async function getCircle(id: string): Promise<Circle | undefined> {
+  const rows = await sql`SELECT * FROM circles WHERE id = ${id}`;
+  return rows[0] ? toCircle(rows[0]) : undefined;
+}
+
+export async function deleteCircle(id: string, userId: string): Promise<boolean> {
+  const rows = await sql`DELETE FROM circles WHERE id = ${id} AND user_id = ${userId} RETURNING id`;
+  return rows.length > 0;
+}
+
+export async function addCircleMember(circleId: string, creatorId: string): Promise<void> {
+  await sql`
+    INSERT INTO circle_members (circle_id, creator_id, added_at)
+    VALUES (${circleId}, ${creatorId}, ${new Date().toISOString()})
+    ON CONFLICT (circle_id, creator_id) DO NOTHING
+  `;
+}
+
+export async function removeCircleMember(circleId: string, creatorId: string): Promise<void> {
+  await sql`DELETE FROM circle_members WHERE circle_id = ${circleId} AND creator_id = ${creatorId}`;
+}
+
+export async function listCircleMembers(circleId: string): Promise<Creator[]> {
+  const rows = await sql`
+    SELECT c.* FROM creators c JOIN circle_members cm ON cm.creator_id = c.id
+    WHERE cm.circle_id = ${circleId} ORDER BY cm.added_at ASC
+  `;
+  return rows.map(toCreator);
+}
+
+/** Every link from every creator in this circle, newest first. */
+export async function circleMembersFeed(circleId: string, opts: { limit?: number } = {}): Promise<Link[]> {
+  const limit = Math.min(opts.limit ?? 60, 200);
+  const rows = await sql`
+    SELECT l.* FROM links l JOIN circle_members cm ON cm.creator_id = l.creator_id
+    WHERE cm.circle_id = ${circleId} ORDER BY l.seq DESC LIMIT ${limit}
+  `;
+  return rows.map(toLink);
+}
+
 /* ------------------------------------------------------------- sessions */
 
 export async function createSessionRow(token: string, userId: string): Promise<void> {
@@ -807,6 +877,6 @@ export async function setApplicationStatus(
 /* ----------------------------------------------------------------- test */
 
 export async function __resetStoreForTests(): Promise<void> {
-  await sql`TRUNCATE sessions, favorites, follows, opportunity_applications, opportunities, clicks, links, creators, users CASCADE`;
+  await sql`TRUNCATE sessions, favorites, follows, circle_members, circles, opportunity_applications, opportunities, clicks, links, creators, users CASCADE`;
   await sql`ALTER SEQUENCE links_seq_counter RESTART WITH 1`;
 }
