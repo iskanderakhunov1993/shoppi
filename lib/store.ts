@@ -195,6 +195,10 @@ export async function setAffiliateTemplate(userId: string, template: string | nu
   await sql`UPDATE users SET affiliate_template = ${template} WHERE id = ${userId}`;
 }
 
+export async function updateUserPasswordHash(userId: string, passwordHash: string): Promise<void> {
+  await sql`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId}`;
+}
+
 export async function getUserBySlug(slug: string): Promise<User | undefined> {
   const rows = await sql`SELECT * FROM users WHERE slug = ${slug}`;
   return rows[0] ? toUser(rows[0]) : undefined;
