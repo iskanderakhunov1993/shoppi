@@ -55,6 +55,7 @@ export function CreatorDashboard({
   const [editImage, setEditImage] = useState("");
   const [editPromoCode, setEditPromoCode] = useState("");
   const [origin, setOrigin] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
   const [tab, setTab] = useState<"products" | "earnings" | "profile">("products");
   // Paused while the monetization approach (promo codes / CPA / opportunities)
   // is still being decided — set back to true to bring the tab back.
@@ -217,10 +218,32 @@ export function CreatorDashboard({
               </a>
               <a
                 href={`/${me.slug}`}
-                className="text-[12.5px] text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+                className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
               >
-                {origin ? origin.replace(/^https?:\/\//, "") : ""}/{me.slug}
+                Витрина
               </a>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${origin}/${me.slug}`);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 1800);
+                }}
+                aria-label="Скопировать ссылку на витрину"
+                title={`${origin ? origin.replace(/^https?:\/\//, "") : ""}/${me.slug}`}
+                className="w-9 h-9 flex items-center justify-center border border-line text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
+              >
+                {linkCopied ? (
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 8.5l3.2 3.2L13 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <rect x="5.5" y="5.5" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M3 10.5V3.5a1 1 0 0 1 1-1H10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                )}
+              </button>
             </div>
           )
         }
@@ -449,7 +472,7 @@ export function CreatorDashboard({
       )}
 
       {tab === "profile" && (
-        <div className="px-8 py-8 max-w-md">
+        <div className="px-8 py-8 max-w-lg mx-auto w-full">
           <ProfileEditor me={me} onSaved={onProfileSaved} defaultOpen />
         </div>
       )}
