@@ -28,6 +28,8 @@ export async function GET(
     displayName: creator.displayName,
     bio: creator.bio,
     avatarUrl: creator.avatarUrl,
+    instagramHandle: creator.instagramHandle,
+    tiktokHandle: creator.tiktokHandle,
     followers: await countFollowers(creator.id),
     links,
   });

@@ -30,6 +30,8 @@ export type Creator = {
   displayName: string;
   bio?: string;
   avatarUrl?: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
 };
 
 export type Link = {
@@ -86,6 +88,8 @@ function toCreator(r: Row): Creator {
     displayName: str(r.display_name),
     bio: opt(r.bio),
     avatarUrl: opt(r.avatar_url),
+    instagramHandle: opt(r.instagram_handle),
+    tiktokHandle: opt(r.tiktok_handle),
   };
 }
 
@@ -209,7 +213,14 @@ export async function getCreatorById(id: string): Promise<Creator | undefined> {
 
 export async function updateCreator(
   creatorId: string,
-  patch: { displayName?: string; bio?: string; avatarUrl?: string; slug?: string }
+  patch: {
+    displayName?: string;
+    bio?: string;
+    avatarUrl?: string;
+    slug?: string;
+    instagramHandle?: string | null;
+    tiktokHandle?: string | null;
+  }
 ): Promise<Creator | undefined> {
   const current = await getCreatorById(creatorId);
   if (!current) return undefined;
@@ -221,7 +232,9 @@ export async function updateCreator(
         display_name_lower = ${nextName.toLowerCase()},
         bio = ${patch.bio ?? current.bio ?? null},
         avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null},
-        slug = ${patch.slug ?? current.slug}
+        slug = ${patch.slug ?? current.slug},
+        instagram_handle = ${patch.instagramHandle === undefined ? (current.instagramHandle ?? null) : patch.instagramHandle},
+        tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle}
     WHERE id = ${creatorId}
   `;
 

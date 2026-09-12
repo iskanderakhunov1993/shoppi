@@ -14,6 +14,8 @@ type Me = {
   brandDomain?: string;
   brandArticles?: string[];
   affiliateTemplate?: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
 };
 
 export default function DashboardPage() {

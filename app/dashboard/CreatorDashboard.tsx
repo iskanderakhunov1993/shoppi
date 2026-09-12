@@ -32,7 +32,14 @@ export function CreatorDashboard({
   me,
   onProfileSaved,
 }: {
-  me: { displayName: string; slug?: string; bio?: string };
+  me: {
+    displayName: string;
+    slug?: string;
+    bio?: string;
+    avatarUrl?: string;
+    instagramHandle?: string;
+    tiktokHandle?: string;
+  };
   onProfileSaved: () => void;
 }) {
   const [links, setLinks] = useState<LinkRow[] | null>(null);
