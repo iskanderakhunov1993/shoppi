@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 export function DashboardHeader({
   label,
@@ -33,6 +34,7 @@ export function DashboardHeader({
       </div>
       <div className="flex items-center gap-3">
         {action}
+        <ThemeToggle className="text-stone hover:text-ink border border-line" />
         <button
           type="button"
           onClick={handleLogout}

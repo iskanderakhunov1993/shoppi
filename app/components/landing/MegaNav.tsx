@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 type Item = { label: string; href: string; description: string };
 type Menu = { key: string; label: string; align: "left" | "center" | "right"; items: Item[] };
@@ -263,6 +264,7 @@ export function MegaNav({
               </svg>
             </button>
           )}
+          <ThemeToggle className={`${mutedColor} hover:${textColor}`} />
           {signedIn ? (
             <Link
               href="/dashboard"
