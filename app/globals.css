@@ -74,7 +74,7 @@ body {
 }
 
 .barcode {
-  height: 32px;
+  height: 24px;
   background-image: repeating-linear-gradient(
     90deg,
     var(--receipt-ink) 0,

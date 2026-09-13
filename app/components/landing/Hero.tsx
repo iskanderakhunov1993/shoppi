@@ -30,7 +30,7 @@ export function Hero() {
 
   return (
     <section
-      className="relative px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden"
+      className="relative px-6 md:px-10 pt-24 pb-12 md:pt-28 md:pb-16 overflow-hidden"
       style={{ background: "#141210" }}
     >
       {/* A quiet radial glow behind the receipt — the paper itself is
@@ -48,17 +48,17 @@ export function Hero() {
         <div className="receipt-print w-full max-w-[420px]">
           <div className="receipt-zigzag receipt-zigzag-top" aria-hidden="true" />
           <div
-            className="px-7 pt-8 pb-6 font-mono"
+            className="px-7 pt-6 pb-5 font-mono"
             style={{ background: "var(--receipt-paper)", color: "var(--receipt-ink)" }}
           >
-            <div className="text-center mb-5">
-              <div className="font-display text-2xl tracking-tight mb-1">Shoppi</div>
+            <div className="text-center mb-3">
+              <div className="font-display text-xl tracking-tight mb-1">Shoppi</div>
               <div className="text-[11px] opacity-60">ЧЕК № 000142</div>
               <div className="text-[11px] opacity-60">{formatNow()}</div>
             </div>
 
             <div
-              className="pt-4 flex flex-col gap-3"
+              className="pt-3 flex flex-col gap-2"
               style={{ borderTop: "1px dashed var(--receipt-line)" }}
             >
               {ITEMS.map((item) => (
@@ -76,26 +76,26 @@ export function Hero() {
             </div>
 
             <div
-              className="mt-4 pt-4 flex items-baseline justify-between text-[14px] font-medium"
+              className="mt-3 pt-3 flex items-baseline justify-between text-[14px] font-medium"
               style={{ borderTop: "1px dashed var(--receipt-line)" }}
             >
               <span>ИТОГО</span>
               <span className="tabular-nums">{formatPrice(total)} ₽</span>
             </div>
 
-            <div className="flex justify-center my-5">
+            <div className="flex justify-center my-3">
               <div className="signal-stamp">0% АЛГОРИТМА</div>
             </div>
 
             <p
-              className="text-center text-[12px] leading-relaxed opacity-70 pt-4"
+              className="text-center text-[12px] leading-relaxed opacity-70 pt-3"
               style={{ borderTop: "1px dashed var(--receipt-line)" }}
             >
               Спасибо, что выбираете людей,
               <br />а не алгоритм.
             </p>
 
-            <div className="barcode mt-5" aria-hidden="true" />
+            <div className="barcode mt-3" aria-hidden="true" />
             <div className="text-center text-[9.5px] tracking-[0.3em] opacity-60 mt-1.5">
               SHOPPI · RU
             </div>
@@ -103,7 +103,7 @@ export function Hero() {
           <div className="receipt-zigzag receipt-zigzag-bottom" aria-hidden="true" />
         </div>
 
-        <p className="font-body text-white/70 text-[15px] md:text-base max-w-md text-center mt-10 mb-8">
+        <p className="font-body text-white/70 text-[15px] md:text-base max-w-md text-center mt-6 mb-6">
           Косметика, мужские товары, инструменты — витрины людей, которым ты
           доверяешь, а не бесконечная лента.
         </p>

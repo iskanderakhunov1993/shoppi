@@ -69,7 +69,7 @@ export function FollowButton({
           : "bg-ink text-paper hover:opacity-80"
       }`}
     >
-      {following ? "В ваших кураторах" : "Добавить в моих"}
+      {following ? "В ваших кураторах" : "Добавить в моих кураторов"}
       {followers > 0 && <span className="opacity-70 ml-2 normal-case">· {followers}</span>}
     </button>
   );
