@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
-import { OnboardingProgress } from "./OnboardingProgress";
+import { OnboardingModal } from "./OnboardingModal";
 import { CircleOnboarding } from "./CircleOnboarding";
 import { MyCircles } from "./MyCircles";
 import { placeholderAvatar } from "@/lib/avatar";
@@ -32,7 +32,9 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
   const [tab, setTab] = useState<"saved" | "circle" | "circles">("saved");
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
+  const [circleCount, setCircleCount] = useState<number | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [origin, setOrigin] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -48,10 +50,33 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
     setCircle(res.ok ? await res.json() : { creators: [], feed: [] });
   }, []);
 
+  const loadCircleCount = useCallback(async () => {
+    const res = await fetch("/api/circles");
+    const data = res.ok ? await res.json() : { circles: [] };
+    setCircleCount((data.circles ?? []).length);
+  }, []);
+
   useEffect(() => {
     loadFavorites();
     loadCircle();
-  }, [loadFavorites, loadCircle]);
+    loadCircleCount();
+  }, [loadFavorites, loadCircle, loadCircleCount]);
+
+  // Auto-surface the checklist once per browser for anyone who hasn't
+  // finished it yet — same idea as a first-run modal, but it won't
+  // nag again once dismissed even if steps stay incomplete.
+  useEffect(() => {
+    if (favorites === null || circle === null || circleCount === null) return;
+    const allDone = favorites.length > 0 && circle.creators.length > 0 && circleCount > 0;
+    if (allDone) return;
+    if (localStorage.getItem("shoppi-onboarding-dismissed")) return;
+    setShowOnboardingModal(true);
+  }, [favorites, circle, circleCount]);
+
+  function dismissOnboardingModal() {
+    localStorage.setItem("shoppi-onboarding-dismissed", "1");
+    setShowOnboardingModal(false);
+  }
 
   async function remove(linkId: string) {
     await fetch(`/api/favorites?linkId=${encodeURIComponent(linkId)}`, { method: "DELETE" });
@@ -63,6 +88,11 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
     await loadCircle();
   }
 
+  const hasFavorite = Boolean(favorites && favorites.length > 0);
+  const hasFollow = Boolean(circle && circle.creators.length > 0);
+  const hasCircle = Boolean(circleCount !== null && circleCount > 0);
+  const onboardingDone = hasFavorite && hasFollow && hasCircle;
+
   return (
     <main className="flex-1 flex flex-col">
       <DashboardHeader
@@ -70,13 +100,15 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
         title={me.displayName}
         action={
           <div className="flex items-center gap-2">
-            <OnboardingProgress
-              steps={[
-                { label: "Сохраните первый товар", done: Boolean(favorites && favorites.length > 0) },
-                { label: "Подпишитесь на куратора", done: Boolean(circle && circle.creators.length > 0) },
-                { label: "Посмотрите ленту находок", done: Boolean(circle && circle.feed.length > 0) },
-              ]}
-            />
+            {!onboardingDone && (
+              <button
+                type="button"
+                onClick={() => setShowOnboardingModal(true)}
+                className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors cursor-pointer"
+              >
+                Начало работы · {[hasFavorite, hasFollow, hasCircle].filter(Boolean).length}/3
+              </button>
+            )}
             <Link
               href="/curators"
               className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
@@ -309,7 +341,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       {tab === "circles" && (
         <div className="px-8 py-8">
-          <MyCircles availableCreators={circle?.creators ?? []} />
+          <MyCircles availableCreators={circle?.creators ?? []} onChange={loadCircleCount} />
         </div>
       )}
 
@@ -320,6 +352,58 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             setShowOnboarding(false);
             await loadCircle();
           }}
+        />
+      )}
+
+      {showOnboardingModal && (
+        <OnboardingModal
+          onClose={dismissOnboardingModal}
+          steps={[
+            {
+              n: 1,
+              title: "Подпишитесь на куратора",
+              description: "Добавьте того, чьему вкусу доверяете — его находки появятся у вас в ленте.",
+              done: hasFollow,
+              cta: {
+                label: "Быстрый подбор",
+                onClick: () => {
+                  setShowOnboardingModal(false);
+                  setShowOnboarding(true);
+                },
+              },
+              secondaryCta: {
+                label: "Все кураторы",
+                onClick: () => {
+                  window.location.href = "/curators";
+                },
+              },
+            },
+            {
+              n: 2,
+              title: "Соберите свой круг",
+              description: "Назовите круг и добавьте туда кураторов — например, «Уход» или «На дачу».",
+              done: hasCircle,
+              cta: {
+                label: "Создать круг",
+                onClick: () => {
+                  setShowOnboardingModal(false);
+                  setTab("circles");
+                },
+              },
+            },
+            {
+              n: 3,
+              title: "Сохраните товар в избранное",
+              description: "На любой витрине куратора нажмите «Сохранить» — товар появится в «Сохранённом».",
+              done: hasFavorite,
+              cta: {
+                label: "Смотреть кураторов",
+                onClick: () => {
+                  window.location.href = "/curators";
+                },
+              },
+            },
+          ]}
         />
       )}
     </main>

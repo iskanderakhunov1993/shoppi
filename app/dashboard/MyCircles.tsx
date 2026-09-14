@@ -17,7 +17,13 @@ type FeedLink = {
 };
 type CircleDetail = CircleSummary & { feed: FeedLink[] };
 
-export function MyCircles({ availableCreators }: { availableCreators: Member[] }) {
+export function MyCircles({
+  availableCreators,
+  onChange,
+}: {
+  availableCreators: Member[];
+  onChange?: () => void;
+}) {
   const [circles, setCircles] = useState<CircleSummary[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CircleDetail | null>(null);
@@ -51,6 +57,7 @@ export function MyCircles({ availableCreators }: { availableCreators: Member[] }
     if (res.ok) {
       setNewName("");
       await loadCircles();
+      onChange?.();
     }
   }
 
@@ -63,6 +70,7 @@ export function MyCircles({ availableCreators }: { availableCreators: Member[] }
       setDetail(null);
     }
     await loadCircles();
+    onChange?.();
   }
 
   async function toggleOpen(id: string) {
