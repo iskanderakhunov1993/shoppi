@@ -699,6 +699,34 @@ export async function circleFeed(userId: string, opts: { limit?: number } = {}):
   return rows.map(toLink);
 }
 
+export type RecentLink = Link & {
+  creatorName: string;
+  creatorSlug: string;
+  creatorAvatarUrl?: string;
+};
+
+/**
+ * The platform-wide "Latest Finds" feed: every product from every
+ * creator, newest first — plain chronological order, no ranking or
+ * personalization. This is the only way to discover creators beyond
+ * the static /curators list without pretending to have a real
+ * recommendation algorithm.
+ */
+export async function listRecentLinks(opts: { limit?: number } = {}): Promise<RecentLink[]> {
+  const limit = Math.min(opts.limit ?? 40, 100);
+  const rows = await sql`
+    SELECT l.*, c.display_name AS creator_display_name, c.slug AS creator_slug, c.avatar_url AS creator_avatar_url
+    FROM links l JOIN creators c ON c.id = l.creator_id
+    ORDER BY l.seq DESC LIMIT ${limit}
+  `;
+  return rows.map((r) => ({
+    ...toLink(r),
+    creatorName: str(r.creator_display_name),
+    creatorSlug: str(r.creator_slug),
+    creatorAvatarUrl: r.creator_avatar_url === null ? undefined : str(r.creator_avatar_url),
+  }));
+}
+
 /* -------------------------------------------------------------- circles */
 
 export type Circle = {

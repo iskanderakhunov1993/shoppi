@@ -299,7 +299,11 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <p className="text-stone text-sm">Загрузка…</p>
             ) : circle.feed.length === 0 ? (
               <p className="font-display italic text-stone text-sm">
-                Пока пусто — как только кто-то из ваших кураторов добавит товар, он появится тут.
+                Пока пусто — как только кто-то из ваших кураторов добавит товар, он появится тут.{" "}
+                <a href="/finds" className="not-italic underline underline-offset-4">
+                  Посмотрите находки всей площадки
+                </a>
+                .
               </p>
             ) : (
               <ul className="flex flex-col">

@@ -29,6 +29,11 @@ function buildMenus(demoSlug?: string): Menu[] {
           href: "/curators",
           description: "Витрины людей, чьему вкусу вы доверяете, а не лента алгоритма.",
         },
+        {
+          label: "Последние находки",
+          href: "/finds",
+          description: "Товары от всех кураторов сразу, по порядку добавления.",
+        },
         ...(BRANDS_ENABLED
           ? [
               {
