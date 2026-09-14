@@ -28,8 +28,34 @@ type FollowedCreator = {
 
 type FeedLink = FavoriteLink & { wrappedUrl: string; clicks: number; creatorName?: string; creatorSlug?: string };
 
+type Tab = "overview" | "saved" | "circle" | "circles";
+const VALID_TABS: Tab[] = ["overview", "saved", "circle", "circles"];
+
+const TAB_HINT: Record<Tab, string> = {
+  overview: "Как связаны разделы ниже — и что где искать.",
+  saved: "Товары, сохранённые с любой витрины — не привязаны к кругу или куратору.",
+  circle: "Те, на кого вы подписаны напрямую — их находки собираются в ленте ниже.",
+  circles: "Группируйте кураторов из «Мои кураторы» по темам — например, «Уход» или «На дачу».",
+};
+
 export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
-  const [tab, setTab] = useState<"saved" | "circle" | "circles">("saved");
+  const [tab, setTabState] = useState<Tab>("overview");
+
+  // Keeps the URL shareable/bookmarkable per tab (e.g. a link straight
+  // to "Круги"), and restores the tab on load instead of always
+  // resetting to the overview.
+  const setTab = useCallback((next: Tab) => {
+    setTabState(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState(null, "", url);
+  }, []);
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("tab");
+    if (fromUrl && VALID_TABS.includes(fromUrl as Tab)) setTabState(fromUrl as Tab);
+  }, []);
+
   const [favorites, setFavorites] = useState<FavoriteLink[] | null>(null);
   const [circle, setCircle] = useState<{ creators: FollowedCreator[]; feed: FeedLink[] } | null>(null);
   const [circleCount, setCircleCount] = useState<number | null>(null);
@@ -163,12 +189,12 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       <div className="flex gap-6 px-8 pt-6 border-b border-line">
         <button
-          onClick={() => setTab("saved")}
+          onClick={() => setTab("overview")}
           className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px transition-colors cursor-pointer ${
-            tab === "saved" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+            tab === "overview" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
           }`}
         >
-          Сохранённое{favorites ? ` · ${favorites.length}` : ""}
+          Обзор
         </button>
         <button
           onClick={() => setTab("circle")}
@@ -184,9 +210,131 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             tab === "circles" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
           }`}
         >
-          Круги
+          Круги{circleCount !== null ? ` · ${circleCount}` : ""}
+        </button>
+        <button
+          onClick={() => setTab("saved")}
+          className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px transition-colors cursor-pointer ${
+            tab === "saved" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+          }`}
+        >
+          Сохранённое{favorites ? ` · ${favorites.length}` : ""}
         </button>
       </div>
+      <p className="px-8 pt-3 text-[12.5px] text-stone">{TAB_HINT[tab]}</p>
+
+      {tab === "overview" && (
+        <div className="px-8 py-8 flex flex-col gap-10">
+          <ol className="flex flex-col sm:flex-row gap-5 sm:gap-3 max-w-3xl">
+            <li className="flex-1 flex gap-3">
+              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">1</span>
+              <p className="text-[13px] text-stone leading-snug">
+                <span className="text-ink font-medium">Подпишитесь</span> на кураторов, чьему вкусу
+                доверяете — вкладка «Мои кураторы».
+              </p>
+            </li>
+            <li className="flex-1 flex gap-3">
+              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">2</span>
+              <p className="text-[13px] text-stone leading-snug">
+                <span className="text-ink font-medium">Группируйте</span> их по темам в «Круги» —
+                своя лента находок под каждый круг.
+              </p>
+            </li>
+            <li className="flex-1 flex gap-3">
+              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">3</span>
+              <p className="text-[13px] text-stone leading-snug">
+                <span className="text-ink font-medium">Сохраняйте</span> конкретные товары в
+                «Сохранённое» — с любой витрины, не только от своих кураторов.
+              </p>
+            </li>
+          </ol>
+
+          <div className="grid sm:grid-cols-3 gap-px bg-line border border-line">
+            <button
+              type="button"
+              onClick={() => setTab("circle")}
+              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
+            >
+              <span className="block font-display text-3xl">{circle ? circle.creators.length : "–"}</span>
+              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">
+                Мои кураторы →
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("circles")}
+              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
+            >
+              <span className="block font-display text-3xl">{circleCount ?? "–"}</span>
+              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">Круги →</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("saved")}
+              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
+            >
+              <span className="block font-display text-3xl">{favorites ? favorites.length : "–"}</span>
+              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">
+                Сохранённое →
+              </span>
+            </button>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[11px] uppercase tracking-wider text-stone">
+                Последние находки от ваших кураторов
+              </h3>
+              {circle && circle.feed.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTab("circle")}
+                  className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+                >
+                  Все →
+                </button>
+              )}
+            </div>
+            {circle === null ? (
+              <p className="text-stone text-sm">Загрузка…</p>
+            ) : circle.feed.length === 0 ? (
+              <p className="font-display italic text-stone text-sm">
+                Пока пусто — как только кто-то из ваших кураторов добавит товар, он появится тут.
+              </p>
+            ) : (
+              <ul className="flex flex-col">
+                {circle.feed.slice(0, 4).map((link) => (
+                  <li
+                    key={link.id}
+                    className="grid grid-cols-[1fr_auto] items-center gap-4 py-3.5 border-b border-line last:border-b-0"
+                  >
+                    <div>
+                      <a href={link.wrappedUrl} className="text-[13.5px] font-medium hover:underline">
+                        {link.title}
+                      </a>
+                      <span className="block text-[10.5px] uppercase tracking-wide text-stone mt-0.5">
+                        {CATEGORY_LABEL[link.category]}
+                        {link.creatorSlug && (
+                          <>
+                            {" "}
+                            · от{" "}
+                            <a href={`/${link.creatorSlug}`} className="hover:underline">
+                              {link.creatorName}
+                            </a>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    {link.price && (
+                      <span className="text-sm text-stone">{link.price.toLocaleString("ru-RU")} ₽</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       {tab === "saved" && (
         <div className="px-8 py-8">
