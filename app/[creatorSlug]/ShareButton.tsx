@@ -4,11 +4,11 @@ import { useState } from "react";
 
 /**
  * Only rendered for the creator viewing their own live storefront —
- * a quick way to copy the link without switching to the dashboard.
- * Mirrors the copy-link pattern already used for the shopper wishlist
- * link and the creator dashboard's own storefront-link box.
+ * a quick icon-only way to copy the link without switching to the
+ * dashboard. Mirrors the copy-link pattern already used for the
+ * shopper wishlist link and the creator dashboard's storefront box.
  */
-export function ShareButton({ url }: { url: string }) {
+export function ShareButtonIcon({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -19,23 +19,31 @@ export function ShareButton({ url }: { url: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-stone border border-line rounded-full px-3 py-1.5 hover:border-ink hover:text-ink transition-colors cursor-pointer"
+      aria-label="Скопировать ссылку на витрину"
+      title="Поделиться"
+      className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
     >
       {copied ? (
-        <>
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8.5l3.2 3.2L13 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Скопировано
-        </>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8.5l3.2 3.2L13 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       ) : (
-        <>
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <rect x="5.5" y="5.5" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
-            <path d="M3 10.5V3.5a1 1 0 0 1 1-1H10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          </svg>
-          Поделиться
-        </>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M8 10V2.5M8 2.5L5.2 5.3M8 2.5l2.8 2.8"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M3.5 8.5v3.3c0 .66.54 1.2 1.2 1.2h6.6c.66 0 1.2-.54 1.2-1.2V8.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       )}
     </button>
   );

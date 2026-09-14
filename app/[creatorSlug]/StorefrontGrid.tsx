@@ -42,19 +42,19 @@ export function StorefrontGrid({ links }: { links: StorefrontLink[] }) {
 
   return (
     <div>
-      <div className="flex gap-6 px-8 pt-6 overflow-x-auto border-b border-line">
+      <div className="flex items-center gap-2 px-8 pt-6 pb-4 overflow-x-auto">
         <button
           onClick={() => setTab("latest")}
-          className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px whitespace-nowrap transition-colors cursor-pointer ${
-            tab === "latest" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+          className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+            tab === "latest" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
           }`}
         >
           Последние
         </button>
         <button
           onClick={() => setTab("popular")}
-          className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px whitespace-nowrap transition-colors cursor-pointer ${
-            tab === "popular" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+          className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+            tab === "popular" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
           }`}
         >
           Популярное
@@ -63,8 +63,8 @@ export function StorefrontGrid({ links }: { links: StorefrontLink[] }) {
           <button
             key={c}
             onClick={() => setTab(c)}
-            className={`text-[12px] uppercase tracking-wide pb-3 border-b-2 -mb-px whitespace-nowrap transition-colors cursor-pointer ${
-              tab === c ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
+            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+              tab === c ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
             }`}
           >
             {CATEGORY_LABEL[c] ?? c}

@@ -64,6 +64,15 @@ export function CreatorDashboard({
 
   useEffect(() => setOrigin(window.location.origin), []);
 
+  // Lets the storefront's own "edit profile" icon deep-link straight
+  // into this tab instead of always landing on "Товары".
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("tab");
+    if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile") {
+      setTab(fromUrl);
+    }
+  }, []);
+
   const loadLinks = useCallback(async () => {
     const res = await fetch("/api/links");
     if (res.ok) setLinks((await res.json()).links);

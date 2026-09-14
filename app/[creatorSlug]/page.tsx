@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
-import { ShareButton } from "./ShareButton";
+import { ShareButtonIcon } from "./ShareButton";
 import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
@@ -52,6 +52,20 @@ async function getStorefront(slug: string) {
   }>;
 }
 
+function PencilIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M11.3 2.3a1.4 1.4 0 0 1 2 2L5.4 12.2l-2.8.7.7-2.8L11.3 2.3z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function InstagramIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -99,7 +113,19 @@ export default async function StorefrontPage({
     <main className="flex-1 flex flex-col">
       <LandingNav />
 
-      <div className="text-center px-8 pt-32 pb-10 border-b border-line">
+      <div className="relative text-center px-8 pt-32 pb-10 border-b border-line">
+        {isOwner && (
+          <div className="absolute top-36 right-6 flex items-center gap-2">
+            <ShareButtonIcon url={storefrontUrl} />
+            <a
+              href="/dashboard?tab=profile"
+              aria-label="Редактировать профиль"
+              className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors"
+            >
+              <PencilIcon />
+            </a>
+          </div>
+        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={creator.avatarUrl || placeholderAvatar(creatorSlug)}
@@ -109,23 +135,15 @@ export default async function StorefrontPage({
         <span className="font-display italic text-stone text-base block mb-1">Курирует</span>
         <h1 className="font-display text-4xl mb-3">{creator.displayName}</h1>
         {creator.bio && (
-          <p className="text-stone text-sm max-w-md mx-auto mb-6">{creator.bio}</p>
+          <p className="text-stone text-sm max-w-md mx-auto mb-3">{creator.bio}</p>
         )}
         {creator.categories && creator.categories.length > 0 && (
-          <div className="flex justify-center flex-wrap gap-2 mb-6">
-            {creator.categories.map((c) => (
-              <span
-                key={c}
-                className="text-[10.5px] uppercase tracking-wide text-stone border border-line px-2.5 py-1"
-              >
-                {CATEGORY_LABEL[c]}
-              </span>
-            ))}
-          </div>
+          <p className="font-display italic text-stone text-sm mb-6">
+            {creator.categories.map((c) => CATEGORY_LABEL[c]).join(" · ")}
+          </p>
         )}
         <div className="flex justify-center items-center gap-2.5 mb-5">
           <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
-          {isOwner && <ShareButton url={storefrontUrl} />}
         </div>
         <p className="font-display italic text-stone text-sm mb-4">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
