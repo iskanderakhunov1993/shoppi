@@ -241,8 +241,8 @@ export function MegaNav({
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          {searchOpen ? (
+        <div className="flex items-center gap-4 md:gap-5">
+          {searchOpen && (
             <form onSubmit={submitSearch} className="hidden sm:flex items-center">
               <input
                 autoFocus
@@ -256,26 +256,12 @@ export function MegaNav({
                 }`}
               />
             </form>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Поиск"
-              className={`hidden sm:flex items-center justify-center w-7 h-7 ${mutedColor} hover:${textColor} transition-colors cursor-pointer`}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
-                <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              </svg>
-            </button>
           )}
-          <ThemeToggle className={`${mutedColor} hover:${textColor}`} />
+
           {signedIn ? (
             <Link
               href="/dashboard"
-              className={`text-[12px] font-semibold uppercase tracking-wide px-4 py-2.5 transition-opacity hover:opacity-80 ${
-                transparent ? "bg-white text-black" : "bg-ink text-paper"
-              }`}
+              className={`text-[13px] tracking-wide ${mutedColor} hover:${textColor} transition-colors`}
             >
               Кабинет
             </Link>
@@ -283,20 +269,40 @@ export function MegaNav({
             <>
               <Link
                 href="/login"
-                className={`hidden sm:inline text-[12px] uppercase tracking-wide ${mutedColor} hover:${textColor} transition-colors`}
+                className={`hidden sm:inline text-[13px] tracking-wide ${mutedColor} hover:${textColor} transition-colors`}
               >
                 Войти
               </Link>
               <Link
                 href="/signup"
-                className={`text-[12px] font-semibold uppercase tracking-wide px-4 py-2.5 transition-opacity hover:opacity-80 ${
-                  transparent ? "bg-white text-black" : "bg-ink text-paper"
+                className={`hidden sm:inline text-[13px] tracking-wide px-5 py-2 border transition-colors ${
+                  transparent
+                    ? "border-white text-white hover:bg-white hover:text-black"
+                    : "border-ink text-ink hover:bg-ink hover:text-paper"
                 }`}
               >
                 Регистрация
               </Link>
             </>
           )}
+
+          {!searchOpen && (
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Поиск"
+              className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-full border ${
+                transparent ? "border-white/60" : "border-line"
+              } ${mutedColor} hover:${textColor} transition-colors cursor-pointer`}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+
+          <ThemeToggle className={`${mutedColor} hover:${textColor}`} />
 
           <button
             type="button"

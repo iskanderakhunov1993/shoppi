@@ -23,8 +23,11 @@ export default async function Home() {
   return (
     <main className="flex-1 flex flex-col">
       {/* The bar is fixed, so it rides over the hero rather than sitting
-          above it, and stays put once the page scrolls. */}
-      <LandingNav overlay />
+          above it, and stays put once the page scrolls. The hero itself
+          is now a plain themed section (no fixed dark backdrop), so the
+          nav needs normal theme-aware colors, not the white-on-dark
+          overlay treatment. */}
+      <LandingNav />
       <Hero />
       <HowItWorks />
       <CuratorGrid creators={creators} />
