@@ -117,11 +117,11 @@ export function CreatorOnboardingWizard({
   return (
     <main className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm flex flex-col gap-8">
-        <div className="flex gap-1.5">
+        <div className="flex gap-1">
           {[0, 1, 2, 3].map((i) => (
             <span
               key={i}
-              className={`h-1 flex-1 ${i <= step ? "bg-ink" : "bg-line"}`}
+              className={`h-[3px] flex-1 rounded-full transition-colors ${i <= step ? "bg-ink" : "bg-line"}`}
             />
           ))}
         </div>
@@ -137,10 +137,9 @@ export function CreatorOnboardingWizard({
             <div>
               <h1 className="font-display text-2xl mb-2">Привет, {me.displayName}!</h1>
               <p className="text-stone text-sm leading-relaxed">
-                Добро пожаловать в Shoppi. Здесь вы ведёте витрину с товарами, которые
-                действительно советуете, и видите честную статистику переходов — без
-                чужого алгоритма между вами и вашей аудиторией. Пара шагов — и витрина
-                готова.
+                Ведите витрину с товарами, которые правда советуете, и видите честную
+                статистику переходов — без чужого алгоритма между вами и аудиторией.
+                Пара шагов — и готово.
               </p>
             </div>
             <button onClick={() => setStep(1)} className={`${buttonClass} w-fit`}>
@@ -158,7 +157,7 @@ export function CreatorOnboardingWizard({
 
             <label className="text-[11px] uppercase tracking-wider text-stone">Имя на витрине</label>
             <input
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               required
@@ -166,7 +165,7 @@ export function CreatorOnboardingWizard({
 
             <label className="text-[11px] uppercase tracking-wider text-stone">О себе</label>
             <textarea
-              className={`${inputClass} border border-line px-3 py-2.5 resize-y min-h-20`}
+              className={`${inputClass} resize-y min-h-20`}
               value={bio}
               placeholder="Одна строка о том, что вы советуете"
               onChange={(e) => setBio(e.target.value)}
@@ -183,7 +182,7 @@ export function CreatorOnboardingWizard({
                 className="w-12 h-12 rounded-full object-cover bg-raise flex-none border border-line"
               />
               <input
-                className={`${inputClass} border border-line px-3 py-2.5 flex-1 min-w-0`}
+                className={`${inputClass} flex-1 min-w-0`}
                 value={avatarUrl}
                 placeholder="Ссылка на фото"
                 onChange={(e) => setAvatarUrl(e.target.value)}
@@ -197,13 +196,13 @@ export function CreatorOnboardingWizard({
               Появятся значками на витрине рядом с именем.
             </p>
             <input
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={instagramHandle}
               placeholder="Instagram: имя_аккаунта"
               onChange={(e) => setInstagramHandle(e.target.value)}
             />
             <input
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={tiktokHandle}
               placeholder="TikTok: имя_аккаунта"
               onChange={(e) => setTiktokHandle(e.target.value)}
@@ -226,13 +225,13 @@ export function CreatorOnboardingWizard({
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-2">
+            <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => toggleNiche(c)}
-                  className={`text-left px-4 py-3 border transition-colors cursor-pointer ${
+                  className={`text-[13px] px-4 py-2 rounded-full border transition-colors cursor-pointer ${
                     niche.includes(c) ? "border-ink bg-ink text-paper" : "border-line hover:border-ink"
                   }`}
                 >
@@ -273,7 +272,7 @@ export function CreatorOnboardingWizard({
             <input
               placeholder="Название товара"
               required
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -281,12 +280,12 @@ export function CreatorOnboardingWizard({
               placeholder="Ссылка на товар"
               type="url"
               required
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={targetUrl}
               onChange={(e) => setTargetUrl(e.target.value)}
             />
             <select
-              className={`${inputClass} border border-line px-3 py-2.5`}
+              className={`${inputClass}`}
               value={category}
               onChange={(e) => setCategory(e.target.value as Category)}
             >
@@ -328,7 +327,7 @@ export function CreatorOnboardingWizard({
               <input
                 placeholder="Название товара"
                 required
-                className={`${inputClass} border border-line px-3 py-2.5`}
+                className={`${inputClass}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -336,12 +335,12 @@ export function CreatorOnboardingWizard({
                 placeholder="Ссылка на товар"
                 type="url"
                 required
-                className={`${inputClass} border border-line px-3 py-2.5`}
+                className={`${inputClass}`}
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
               />
               <select
-                className={`${inputClass} border border-line px-3 py-2.5`}
+                className={`${inputClass}`}
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
               >
