@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       instagramHandle: creator?.instagramHandle ?? "",
       tiktokHandle: creator?.tiktokHandle ?? "",
       categories: creator?.categories ?? [],
+      hidePopular: creator?.hidePopular ?? false,
     });
   }
 
@@ -87,6 +88,7 @@ export async function PUT(request: NextRequest) {
       instagramHandle: body?.instagramHandle !== undefined ? normalizeHandle(body.instagramHandle) : undefined,
       tiktokHandle: body?.tiktokHandle !== undefined ? normalizeHandle(body.tiktokHandle) : undefined,
       categories: Array.isArray(body?.categories) ? body.categories.filter(isCategory) : undefined,
+      hidePopular: typeof body?.hidePopular === "boolean" ? body.hidePopular : undefined,
     });
 
     return NextResponse.json({
@@ -97,6 +99,7 @@ export async function PUT(request: NextRequest) {
       instagramHandle: updated?.instagramHandle ?? "",
       tiktokHandle: updated?.tiktokHandle ?? "",
       categories: updated?.categories ?? [],
+      hidePopular: updated?.hidePopular ?? false,
     });
   }
 

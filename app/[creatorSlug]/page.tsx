@@ -48,7 +48,9 @@ async function getStorefront(slug: string) {
     instagramHandle?: string;
     tiktokHandle?: string;
     categories?: Category[];
+    hidePopular?: boolean;
     followers: number;
+    sections?: { id: string; name: string; links: StorefrontLink[] }[];
   }>;
 }
 
@@ -177,7 +179,7 @@ export default async function StorefrontPage({
         )}
       </div>
 
-      <StorefrontGrid links={creator.links} />
+      <StorefrontGrid links={creator.links} sections={creator.sections} hidePopular={creator.hidePopular} />
 
       <LandingFooter />
     </main>

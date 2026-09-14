@@ -8,6 +8,7 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { OpportunitiesFeed } from "./OpportunitiesFeed";
 import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
+import { SectionsManager } from "./SectionsManager";
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type LinkRow = {
@@ -34,6 +35,7 @@ export function CreatorDashboard({
     instagramHandle?: string;
     tiktokHandle?: string;
     categories?: Category[];
+    hidePopular?: boolean;
   };
   onProfileSaved: () => void;
 }) {
@@ -57,7 +59,7 @@ export function CreatorDashboard({
   const [editPromoCode, setEditPromoCode] = useState("");
   const [origin, setOrigin] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
-  const [tab, setTab] = useState<"products" | "earnings" | "profile">("products");
+  const [tab, setTab] = useState<"products" | "earnings" | "profile" | "sections">("products");
   // Paused while the monetization approach (promo codes / CPA / opportunities)
   // is still being decided — set back to true to bring the tab back.
   const EARNINGS_TAB_ENABLED = false;
@@ -68,7 +70,7 @@ export function CreatorDashboard({
   // into this tab instead of always landing on "Товары".
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("tab");
-    if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile") {
+    if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile" || fromUrl === "sections") {
       setTab(fromUrl);
     }
   }, []);
@@ -263,6 +265,7 @@ export function CreatorDashboard({
         {(
           [
             ["products", "Товары"],
+            ["sections", "Разделы витрины"],
             ...(EARNINGS_TAB_ENABLED ? ([["earnings", "Заработок"]] as const) : []),
             ["profile", "Профиль и медиакит"],
           ] as const
@@ -460,6 +463,12 @@ export function CreatorDashboard({
               </ul>
             )}
           </div>
+        </div>
+      )}
+
+      {tab === "sections" && (
+        <div className="px-8 py-8 max-w-xl">
+          <SectionsManager links={links ?? []} />
         </div>
       )}
 

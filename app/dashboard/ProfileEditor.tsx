@@ -16,6 +16,7 @@ export function ProfileEditor({
     slug?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    hidePopular?: boolean;
   };
   onSaved: () => void;
   defaultOpen?: boolean;
@@ -26,6 +27,7 @@ export function ProfileEditor({
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
   const [instagramHandle, setInstagramHandle] = useState(me.instagramHandle ?? "");
   const [tiktokHandle, setTiktokHandle] = useState(me.tiktokHandle ?? "");
+  const [hidePopular, setHidePopular] = useState(me.hidePopular ?? false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle }),
+      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle, hidePopular }),
     });
     const data = await res.json();
     setSaving(false);
@@ -137,6 +139,20 @@ export function ProfileEditor({
           placeholder="TikTok: имя_аккаунта"
           onChange={(e) => setTiktokHandle(e.target.value)}
         />
+      </section>
+
+      <section className="flex flex-col gap-3 p-5 border border-line">
+        <h3 className="text-[11px] uppercase tracking-wider text-stone">Витрина</h3>
+        <label className="flex items-start gap-2.5 text-[13px] leading-relaxed cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hidePopular}
+            onChange={(e) => setHidePopular(e.target.checked)}
+            className="mt-0.5 shrink-0"
+          />
+          Скрыть вкладку «Популярное» на витрине — не показывать покупателям, какие товары
+          кликают чаще.
+        </label>
       </section>
 
       {error && <p className="text-error text-sm">{error}</p>}

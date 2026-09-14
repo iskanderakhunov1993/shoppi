@@ -16,9 +16,19 @@ type StorefrontLink = {
   clicks: number;
 };
 
+type Section = { id: string; name: string; links: StorefrontLink[] };
+
 type Tab = "latest" | "popular" | string;
 
-export function StorefrontGrid({ links }: { links: StorefrontLink[] }) {
+export function StorefrontGrid({
+  links,
+  sections = [],
+  hidePopular = false,
+}: {
+  links: StorefrontLink[];
+  sections?: Section[];
+  hidePopular?: boolean;
+}) {
   const [tab, setTab] = useState<Tab>("latest");
 
   const categories = useMemo(
@@ -29,8 +39,10 @@ export function StorefrontGrid({ links }: { links: StorefrontLink[] }) {
   const visible = useMemo(() => {
     if (tab === "latest") return links;
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
+    const section = sections.find((s) => s.id === tab);
+    if (section) return section.links;
     return links.filter((l) => l.category === tab);
-  }, [links, tab]);
+  }, [links, tab, sections]);
 
   if (links.length === 0) {
     return (
@@ -51,14 +63,27 @@ export function StorefrontGrid({ links }: { links: StorefrontLink[] }) {
         >
           Последние
         </button>
-        <button
-          onClick={() => setTab("popular")}
-          className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-            tab === "popular" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
-          }`}
-        >
-          Популярное
-        </button>
+        {!hidePopular && (
+          <button
+            onClick={() => setTab("popular")}
+            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "popular" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+            }`}
+          >
+            Популярное
+          </button>
+        )}
+        {sections.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => setTab(s.id)}
+            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+              tab === s.id ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+            }`}
+          >
+            {s.name}
+          </button>
+        ))}
         {categories.map((c) => (
           <button
             key={c}

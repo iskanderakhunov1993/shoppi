@@ -44,6 +44,9 @@ export type Creator = {
   // onboarding, shown on the storefront as a light orientation cue.
   // Not a claim of expertise or a ranking signal, just a filter hint.
   categories?: Category[];
+  // Lets a creator opt out of showing the "Популярное" (Most Popular)
+  // auto-section publicly — same idea as ShopMy's hide toggle on it.
+  hidePopular: boolean;
 };
 
 export type Link = {
@@ -106,6 +109,7 @@ function toCreator(r: Row): Creator {
     instagramHandle: opt(r.instagram_handle),
     tiktokHandle: opt(r.tiktok_handle),
     categories: r.categories ? (JSON.parse(str(r.categories)) as Category[]) : undefined,
+    hidePopular: Boolean(r.hide_popular),
   };
 }
 
@@ -303,6 +307,7 @@ export async function updateCreator(
     instagramHandle?: string | null;
     tiktokHandle?: string | null;
     categories?: Category[] | null;
+    hidePopular?: boolean;
   }
 ): Promise<Creator | undefined> {
   const current = await getCreatorById(creatorId);
@@ -320,7 +325,8 @@ export async function updateCreator(
         slug = ${patch.slug ?? current.slug},
         instagram_handle = ${patch.instagramHandle === undefined ? (current.instagramHandle ?? null) : patch.instagramHandle},
         tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle},
-        categories = ${nextCategories ? JSON.stringify(nextCategories) : null}
+        categories = ${nextCategories ? JSON.stringify(nextCategories) : null},
+        hide_popular = ${patch.hidePopular ?? current.hidePopular}
     WHERE id = ${creatorId}
   `;
 
@@ -426,6 +432,108 @@ export async function listLinksByCreator(
 export async function countLinksByCreator(creatorId: string): Promise<number> {
   const rows = await sql`SELECT COUNT(*) AS c FROM links WHERE creator_id = ${creatorId}`;
   return Number(rows[0].c);
+}
+
+/* -------------------------------------------------------------- sections */
+
+export type Section = {
+  id: string;
+  creatorId: string;
+  name: string;
+  position: number;
+  hidden: boolean;
+  createdAt: string;
+};
+
+function toSection(r: Row): Section {
+  return {
+    id: str(r.id),
+    creatorId: str(r.creator_id),
+    name: str(r.name),
+    position: Number(r.position),
+    hidden: Boolean(r.hidden),
+    createdAt: str(r.created_at),
+  };
+}
+
+export async function listSectionsByCreator(creatorId: string): Promise<Section[]> {
+  const rows = await sql`SELECT * FROM sections WHERE creator_id = ${creatorId} ORDER BY position ASC`;
+  return rows.map(toSection);
+}
+
+export async function createSection(creatorId: string, name: string): Promise<Section> {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  const rows = await sql`SELECT COALESCE(MAX(position), -1) AS max_pos FROM sections WHERE creator_id = ${creatorId}`;
+  const position = Number(rows[0].max_pos) + 1;
+  await sql`
+    INSERT INTO sections (id, creator_id, name, position, hidden, created_at)
+    VALUES (${id}, ${creatorId}, ${name}, ${position}, false, ${now})
+  `;
+  return { id, creatorId, name, position, hidden: false, createdAt: now };
+}
+
+export async function getSectionById(id: string): Promise<Section | undefined> {
+  const rows = await sql`SELECT * FROM sections WHERE id = ${id}`;
+  return rows[0] ? toSection(rows[0]) : undefined;
+}
+
+export async function renameSection(id: string, name: string): Promise<void> {
+  await sql`UPDATE sections SET name = ${name} WHERE id = ${id}`;
+}
+
+export async function setSectionHidden(id: string, hidden: boolean): Promise<void> {
+  await sql`UPDATE sections SET hidden = ${hidden} WHERE id = ${id}`;
+}
+
+export async function deleteSection(id: string): Promise<void> {
+  await sql`DELETE FROM sections WHERE id = ${id}`;
+}
+
+/** Swaps this section's position with its immediate neighbor in that direction. */
+export async function moveSection(creatorId: string, id: string, direction: "up" | "down"): Promise<void> {
+  const sections = await listSectionsByCreator(creatorId);
+  const idx = sections.findIndex((s) => s.id === id);
+  if (idx === -1) return;
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= sections.length) return;
+  const a = sections[idx];
+  const b = sections[swapIdx];
+  await sql`UPDATE sections SET position = ${b.position} WHERE id = ${a.id}`;
+  await sql`UPDATE sections SET position = ${a.position} WHERE id = ${b.id}`;
+}
+
+export async function listSectionLinkIds(sectionId: string): Promise<Set<string>> {
+  const rows = await sql`SELECT link_id FROM section_links WHERE section_id = ${sectionId}`;
+  return new Set(rows.map((r) => str(r.link_id)));
+}
+
+export async function setLinkInSection(sectionId: string, linkId: string, included: boolean): Promise<void> {
+  if (included) {
+    await sql`
+      INSERT INTO section_links (section_id, link_id) VALUES (${sectionId}, ${linkId})
+      ON CONFLICT DO NOTHING
+    `;
+  } else {
+    await sql`DELETE FROM section_links WHERE section_id = ${sectionId} AND link_id = ${linkId}`;
+  }
+}
+
+/** Every section for this creator that has at least one product, each with its links — for the public storefront. */
+export async function listPublicSections(creatorId: string): Promise<(Section & { links: Link[] })[]> {
+  const sections = await listSectionsByCreator(creatorId);
+  const withLinks = await Promise.all(
+    sections
+      .filter((s) => !s.hidden)
+      .map(async (s) => {
+        const rows = await sql`
+          SELECT l.* FROM links l JOIN section_links sl ON sl.link_id = l.id
+          WHERE sl.section_id = ${s.id} ORDER BY l.seq DESC
+        `;
+        return { ...s, links: rows.map(toLink) };
+      })
+  );
+  return withLinks.filter((s) => s.links.length > 0);
 }
 
 function hostnameOf(url: string): string | null {
@@ -942,6 +1050,6 @@ export async function setApplicationStatus(
 /* ----------------------------------------------------------------- test */
 
 export async function __resetStoreForTests(): Promise<void> {
-  await sql`TRUNCATE sessions, favorites, follows, circle_members, circles, opportunity_applications, opportunities, clicks, links, creators, users CASCADE`;
+  await sql`TRUNCATE sessions, favorites, follows, circle_members, circles, opportunity_applications, opportunities, section_links, sections, clicks, links, creators, users CASCADE`;
   await sql`ALTER SEQUENCE links_seq_counter RESTART WITH 1`;
 }

@@ -19,6 +19,7 @@ type Me = {
   instagramHandle?: string;
   tiktokHandle?: string;
   categories?: Category[];
+  hidePopular?: boolean;
 };
 
 export default function DashboardPage() {

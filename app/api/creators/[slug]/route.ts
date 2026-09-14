@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { countClicksForLinks, countFollowers, getCreatorBySlug, listLinksByCreator } from "@/lib/store";
+import { countClicksForLinks, countFollowers, getCreatorBySlug, listLinksByCreator, listPublicSections } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -24,6 +24,22 @@ export async function GET(
     clicks: counts.get(link.id)?.human ?? 0,
   }));
 
+  const publicSections = await listPublicSections(creator.id);
+  const sections = publicSections.map((s) => ({
+    id: s.id,
+    name: s.name,
+    links: s.links.map((link) => ({
+      id: link.id,
+      title: link.title,
+      imageUrl: link.imageUrl,
+      price: link.price,
+      category: link.category,
+      promoCode: link.promoCode,
+      wrappedUrl: `/r/${link.id}`,
+      clicks: counts.get(link.id)?.human ?? 0,
+    })),
+  }));
+
   return NextResponse.json({
     id: creator.id,
     slug: creator.slug,
@@ -33,7 +49,9 @@ export async function GET(
     instagramHandle: creator.instagramHandle,
     tiktokHandle: creator.tiktokHandle,
     categories: creator.categories ?? [],
+    hidePopular: creator.hidePopular,
     followers: await countFollowers(creator.id),
     links,
+    sections,
   });
 }
