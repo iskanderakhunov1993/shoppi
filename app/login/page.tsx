@@ -96,6 +96,12 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
+          <Link
+            href="/forgot-password"
+            className="text-stone hover:text-ink underline underline-offset-4 text-[13px] -mt-3 w-fit"
+          >
+            Забыли пароль?
+          </Link>
           {error && <p className="text-error text-sm">{error}</p>}
           <button type="submit" disabled={submitting} className={buttonClass}>
             {submitting ? "Секунду…" : "Войти"}

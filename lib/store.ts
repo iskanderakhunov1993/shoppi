@@ -204,6 +204,34 @@ export async function updateUserPasswordHash(userId: string, passwordHash: strin
   await sql`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId}`;
 }
 
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/**
+ * Issues a fresh password-reset token for an existing account and
+ * returns it, or undefined if no account has that email — callers
+ * must not reveal which case happened, to avoid leaking whether an
+ * email is registered.
+ */
+export async function setResetToken(email: string): Promise<string | undefined> {
+  const user = await getUserByEmail(email);
+  if (!user) return undefined;
+  const token = randomUUID();
+  const expires = new Date(Date.now() + RESET_TOKEN_TTL_MS).toISOString();
+  await sql`UPDATE users SET reset_token = ${token}, reset_token_expires_at = ${expires} WHERE id = ${user.id}`;
+  return token;
+}
+
+export async function getUserByResetToken(token: string): Promise<User | undefined> {
+  const rows = await sql`
+    SELECT * FROM users WHERE reset_token = ${token} AND reset_token_expires_at > now()
+  `;
+  return rows[0] ? toUser(rows[0]) : undefined;
+}
+
+export async function clearResetToken(userId: string): Promise<void> {
+  await sql`UPDATE users SET reset_token = NULL, reset_token_expires_at = NULL WHERE id = ${userId}`;
+}
+
 export async function getUserBySlug(slug: string): Promise<User | undefined> {
   const rows = await sql`SELECT * FROM users WHERE slug = ${slug}`;
   return rows[0] ? toUser(rows[0]) : undefined;

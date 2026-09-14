@@ -46,3 +46,36 @@ export async function sendVerificationEmail(email: string, verifyUrl: string): P
     return false;
   }
 }
+
+/** Same fallback behavior as sendVerificationEmail — see its comment. */
+export async function sendResetPasswordEmail(email: string, resetUrl: string): Promise<boolean> {
+  if (!resend) return false;
+
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: "Восстановление пароля — Shoppi",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+          <h1 style="font-size: 20px;">Восстановление пароля</h1>
+          <p>Ссылка действует час. Если вы не запрашивали сброс пароля, проигнорируйте это письмо.</p>
+          <p>
+            <a href="${resetUrl}" style="display: inline-block; background: #111; color: #fff; padding: 12px 20px; text-decoration: none; font-weight: 600;">
+              Задать новый пароль
+            </a>
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send reset email:", err);
+    return false;
+  }
+}
