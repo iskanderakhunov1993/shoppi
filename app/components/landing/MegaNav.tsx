@@ -138,10 +138,12 @@ export function MegaNav({
   signedIn,
   demoSlug,
   overlay = false,
+  onboarding,
 }: {
   signedIn: boolean;
   demoSlug?: string;
   overlay?: boolean;
+  onboarding?: { done: number; total: number };
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -242,6 +244,16 @@ export function MegaNav({
         </div>
 
         <div className="flex items-center gap-4 md:gap-5">
+          {onboarding && (
+            <Link
+              href="/dashboard?onboarding=1"
+              className={`hidden sm:inline text-[12px] tracking-wide rounded-full border px-3 py-1.5 transition-colors ${
+                transparent ? "border-white/60 text-white/85 hover:border-white" : "border-line text-stone hover:border-ink hover:text-ink"
+              }`}
+            >
+              {onboarding.done}/{onboarding.total} выполнено
+            </Link>
+          )}
           {searchOpen && (
             <form onSubmit={submitSearch} className="hidden sm:flex items-center">
               <input

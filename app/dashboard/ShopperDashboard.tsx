@@ -40,6 +40,14 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
   useEffect(() => setOrigin(window.location.origin), []);
 
+  // Opened from the "X/3 выполнено" badge in the global nav, which
+  // links here with this query param instead of duplicating the modal.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("onboarding")) {
+      setShowOnboardingModal(true);
+    }
+  }, []);
+
   const loadFavorites = useCallback(async () => {
     const res = await fetch("/api/favorites");
     setFavorites(res.ok ? (await res.json()).favorites : []);
