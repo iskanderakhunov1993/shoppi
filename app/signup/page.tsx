@@ -7,40 +7,14 @@ import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Role = "shopper" | "creator" | "brand";
 
-const ROLE_CARDS: {
-  role: Role;
-  title: string;
-  tagline: string;
-  imageSeed: string;
-}[] = [
-  {
-    role: "shopper",
-    title: "Покупатель",
-    tagline: "Покупай у своих людей, не у алгоритма.",
-    imageSeed: "shoppi-shoppers",
-  },
-  {
-    role: "creator",
-    title: "Куратор",
-    tagline: "Твой вкус — теперь витрина.",
-    imageSeed: "shoppi-creators",
-  },
-  {
-    role: "brand",
-    title: "Бренд",
-    tagline: "Смотрите, кто вас продвигает.",
-    imageSeed: "shoppi-brands",
-  },
+const ROLE_TABS: { role: Role; label: string; tagline: string }[] = [
+  { role: "shopper", label: "Покупатель", tagline: "Покупай у своих людей, не у алгоритма." },
+  { role: "creator", label: "Куратор", tagline: "Твой вкус — теперь витрина." },
+  { role: "brand", label: "Бренд", tagline: "Смотрите, кто вас продвигает." },
 ];
 
-const ROLE_TITLE: Record<Role, string> = {
-  shopper: "Покупатель",
-  creator: "Куратор",
-  brand: "Бренд",
-};
-
 export default function SignupPage() {
-  const [role, setRole] = useState<Role | null>(null);
+  const [role, setRole] = useState<Role>("shopper");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [brandDomain, setBrandDomain] = useState("");
@@ -53,6 +27,9 @@ export default function SignupPage() {
   const [resending, setResending] = useState(false);
   const [resendNote, setResendNote] = useState<string | null>(null);
 
+  const tabs = ROLE_TABS.filter((t) => BRANDS_ENABLED || t.role !== "brand");
+  const activeTagline = tabs.find((t) => t.role === role)?.tagline;
+
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
@@ -61,7 +38,6 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!role) return;
     setError(null);
     setSubmitting(true);
 
@@ -149,72 +125,15 @@ export default function SignupPage() {
     );
   }
 
-  // Step 1: pick a role as a visual choice, not a dropdown buried in a form.
-  if (!role) {
-    return (
-      <main className="flex-1 flex flex-col">
-        <div className="text-center pt-14 pb-8 px-6">
-          <div className="text-[11px] uppercase tracking-widest text-stone mb-3">Shoppi</div>
-          <h1 className="font-display text-3xl md:text-4xl mb-2">Кто вы?</h1>
-          <p className="text-stone text-sm">
-            Уже есть аккаунт?{" "}
-            <Link href="/login" className="text-ink underline underline-offset-4">
-              Войти
-            </Link>
-          </p>
-        </div>
-
-        <div className={`grid ${BRANDS_ENABLED ? "md:grid-cols-3" : "md:grid-cols-2"} flex-1`}>
-          {ROLE_CARDS.filter((card) => BRANDS_ENABLED || card.role !== "brand").map((card) => (
-            <button
-              key={card.role}
-              onClick={() => setRole(card.role)}
-              className="group relative flex flex-col justify-end min-h-[420px] md:min-h-[520px] p-8 text-left overflow-hidden cursor-pointer border-b md:border-b-0 md:border-r border-line last:border-none"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://picsum.photos/seed/${card.imageSeed}/900/1100`}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black via-black/45 to-black/10" />
-              <div className="relative flex flex-col gap-3">
-                <h2 className="font-display text-white text-3xl">{card.title}</h2>
-                <p className="text-white/80 text-sm max-w-[22ch]">{card.tagline}</p>
-                <span className="mt-2 w-fit text-[12px] font-semibold uppercase tracking-wide text-black bg-white px-5 py-3 group-hover:opacity-85 transition-opacity">
-                  Зарегистрироваться
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </main>
-    );
-  }
-
-  // Step 2: email/password — the role is already decided, so it's shown
-  // as a fact with a way back, not another field to fill in.
+  // One continuous form — the role is a segmented control at the top,
+  // not a separate screen. Switching roles never re-renders the whole
+  // page, so email/password typed so far never gets lost either.
   return (
-    <main className="grid md:grid-cols-2 flex-1">
-      <div className="border-b md:border-b-0 md:border-r border-line flex flex-col justify-center px-8 py-14 md:px-16">
-        <div className="text-[11px] uppercase tracking-widest text-stone mb-4">
-          Shoppi
-        </div>
-        <h2 className="font-display text-3xl leading-tight max-w-[12ch]">
-          Покупай у своих людей, не у алгоритма.
-        </h2>
-      </div>
-      <div className="flex flex-col justify-center gap-6 px-8 py-14 md:px-16">
+    <main className="flex-1 flex items-center justify-center px-6 py-14">
+      <div className="w-full max-w-sm flex flex-col gap-6">
         <div>
-          <button
-            onClick={() => setRole(null)}
-            className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer mb-3"
-          >
-            ← другая роль
-          </button>
-          <h1 className="font-display text-2xl mb-1">
-            Создать аккаунт: {ROLE_TITLE[role]}
-          </h1>
+          <div className="text-[11px] uppercase tracking-widest text-stone mb-3">Shoppi</div>
+          <h1 className="font-display text-2xl mb-1">Создать аккаунт</h1>
           <p className="text-stone text-sm">
             Уже есть аккаунт?{" "}
             <Link href="/login" className="text-ink underline underline-offset-4">
@@ -222,12 +141,31 @@ export default function SignupPage() {
             </Link>
           </p>
         </div>
+
+        <div>
+          <div className={`grid gap-px bg-line border border-line ${tabs.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+            {tabs.map((t) => (
+              <button
+                key={t.role}
+                type="button"
+                onClick={() => setRole(t.role)}
+                aria-pressed={role === t.role}
+                className={`text-[13px] py-3 transition-colors cursor-pointer ${
+                  role === t.role ? "bg-ink text-paper font-medium" : "bg-paper text-stone hover:text-ink"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {activeTagline && <p className="text-stone text-[12.5px] mt-2.5">{activeTagline}</p>}
+        </div>
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <Field label="Email">
             <input
               type="email"
               required
-              autoFocus
               className={inputClass}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
