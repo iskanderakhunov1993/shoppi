@@ -1,11 +1,14 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
+import { ShareButton } from "./ShareButton";
 import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { SESSION_COOKIE } from "@/lib/auth";
+import { getSessionUserId, getCreatorByUserId } from "@/lib/store";
 
 function pluralizeShoppers(n: number): string {
   const mod10 = n % 10;
@@ -82,6 +85,16 @@ export default async function StorefrontPage({
   const creator = await getStorefront(creatorSlug);
   if (!creator) notFound();
 
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const viewerId = token ? await getSessionUserId(token) : null;
+  const viewerCreator = viewerId ? await getCreatorByUserId(viewerId) : undefined;
+  const isOwner = viewerCreator?.slug === creatorSlug;
+
+  const h = await headers();
+  const host = h.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  const storefrontUrl = `${protocol}://${host}/${creatorSlug}`;
+
   return (
     <main className="flex-1 flex flex-col">
       <LandingNav />
@@ -110,8 +123,9 @@ export default async function StorefrontPage({
             ))}
           </div>
         )}
-        <div className="flex justify-center mb-5">
+        <div className="flex justify-center items-center gap-2.5 mb-5">
           <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
+          {isOwner && <ShareButton url={storefrontUrl} />}
         </div>
         <p className="font-display italic text-stone text-sm mb-4">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
