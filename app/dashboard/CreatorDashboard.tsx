@@ -387,8 +387,8 @@ export function CreatorDashboard({
                   </div>
                 </details>
                 {error && <p className="text-error text-sm">{error}</p>}
-                <button type="submit" disabled={submitting} className={buttonClass}>
-                  {submitting ? "Добавляем…" : "Добавить"}
+                <button type="submit" disabled={submitting || lookingUp} className={buttonClass}>
+                  {submitting ? "Добавляем…" : lookingUp ? "Секунду…" : "Добавить"}
                 </button>
               </form>
             </div>
