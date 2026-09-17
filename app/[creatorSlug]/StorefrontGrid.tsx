@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { EmptyState } from "@/app/components/EmptyState";
+import { EditSectionButton } from "./EditSectionButton";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type StorefrontLink = {
@@ -27,10 +28,12 @@ export function StorefrontGrid({
   links,
   sections = [],
   hidePopular = false,
+  isOwner = false,
 }: {
   links: StorefrontLink[];
   sections?: Section[];
   hidePopular?: boolean;
+  isOwner?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("latest");
   const [facet, setFacet] = useState<{ field: "subtype" | "brand"; value: string } | null>(null);
@@ -129,16 +132,22 @@ export function StorefrontGrid({
           </button>
         )}
         {sections.map((s) => (
-          <button
+          <span
             key={s.id}
-            onClick={() => selectTab(s.id)}
-            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+            className={`inline-flex items-center rounded-full whitespace-nowrap transition-colors ${
               tab === s.id ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
             }`}
           >
-            {s.icon && <span className="mr-1">{s.icon}</span>}
-            {s.name}
-          </button>
+            <button onClick={() => selectTab(s.id)} className="text-[13px] pl-3 pr-1.5 py-1.5 cursor-pointer">
+              {s.icon && <span className="mr-1">{s.icon}</span>}
+              {s.name}
+            </button>
+            {isOwner && tab === s.id && (
+              <span className="pr-2.5">
+                <EditSectionButton sectionId={s.id} name={s.name} onHidden={() => selectTab("latest")} />
+              </span>
+            )}
+          </span>
         ))}
         {categories.map((c) => (
           <button

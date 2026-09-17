@@ -190,7 +190,7 @@ export default async function StorefrontPage({
         )}
       </div>
 
-      <StorefrontGrid links={creator.links} sections={creator.sections} hidePopular={creator.hidePopular} />
+      <StorefrontGrid links={creator.links} sections={creator.sections} hidePopular={creator.hidePopular} isOwner={isOwner} />
 
       <LandingFooter />
     </main>
