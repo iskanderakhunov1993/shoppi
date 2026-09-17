@@ -297,7 +297,7 @@ export function CreatorDashboard({
       </div>
 
       {tab === "products" && (
-        <div className="grid md:grid-cols-[300px_1fr] flex-1">
+        <div className="grid md:grid-cols-[300px_1fr] flex-1 max-w-[1400px] w-full mx-auto">
           <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8">
             <div className="flex flex-col gap-4">
               <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
@@ -518,7 +518,7 @@ export function CreatorDashboard({
       )}
 
       {tab === "sections" && (
-        <div className="px-8 py-8 max-w-xl">
+        <div className="px-8 py-8 max-w-xl mx-auto w-full">
           <SectionsManager links={links ?? []} />
         </div>
       )}

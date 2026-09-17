@@ -13,6 +13,14 @@ const CATEGORY_SEED: Record<Category, string> = {
   mens: "shoppi-cat-mens",
   clothing: "shoppi-cat-clothing",
   tools: "shoppi-cat-tools",
+  shoes: "shoppi-cat-shoes",
+  accessories: "shoppi-cat-accessories",
+  home: "shoppi-cat-home",
+  kids: "shoppi-cat-kids",
+  electronics: "shoppi-cat-electronics",
+  sport: "shoppi-cat-sport",
+  beauty_health: "shoppi-cat-beauty-health",
+  books_stationery: "shoppi-cat-books-stationery",
 };
 
 export default async function CategoryPage({

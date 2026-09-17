@@ -35,7 +35,7 @@ const BRAND_NAMES = ["Nordwear", "Purelab", "Uraltools", "Mono", "Bereg"];
 const LAST = ["Иванова", "Смирнова", "Кузнецова", "Попова", "Соколова", "Волкова", "Морозова", "Новикова"];
 
 const CATEGORIES: Category[] = ["cosmetics", "mens", "clothing", "tools"];
-const CATEGORY_TITLES: Record<Category, string[]> = {
+const CATEGORY_TITLES: Partial<Record<Category, string[]>> = {
   cosmetics: ["Сыворотка с ниацинамидом", "Крем для рук", "Санскрин SPF 50"],
   mens: ["Термокружка", "Кожаный ремень", "Механические часы"],
   clothing: ["Пальто из шерсти", "Джинсы прямого кроя", "Худи без принта"],
@@ -110,7 +110,7 @@ async function main() {
       }
       for (let p = 0; p < numProducts; p++) {
         const category = pick(CATEGORIES);
-        const title = pick(CATEGORY_TITLES[category]);
+        const title = pick(CATEGORY_TITLES[category]!);
         try {
           await addLink({
             creatorId: creator.id,

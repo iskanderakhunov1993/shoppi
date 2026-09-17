@@ -1,9 +1,4 @@
-const CATEGORIES = [
-  { slug: "cosmetics", label: "Косметика", seed: "shoppi-tile-cosmetics" },
-  { slug: "mens", label: "Мужские товары", seed: "shoppi-tile-mens" },
-  { slug: "clothing", label: "Одежда", seed: "shoppi-tile-clothing" },
-  { slug: "tools", label: "Инструменты", seed: "shoppi-tile-tools" },
-] as const;
+import { CATEGORIES, CATEGORY_LABEL } from "@/lib/categories";
 
 export function ShopByCategory() {
   return (
@@ -20,16 +15,16 @@ export function ShopByCategory() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-line">
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map((slug) => (
             <a
-              key={cat.slug}
-              href={`/category/${cat.slug}`}
+              key={slug}
+              href={`/category/${slug}`}
               className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
             >
               <div className="aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://picsum.photos/seed/${cat.seed}/500/400`}
+                  src={`https://picsum.photos/seed/shoppi-tile-${slug}/500/400`}
                   alt=""
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
@@ -38,7 +33,7 @@ export function ShopByCategory() {
                 <span className="font-display italic text-xs text-stone block mb-0.5">
                   Смотреть
                 </span>
-                <span className="font-display text-lg">{cat.label}</span>
+                <span className="font-display text-lg">{CATEGORY_LABEL[slug]}</span>
               </div>
             </a>
           ))}
