@@ -15,6 +15,8 @@ type LinkRow = {
   id: string;
   title: string;
   category: Category;
+  brand?: string;
+  subtype?: string;
   imageUrl?: string;
   price?: number;
   promoCode?: string;
@@ -47,6 +49,8 @@ export function CreatorDashboard({
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [promoCode, setPromoCode] = useState("");
+  const [brand, setBrand] = useState("");
+  const [subtype, setSubtype] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
@@ -57,6 +61,8 @@ export function CreatorDashboard({
   const [editPrice, setEditPrice] = useState("");
   const [editImage, setEditImage] = useState("");
   const [editPromoCode, setEditPromoCode] = useState("");
+  const [editBrand, setEditBrand] = useState("");
+  const [editSubtype, setEditSubtype] = useState("");
   const [origin, setOrigin] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const [tab, setTab] = useState<"products" | "earnings" | "profile" | "sections">("products");
@@ -124,6 +130,8 @@ export function CreatorDashboard({
         imageUrl: imageUrl.trim() || undefined,
         price: price.trim() ? Number(price) : undefined,
         promoCode: promoCode.trim() || undefined,
+        brand: brand.trim() || undefined,
+        subtype: subtype.trim() || undefined,
       }),
     });
     const data = await res.json();
@@ -139,6 +147,8 @@ export function CreatorDashboard({
     setImageUrl("");
     setPrice("");
     setPromoCode("");
+    setBrand("");
+    setSubtype("");
     setLookupNote(null);
     await loadLinks();
   }
@@ -150,6 +160,8 @@ export function CreatorDashboard({
     setEditPrice(link.price ? String(link.price) : "");
     setEditImage(link.imageUrl ?? "");
     setEditPromoCode(link.promoCode ?? "");
+    setEditBrand(link.brand ?? "");
+    setEditSubtype(link.subtype ?? "");
   }
 
   async function saveEdit(id: string) {
@@ -162,6 +174,8 @@ export function CreatorDashboard({
         price: editPrice.trim() ? Number(editPrice) : null,
         imageUrl: editImage.trim() || null,
         promoCode: editPromoCode.trim() || null,
+        brand: editBrand.trim() || null,
+        subtype: editSubtype.trim() || null,
       }),
     });
     if (res.ok) {
@@ -342,6 +356,18 @@ export function CreatorDashboard({
                   onChange={(e) => setPrice(e.target.value)}
                 />
                 <input
+                  placeholder="Бренд (необязательно)"
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                />
+                <input
+                  placeholder="Тип, например «Кроссовки» (необязательно)"
+                  className={`${inputClass} border border-line px-3 py-2.5`}
+                  value={subtype}
+                  onChange={(e) => setSubtype(e.target.value)}
+                />
+                <input
                   placeholder="Промокод от бренда (необязательно)"
                   className={`${inputClass} border border-line px-3 py-2.5`}
                   value={promoCode}
@@ -406,6 +432,18 @@ export function CreatorDashboard({
                           value={editPromoCode}
                           placeholder="Промокод"
                           onChange={(e) => setEditPromoCode(e.target.value)}
+                        />
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editBrand}
+                          placeholder="Бренд"
+                          onChange={(e) => setEditBrand(e.target.value)}
+                        />
+                        <input
+                          className={`${inputClass} border border-line px-3 py-2`}
+                          value={editSubtype}
+                          placeholder="Тип, например «Кроссовки»"
+                          onChange={(e) => setEditSubtype(e.target.value)}
                         />
                         <div className="flex gap-2">
                           <button

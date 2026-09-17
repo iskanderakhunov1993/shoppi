@@ -11,6 +11,8 @@ type StorefrontLink = {
   imageUrl?: string;
   price?: number;
   category: Category;
+  brand?: string;
+  subtype?: string;
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
@@ -30,19 +32,45 @@ export function StorefrontGrid({
   hidePopular?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("latest");
+  const [facet, setFacet] = useState<{ field: "subtype" | "brand"; value: string } | null>(null);
 
   const categories = useMemo(
     () => [...new Set(links.map((l) => l.category))],
     [links]
   );
 
-  const visible = useMemo(() => {
+  const tabFiltered = useMemo(() => {
     if (tab === "latest") return links;
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
     const section = sections.find((s) => s.id === tab);
     if (section) return section.links;
     return links.filter((l) => l.category === tab);
   }, [links, tab, sections]);
+
+  // Secondary facets (тип/бренд) — only built from products in the
+  // current tab that actually have the field set, so an empty facet
+  // never appears just because most products haven't been tagged yet.
+  const subtypeFacets = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const l of tabFiltered) if (l.subtype) counts.set(l.subtype, (counts.get(l.subtype) ?? 0) + 1);
+    return [...counts.entries()];
+  }, [tabFiltered]);
+
+  const brandFacets = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const l of tabFiltered) if (l.brand) counts.set(l.brand, (counts.get(l.brand) ?? 0) + 1);
+    return [...counts.entries()];
+  }, [tabFiltered]);
+
+  const visible = useMemo(() => {
+    if (!facet) return tabFiltered;
+    return tabFiltered.filter((l) => l[facet.field] === facet.value);
+  }, [tabFiltered, facet]);
+
+  function selectTab(next: Tab) {
+    setTab(next);
+    setFacet(null);
+  }
 
   if (links.length === 0) {
     return (
@@ -56,7 +84,7 @@ export function StorefrontGrid({
     <div>
       <div className="flex items-center gap-2 px-8 pt-6 pb-4 overflow-x-auto">
         <button
-          onClick={() => setTab("latest")}
+          onClick={() => selectTab("latest")}
           className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
             tab === "latest" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
           }`}
@@ -65,7 +93,7 @@ export function StorefrontGrid({
         </button>
         {!hidePopular && (
           <button
-            onClick={() => setTab("popular")}
+            onClick={() => selectTab("popular")}
             className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
               tab === "popular" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
             }`}
@@ -76,7 +104,7 @@ export function StorefrontGrid({
         {sections.map((s) => (
           <button
             key={s.id}
-            onClick={() => setTab(s.id)}
+            onClick={() => selectTab(s.id)}
             className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
               tab === s.id ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
             }`}
@@ -88,7 +116,7 @@ export function StorefrontGrid({
         {categories.map((c) => (
           <button
             key={c}
-            onClick={() => setTab(c)}
+            onClick={() => selectTab(c)}
             className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
               tab === c ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
             }`}
@@ -97,6 +125,44 @@ export function StorefrontGrid({
           </button>
         ))}
       </div>
+
+      {(subtypeFacets.length > 0 || brandFacets.length > 0) && (
+        <div className="flex items-center gap-2 px-8 pb-4 overflow-x-auto border-t border-line pt-4">
+          {facet && (
+            <button
+              onClick={() => setFacet(null)}
+              className="text-[11px] uppercase tracking-wide text-ink border-b border-ink whitespace-nowrap cursor-pointer"
+            >
+              {facet.value} ×
+            </button>
+          )}
+          {subtypeFacets.map(([value, count]) => (
+            <button
+              key={`subtype-${value}`}
+              onClick={() => setFacet({ field: "subtype", value })}
+              className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
+                facet?.field === "subtype" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
+              }`}
+            >
+              {value} <span className="text-stone">{count}</span>
+            </button>
+          ))}
+          {subtypeFacets.length > 0 && brandFacets.length > 0 && (
+            <span className="text-line select-none">·</span>
+          )}
+          {brandFacets.map(([value, count]) => (
+            <button
+              key={`brand-${value}`}
+              onClick={() => setFacet({ field: "brand", value })}
+              className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
+                facet?.field === "brand" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
+              }`}
+            >
+              {value} <span className="text-stone">{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {visible.length === 0 ? (
         <div className="py-16 flex justify-center">

@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
     imageUrl: body?.imageUrl || undefined,
     price: typeof body?.price === "number" ? body.price : undefined,
     promoCode: body?.promoCode || undefined,
+    brand: body?.brand || undefined,
+    subtype: body?.subtype || undefined,
     marketplace,
     articleId,
   });

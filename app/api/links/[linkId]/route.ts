@@ -44,6 +44,8 @@ export async function PUT(
     price: body?.price === null ? null : typeof body?.price === "number" ? body.price : undefined,
     imageUrl: body?.imageUrl === null ? null : body?.imageUrl,
     promoCode: body?.promoCode === null ? null : body?.promoCode,
+    brand: body?.brand === null ? null : body?.brand,
+    subtype: body?.subtype === null ? null : body?.subtype,
   });
 
   return NextResponse.json({ ...updated, wrappedUrl: `/r/${linkId}` });

@@ -56,6 +56,12 @@ export type Link = {
   imageUrl?: string;
   price?: number;
   category: Category;
+  // Optional, creator-entered — power the secondary facet filters on
+  // the storefront (e.g. "Обувь" within "Одежда", or "Alaïa"). Left
+  // blank on most existing products, so filters only show values that
+  // actually have at least one product behind them.
+  brand?: string;
+  subtype?: string;
   targetUrl: string;
   marketplace?: string;
   articleId?: string;
@@ -121,6 +127,8 @@ function toLink(r: Row): Link {
     imageUrl: opt(r.image_url),
     price: num(r.price),
     category: str(r.category) as Link["category"],
+    brand: opt(r.brand),
+    subtype: opt(r.subtype),
     targetUrl: str(r.target_url),
     marketplace: opt(r.marketplace),
     articleId: opt(r.article_id),
@@ -373,8 +381,8 @@ export async function addLink(input: Omit<Link, "id" | "createdAt">): Promise<Li
   const now = new Date().toISOString();
   const seq = await nextSeq();
   await sql`
-    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, target_url, marketplace, article_id, promo_code, created_at, seq)
-    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${input.promoCode ?? null}, ${now}, ${seq})
+    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, brand, subtype, target_url, marketplace, article_id, promo_code, created_at, seq)
+    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.brand ?? null}, ${input.subtype ?? null}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${input.promoCode ?? null}, ${now}, ${seq})
   `;
   return (await getLink(id))!;
 }
@@ -392,6 +400,8 @@ export async function updateLink(
     price?: number | null;
     imageUrl?: string | null;
     promoCode?: string | null;
+    brand?: string | null;
+    subtype?: string | null;
   }
 ): Promise<Link | undefined> {
   const current = await getLink(id);
@@ -405,7 +415,9 @@ export async function updateLink(
         category = ${patch.category ?? current.category},
         price = ${patch.price === undefined ? (current.price ?? null) : patch.price},
         image_url = ${patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl},
-        promo_code = ${patch.promoCode === undefined ? (current.promoCode ?? null) : patch.promoCode}
+        promo_code = ${patch.promoCode === undefined ? (current.promoCode ?? null) : patch.promoCode},
+        brand = ${patch.brand === undefined ? (current.brand ?? null) : patch.brand},
+        subtype = ${patch.subtype === undefined ? (current.subtype ?? null) : patch.subtype}
     WHERE id = ${id}
   `;
 
