@@ -87,12 +87,12 @@ export default async function FindsPage({
                 (i + 1) % 3 !== 0 ? "lg:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
             >
-              {link.imageUrl && (
-                <div className="aspect-[4/3] bg-line overflow-hidden mb-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="aspect-[4/3] bg-line overflow-hidden mb-1">
+                {link.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={link.imageUrl} alt={link.title} className="w-full h-full object-cover" />
-                </div>
-              )}
+                )}
+              </div>
               <span className="text-[10px] uppercase tracking-wide text-stone">
                 {CATEGORY_LABEL[link.category] ?? link.category}
               </span>
