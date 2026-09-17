@@ -116,7 +116,7 @@ export default async function StorefrontPage({
 
   return (
     <main className="flex-1 flex flex-col">
-      <LandingNav />
+      <LandingNav alwaysMarketing />
 
       <div className="relative text-center px-8 pt-32 pb-10 border-b border-line">
         {isOwner && (

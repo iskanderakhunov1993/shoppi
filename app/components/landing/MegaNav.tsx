@@ -172,11 +172,13 @@ export function MegaNav({
   onboarding,
   avatarUrl,
   role,
+  alwaysMarketing = false,
 }: {
   signedIn: boolean;
   demoSlug?: string;
   overlay?: boolean;
   onboarding?: { done: number; total: number };
+  alwaysMarketing?: boolean;
   avatarUrl?: string;
   role?: Role;
 }) {
@@ -188,6 +190,7 @@ export function MegaNav({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
   const menus = buildMenus(demoSlug).filter((menu) => BRANDS_ENABLED || menu.key !== "brands");
+  const showQuickNav = signedIn && !alwaysMarketing;
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -248,7 +251,7 @@ export function MegaNav({
 
         {/* desktop triggers — quick links once signed in, marketing dropdowns for guests */}
         <div className="hidden md:flex items-center gap-8">
-          {signedIn
+          {showQuickNav
             ? quickLinksFor(role).map((link) => (
                 <Link
                   key={link.href}
@@ -378,8 +381,8 @@ export function MegaNav({
         </div>
       </div>
 
-      {/* desktop dropdown panel — guests only, signed-in nav has no dropdowns to open */}
-      {!signedIn && menus.map((menu) => (
+      {/* desktop dropdown panel — hidden whenever the quick nav is showing (no dropdowns then) */}
+      {!showQuickNav && menus.map((menu) => (
         <div
           key={menu.key}
           onMouseEnter={cancelClose}
@@ -418,7 +421,7 @@ export function MegaNav({
       {/* mobile stacked menu */}
       {mobileOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-card border-y border-line px-6 py-6 flex flex-col gap-7 max-h-[70vh] overflow-y-auto">
-          {signedIn ? (
+          {showQuickNav ? (
             <div className="flex flex-col gap-2.5">
               {quickLinksFor(role).map((link) => (
                 <Link

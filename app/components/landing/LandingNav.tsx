@@ -18,8 +18,20 @@ import { MegaNav } from "./MegaNav";
  *
  * `overlay` is for the landing page, where the nav sits on top of the
  * hero photo and has to be light on a dark scrim.
+ *
+ * `alwaysMarketing` keeps the full guest-style mega-menu even when
+ * the viewer is signed in — the storefront is a shared public page
+ * (a curator sends its link to anyone), so it should always present
+ * the same way the homepage does, not switch to one viewer's
+ * personal quick links just because they happen to be logged in.
  */
-export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
+export async function LandingNav({
+  overlay = false,
+  alwaysMarketing = false,
+}: {
+  overlay?: boolean;
+  alwaysMarketing?: boolean;
+}) {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   const userId = token ? await getSessionUserId(token) : null;
   const signedIn = Boolean(userId);
@@ -60,6 +72,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       onboarding={onboarding}
       avatarUrl={avatarUrl}
       role={role}
+      alwaysMarketing={alwaysMarketing}
     />
   );
 }
