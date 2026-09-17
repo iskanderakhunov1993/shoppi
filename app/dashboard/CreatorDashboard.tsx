@@ -474,7 +474,17 @@ export function CreatorDashboard({
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-[1fr_auto] items-start gap-4">
+                      <div className="grid grid-cols-[auto_1fr_auto] items-start gap-4">
+                        {link.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={link.imageUrl}
+                            alt=""
+                            className="w-12 h-12 rounded object-cover bg-raise flex-none"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-raise flex-none" aria-hidden="true" />
+                        )}
                         <div>
                           <div className="text-[14px] font-medium">{link.title}</div>
                           <span className="text-[10.5px] uppercase tracking-wide text-stone">
