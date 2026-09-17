@@ -843,6 +843,32 @@ export type RecentLink = Link & {
 };
 
 /**
+ * Same shape as listRecentLinks, but scoped to creators this shopper
+ * follows — the personalized half of "Находки" (the other half being
+ * the platform-wide feed).
+ */
+export async function listFollowedLinks(
+  userId: string,
+  opts: { limit?: number } = {}
+): Promise<RecentLink[]> {
+  const limit = Math.min(opts.limit ?? 60, 200);
+  const rows = await sql`
+    SELECT l.*, c.display_name AS creator_display_name, c.slug AS creator_slug, c.avatar_url AS creator_avatar_url
+    FROM links l
+    JOIN creators c ON c.id = l.creator_id
+    JOIN follows f ON f.creator_id = l.creator_id
+    WHERE f.user_id = ${userId}
+    ORDER BY l.seq DESC LIMIT ${limit}
+  `;
+  return rows.map((r) => ({
+    ...toLink(r),
+    creatorName: str(r.creator_display_name),
+    creatorSlug: str(r.creator_slug),
+    creatorAvatarUrl: r.creator_avatar_url === null ? undefined : str(r.creator_avatar_url),
+  }));
+}
+
+/**
  * The platform-wide "Latest Finds" feed: every product from every
  * creator, newest first — plain chronological order, no ranking or
  * personalization. This is the only way to discover creators beyond

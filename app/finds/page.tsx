@@ -1,5 +1,8 @@
-import { listRecentLinks } from "@/lib/store";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { listRecentLinks, listFollowedLinks, getSessionUserId, getUserById } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
+import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { EmptyState } from "@/app/components/EmptyState";
@@ -7,8 +10,22 @@ import { CATEGORY_LABEL } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
-export default async function FindsPage() {
-  const links = await listRecentLinks({ limit: 60 });
+export default async function FindsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const viewerId = token ? await getSessionUserId(token) : null;
+  const viewerUser = viewerId ? await getUserById(viewerId) : undefined;
+  const isShopperViewer = viewerUser?.role === "shopper";
+
+  const showFollowing = isShopperViewer && tab === "following";
+  const links = showFollowing
+    ? await listFollowedLinks(viewerId!, { limit: 60 })
+    : await listRecentLinks({ limit: 60 });
 
   return (
     <main className="flex-1 flex flex-col">
@@ -18,17 +35,43 @@ export default async function FindsPage() {
         <div className="max-w-[1200px] mx-auto">
           <span className="font-display italic text-lg text-stone block mb-1">Всё сразу</span>
           <h1 className="font-display text-4xl md:text-5xl mb-3">Последние находки</h1>
-          <p className="text-stone text-[14px] max-w-lg">
-            Товары от всех кураторов площадки, по порядку добавления — без ранжирования и без
-            алгоритма. Самый простой способ найти нового куратора, не проверяя каждую витрину по
-            отдельности.
+          <p className="text-stone text-[14px] max-w-lg mb-6">
+            {showFollowing
+              ? "Товары только от кураторов, на которых вы подписаны, по порядку добавления."
+              : "Товары от всех кураторов площадки, по порядку добавления — без ранжирования и без алгоритма. Самый простой способ найти нового куратора, не проверяя каждую витрину по отдельности."}
           </p>
+          {isShopperViewer && (
+            <div className="flex gap-2">
+              <Link
+                href="/finds"
+                className={`text-[12px] uppercase tracking-wide px-4 py-2 border transition-colors ${
+                  !showFollowing ? "border-ink text-ink" : "border-line text-stone hover:border-ink hover:text-ink"
+                }`}
+              >
+                Все находки
+              </Link>
+              <Link
+                href="/finds?tab=following"
+                className={`text-[12px] uppercase tracking-wide px-4 py-2 border transition-colors ${
+                  showFollowing ? "border-ink text-ink" : "border-line text-stone hover:border-ink hover:text-ink"
+                }`}
+              >
+                Мои кураторы
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
       {links.length === 0 ? (
         <div className="py-16 flex justify-center">
-          <EmptyState title="Пока пусто — кураторы ещё не добавили товары." />
+          <EmptyState
+            title={
+              showFollowing
+                ? "Пока пусто — подпишитесь на кураторов, чтобы видеть их находки здесь."
+                : "Пока пусто — кураторы ещё не добавили товары."
+            }
+          />
         </div>
       ) : (
         <div className="max-w-[1200px] mx-auto w-full grid sm:grid-cols-2 lg:grid-cols-3">
