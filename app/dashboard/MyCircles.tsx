@@ -5,7 +5,7 @@ import { placeholderAvatar } from "@/lib/avatar";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type Member = { id: string; slug: string; displayName: string; avatarUrl?: string };
-type CircleSummary = { id: string; name: string; createdAt: string; members: Member[] };
+type CircleSummary = { id: string; name: string; createdAt: string; members: Member[]; previewImages?: string[] };
 type FeedLink = {
   id: string;
   title: string;
@@ -128,34 +128,34 @@ export function MyCircles({
           Пока нет ни одного круга — создайте первый, например по категории или поводу.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid sm:grid-cols-2 gap-3">
           {circles.map((circle) => (
             <div key={circle.id} className="border border-line">
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => toggleOpen(circle.id)}
-                  className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer"
-                >
-                  <div className="flex -space-x-2 flex-none">
-                    {circle.members.slice(0, 4).map((m) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={m.id}
-                        src={m.avatarUrl || placeholderAvatar(m.slug)}
-                        alt=""
-                        className="w-7 h-7 rounded-full object-cover border-2 border-paper bg-raise"
-                      />
-                    ))}
-                    {circle.members.length === 0 && (
-                      <div className="w-7 h-7 rounded-full border border-dashed border-line" />
+              <button
+                type="button"
+                onClick={() => toggleOpen(circle.id)}
+                className="w-full text-left cursor-pointer group"
+              >
+                <div className="grid grid-cols-2 gap-px bg-line aspect-[2/1]">
+                  {(circle.previewImages?.length ? circle.previewImages : [null, null, null, null])
+                    .slice(0, 4)
+                    .map((src, i) =>
+                      src ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={src} alt="" className="w-full h-full object-cover bg-raise" />
+                      ) : (
+                        <div key={i} className="w-full h-full bg-raise" />
+                      )
                     )}
-                  </div>
-                  <span className="text-[13.5px] font-medium truncate">{circle.name}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 px-4 py-3">
+                  <span className="text-[13.5px] font-medium truncate group-hover:underline">{circle.name}</span>
                   <span className="text-[11.5px] text-stone flex-none">
                     {circle.members.length} {circle.members.length === 1 ? "куратор" : "кураторов"}
                   </span>
-                </button>
+                </div>
+              </button>
+              <div className="px-4 pb-3 flex justify-end">
                 <button
                   type="button"
                   onClick={() => deleteCircle(circle.id)}

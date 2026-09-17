@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/require-user";
-import { createCircle, listCircleMembers, listCirclesByUser } from "@/lib/store";
+import { circleMembersFeed, createCircle, listCircleMembers, listCirclesByUser } from "@/lib/store";
 
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
@@ -11,12 +11,16 @@ export async function GET(request: NextRequest) {
   const circles = await listCirclesByUser(user.id);
   const withMembers = await Promise.all(
     circles.map(async (circle) => {
-      const members = await listCircleMembers(circle.id);
+      const [members, feed] = await Promise.all([
+        listCircleMembers(circle.id),
+        circleMembersFeed(circle.id, { limit: 4 }),
+      ]);
       return {
         id: circle.id,
         name: circle.name,
         createdAt: circle.createdAt,
         members: members.map((m) => ({ id: m.id, slug: m.slug, displayName: m.displayName, avatarUrl: m.avatarUrl })),
+        previewImages: feed.map((l) => l.imageUrl).filter((u): u is string => Boolean(u)),
       };
     })
   );
