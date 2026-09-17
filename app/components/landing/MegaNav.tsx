@@ -144,11 +144,13 @@ export function MegaNav({
   demoSlug,
   overlay = false,
   onboarding,
+  avatarUrl,
 }: {
   signedIn: boolean;
   demoSlug?: string;
   overlay?: boolean;
   onboarding?: { done: number; total: number };
+  avatarUrl?: string;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -278,9 +280,12 @@ export function MegaNav({
           {signedIn ? (
             <Link
               href="/dashboard"
-              className={`text-[13px] tracking-wide ${mutedColor} hover:${textColor} transition-colors`}
+              aria-label="Кабинет"
+              title="Кабинет"
+              className="flex-none rounded-full overflow-hidden w-8 h-8 border border-transparent hover:border-current transition-colors"
             >
-              Кабинет
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover bg-raise" />
             </Link>
           ) : (
             <>

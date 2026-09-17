@@ -3,10 +3,12 @@ import { SESSION_COOKIE } from "@/lib/auth";
 import {
   getSessionUserId,
   getUserById,
+  getCreatorByUserId,
   listFavoriteLinks,
   listFollowedCreators,
   listCirclesByUser,
 } from "@/lib/store";
+import { placeholderAvatar } from "@/lib/avatar";
 import { getDemoCreatorSlug } from "@/lib/seed";
 import { MegaNav } from "./MegaNav";
 
@@ -26,9 +28,11 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   // needs a glance at counts — computed server-side here so the nav
   // (visible on every page) doesn't need its own client-side fetches.
   let onboarding: { done: number; total: number } | undefined;
+  let avatarUrl: string | undefined;
   if (userId) {
     const user = await getUserById(userId);
     if (user?.role === "shopper") {
+      avatarUrl = user.avatarUrl || placeholderAvatar(user.slug ?? user.id);
       const [favorites, follows, circles] = await Promise.all([
         listFavoriteLinks(userId),
         listFollowedCreators(userId),
@@ -36,6 +40,13 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       ]);
       const done = [favorites.length > 0, follows.length > 0, circles.length > 0].filter(Boolean).length;
       if (done < 3) onboarding = { done, total: 3 };
+    } else if (user?.role === "creator") {
+      const creator = await getCreatorByUserId(userId);
+      avatarUrl = creator?.avatarUrl || placeholderAvatar(creator?.slug ?? userId);
+    } else {
+      // Brands have no avatar concept yet — still need something in
+      // the circle so the nav icon isn't a broken image.
+      avatarUrl = placeholderAvatar(userId);
     }
   }
 
@@ -45,6 +56,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       demoSlug={await getDemoCreatorSlug()}
       overlay={overlay}
       onboarding={onboarding}
+      avatarUrl={avatarUrl}
     />
   );
 }
