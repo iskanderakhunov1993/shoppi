@@ -6,22 +6,28 @@ export function RoleTeasers() {
     <section id="brands" className="border-b border-line px-6 md:px-10">
       <div className={`max-w-[1200px] mx-auto grid ${BRANDS_ENABLED ? "md:grid-cols-2" : ""}`}>
       <div
-        className={`py-16 md:py-20 flex flex-col ${BRANDS_ENABLED ? "md:pr-14 md:border-r border-line" : ""}`}
+        className={`py-16 md:py-20 flex flex-col ${
+          BRANDS_ENABLED
+            ? "md:pr-14 md:border-r border-line"
+            : "md:flex-row md:items-center md:justify-between md:gap-16"
+        }`}
       >
-        <span className="text-[11px] uppercase tracking-widest text-stone mb-3">
-          Для кураторов
-        </span>
-        <h2 className="font-display text-2xl md:text-3xl mb-5 max-w-xs">
-          Ведите витрину без чужого алгоритма.
-        </h2>
-        <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8">
-          <li>— Своя страница вида shoppi.ru/вы</li>
-          <li>— Добавляйте товары в один клик по ссылке</li>
-          <li>— Видите клики по каждой вещи в реальном времени</li>
-        </ul>
+        <div className={BRANDS_ENABLED ? "" : "max-w-md"}>
+          <span className="text-[11px] uppercase tracking-widest text-stone mb-3 block">
+            Для кураторов
+          </span>
+          <h2 className="font-display text-2xl md:text-3xl mb-5 max-w-xs">
+            Ведите витрину без чужого алгоритма.
+          </h2>
+          <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 md:mb-0">
+            <li>— Своя страница вида shoppi.ru/вы</li>
+            <li>— Добавляйте товары в один клик по ссылке</li>
+            <li>— Видите клики по каждой вещи в реальном времени</li>
+          </ul>
+        </div>
         <Link
           href="/signup"
-          className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-80 transition-opacity w-fit mt-auto"
+          className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-80 transition-opacity w-fit mt-auto md:mt-0 md:flex-none"
         >
           Стать куратором
         </Link>

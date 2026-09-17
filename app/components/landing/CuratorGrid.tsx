@@ -15,11 +15,10 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
             <span className="text-[11px] uppercase tracking-widest text-stone">
               По куратору
             </span>
-            <h2 className="font-display text-4xl md:text-5xl mt-2">Куратор</h2>
+            <h2 className="font-display text-4xl md:text-5xl mt-2">Кураторы</h2>
           </div>
           <p className="text-stone text-sm max-w-xs">
-            Инсайдерский доступ к любимым и проверенным находкам ваших любимых
-            тейстмейкеров.
+            Люди, чьему вкусу вы доверяете больше, чем ленте алгоритма.
           </p>
         </div>
 
