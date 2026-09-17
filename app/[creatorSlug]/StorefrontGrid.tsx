@@ -16,6 +16,7 @@ type StorefrontLink = {
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
+  saves: number;
 };
 
 type Section = { id: string; name: string; icon?: string; links: StorefrontLink[] };
@@ -169,27 +170,35 @@ export function StorefrontGrid({
           <EmptyState title="В этой категории пока пусто." />
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3">
-          {visible.map((link, i) => (
-            <div
-              key={link.id}
-              className={`flex flex-col gap-2 p-5 border-b border-line ${
-                (i + 1) % 3 !== 0 ? "md:border-r" : ""
-              } ${(i + 1) % 2 !== 0 ? "sm:border-r md:border-r-0" : ""}`}
-            >
-              <a href={link.wrappedUrl} className="flex flex-col gap-2 hover:opacity-85 transition-opacity">
-                {link.imageUrl && (
-                  <div className="aspect-[4/3] bg-line overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-9 p-6">
+          {visible.map((link) => (
+            <div key={link.id} className="flex flex-col gap-3">
+              <div className="relative aspect-square bg-line overflow-hidden">
+                <a href={link.wrappedUrl} className="block w-full h-full">
+                  {link.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={link.imageUrl}
                       alt={link.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:opacity-90 transition-opacity"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full" aria-hidden="true" />
+                  )}
+                </a>
+                <div className="absolute top-3 right-3 flex flex-col items-center gap-1">
+                  <FavoriteButton linkId={link.id} variant="overlay" />
+                  {link.saves > 0 && (
+                    <span className="text-[10px] font-medium text-paper bg-ink/75 rounded-full px-1.5 py-px">
+                      {link.saves}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <a href={link.wrappedUrl} className="flex flex-col gap-1 hover:opacity-85 transition-opacity">
                 <span className="text-[10px] uppercase tracking-wide text-stone">
                   {CATEGORY_LABEL[link.category] ?? link.category}
+                  {link.subtype && ` · ${link.subtype}`}
                 </span>
                 <div className="text-sm font-medium leading-snug">{link.title}</div>
                 {link.price && (
@@ -203,7 +212,6 @@ export function StorefrontGrid({
                   </div>
                 )}
               </a>
-              <FavoriteButton linkId={link.id} />
             </div>
           ))}
         </div>

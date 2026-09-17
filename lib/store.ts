@@ -777,6 +777,15 @@ export async function listFavoriteIds(userId: string, linkIds: string[]): Promis
   return new Set(rows.map((r) => str(r.link_id)));
 }
 
+/** How many shoppers saved each link — real social proof for the storefront card. */
+export async function countFavoritesForLinks(linkIds: string[]): Promise<Map<string, number>> {
+  if (linkIds.length === 0) return new Map();
+  const rows = await sql`
+    SELECT link_id, COUNT(*) AS c FROM favorites WHERE link_id IN ${sql(linkIds)} GROUP BY link_id
+  `;
+  return new Map(rows.map((r) => [str(r.link_id), Number(r.c)]));
+}
+
 /* ---------------------------------------------------------------- follows */
 
 export async function followCreator(userId: string, creatorId: string): Promise<void> {

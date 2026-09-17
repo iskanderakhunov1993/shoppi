@@ -24,9 +24,12 @@ type StorefrontLink = {
   imageUrl?: string;
   price?: number;
   category: Category;
+  brand?: string;
+  subtype?: string;
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
+  saves: number;
 };
 
 async function getStorefront(slug: string) {

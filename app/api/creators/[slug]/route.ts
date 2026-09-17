@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { countClicksForLinks, countFollowers, getCreatorBySlug, listLinksByCreator, listPublicSections } from "@/lib/store";
+import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listLinksByCreator, listPublicSections } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,9 @@ export async function GET(
   }
 
   const linkRows = await listLinksByCreator(creator.id);
-  const counts = await countClicksForLinks(linkRows.map((l) => l.id));
+  const linkIds = linkRows.map((l) => l.id);
+  const counts = await countClicksForLinks(linkIds);
+  const saves = await countFavoritesForLinks(linkIds);
   const links = linkRows.map((link) => ({
     id: link.id,
     title: link.title,
@@ -24,6 +26,7 @@ export async function GET(
     promoCode: link.promoCode,
     wrappedUrl: `/r/${link.id}`,
     clicks: counts.get(link.id)?.human ?? 0,
+    saves: saves.get(link.id) ?? 0,
   }));
 
   const publicSections = await listPublicSections(creator.id);
@@ -42,6 +45,7 @@ export async function GET(
       promoCode: link.promoCode,
       wrappedUrl: `/r/${link.id}`,
       clicks: counts.get(link.id)?.human ?? 0,
+      saves: saves.get(link.id) ?? 0,
     })),
   }));
 
