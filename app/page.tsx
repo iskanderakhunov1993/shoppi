@@ -1,5 +1,8 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { seedDemoAccounts, listLandingCreators } from "@/lib/seed";
-import { listDistinctBrandDomains } from "@/lib/store";
+import { listDistinctBrandDomains, getSessionUserId, getUserById } from "@/lib/store";
+import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { Hero } from "@/app/components/landing/Hero";
 import { HowItWorks } from "@/app/components/landing/HowItWorks";
@@ -16,6 +19,14 @@ import { BRANDS_ENABLED } from "@/lib/featureFlags";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const userId = token ? await getSessionUserId(token) : null;
+  if (userId) {
+    const user = await getUserById(userId);
+    if (user?.role === "shopper") redirect("/finds");
+    if (user?.role === "creator") redirect("/dashboard");
+  }
+
   await seedDemoAccounts();
   const creators = await listLandingCreators();
   const domains = await listDistinctBrandDomains();
