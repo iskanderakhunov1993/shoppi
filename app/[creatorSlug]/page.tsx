@@ -147,9 +147,11 @@ export default async function StorefrontPage({
             {creator.categories.map((c) => CATEGORY_LABEL[c]).join(" · ")}
           </p>
         )}
-        <div className="flex justify-center items-center gap-2.5 mb-5">
-          <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
-        </div>
+        {!isOwner && (
+          <div className="flex justify-center items-center gap-2.5 mb-5">
+            <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
+          </div>
+        )}
         <p className="font-display italic text-stone text-sm mb-4">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
           {pluralizeShoppers(creator.followers)}
