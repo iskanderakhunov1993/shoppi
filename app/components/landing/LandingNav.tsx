@@ -29,8 +29,10 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   // (visible on every page) doesn't need its own client-side fetches.
   let onboarding: { done: number; total: number } | undefined;
   let avatarUrl: string | undefined;
+  let role: "shopper" | "creator" | "brand" | undefined;
   if (userId) {
     const user = await getUserById(userId);
+    role = user?.role;
     if (user?.role === "shopper") {
       avatarUrl = user.avatarUrl || placeholderAvatar(user.slug ?? user.id);
       const [favorites, follows, circles] = await Promise.all([
@@ -57,6 +59,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       overlay={overlay}
       onboarding={onboarding}
       avatarUrl={avatarUrl}
+      role={role}
     />
   );
 }

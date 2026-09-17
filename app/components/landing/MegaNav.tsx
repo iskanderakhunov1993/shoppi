@@ -139,18 +139,46 @@ const ARROW_ALIGN: Record<Menu["align"], string> = {
   right: "right-14",
 };
 
+type Role = "shopper" | "creator" | "brand";
+
+/** What a signed-in user actually does day to day — replaces the
+ * marketing dropdowns, which only make sense for someone still
+ * deciding whether to join. Mirrors how shopmy's own nav swaps
+ * "For Shoppers/For Creators" for direct links (Curators, Circles,
+ * Wishlists...) once you're logged in. */
+function quickLinksFor(role: Role | undefined): { label: string; href: string }[] {
+  if (role === "creator") {
+    return [
+      { label: "Кураторы", href: "/curators" },
+      { label: "Находки", href: "/finds" },
+      { label: "Разделы витрины", href: "/dashboard?tab=sections" },
+    ];
+  }
+  // shopper, brand, or unknown role — brands have no dedicated quick
+  // links yet since the role is paused (BRANDS_ENABLED), so they get
+  // the same shopper-facing shortcuts.
+  return [
+    { label: "Кураторы", href: "/curators" },
+    { label: "Находки", href: "/finds" },
+    { label: "Круги", href: "/dashboard?tab=circles" },
+    { label: "Сохранённое", href: "/dashboard?tab=saved" },
+  ];
+}
+
 export function MegaNav({
   signedIn,
   demoSlug,
   overlay = false,
   onboarding,
   avatarUrl,
+  role,
 }: {
   signedIn: boolean;
   demoSlug?: string;
   overlay?: boolean;
   onboarding?: { done: number; total: number };
   avatarUrl?: string;
+  role?: Role;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -218,36 +246,46 @@ export function MegaNav({
           Shoppi
         </Link>
 
-        {/* desktop triggers */}
+        {/* desktop triggers — quick links once signed in, marketing dropdowns for guests */}
         <div className="hidden md:flex items-center gap-8">
-          {menus.map((menu) => (
-            <button
-              key={menu.key}
-              type="button"
-              aria-expanded={open === menu.key}
-              onMouseEnter={() => {
-                cancelClose();
-                setOpen(menu.key);
-              }}
-              onFocus={() => setOpen(menu.key)}
-              onClick={() => setOpen((v) => (v === menu.key ? null : menu.key))}
-              className={`flex items-center gap-1.5 text-[13px] tracking-wide transition-opacity cursor-pointer ${
-                open === menu.key ? textColor : mutedColor
-              } hover:${textColor}`}
-            >
-              {menu.label}
-              <svg
-                width="9"
-                height="6"
-                viewBox="0 0 9 6"
-                fill="none"
-                aria-hidden="true"
-                className={`transition-transform ${open === menu.key ? "rotate-180" : ""}`}
-              >
-                <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.2" fill="none" />
-              </svg>
-            </button>
-          ))}
+          {signedIn
+            ? quickLinksFor(role).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-[13px] tracking-wide transition-opacity ${mutedColor} hover:${textColor}`}
+                >
+                  {link.label}
+                </Link>
+              ))
+            : menus.map((menu) => (
+                <button
+                  key={menu.key}
+                  type="button"
+                  aria-expanded={open === menu.key}
+                  onMouseEnter={() => {
+                    cancelClose();
+                    setOpen(menu.key);
+                  }}
+                  onFocus={() => setOpen(menu.key)}
+                  onClick={() => setOpen((v) => (v === menu.key ? null : menu.key))}
+                  className={`flex items-center gap-1.5 text-[13px] tracking-wide transition-opacity cursor-pointer ${
+                    open === menu.key ? textColor : mutedColor
+                  } hover:${textColor}`}
+                >
+                  {menu.label}
+                  <svg
+                    width="9"
+                    height="6"
+                    viewBox="0 0 9 6"
+                    fill="none"
+                    aria-hidden="true"
+                    className={`transition-transform ${open === menu.key ? "rotate-180" : ""}`}
+                  >
+                    <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                  </svg>
+                </button>
+              ))}
         </div>
 
         <div className="flex items-center gap-4 md:gap-5">
@@ -340,8 +378,8 @@ export function MegaNav({
         </div>
       </div>
 
-      {/* desktop dropdown panel */}
-      {menus.map((menu) => (
+      {/* desktop dropdown panel — guests only, signed-in nav has no dropdowns to open */}
+      {!signedIn && menus.map((menu) => (
         <div
           key={menu.key}
           onMouseEnter={cancelClose}
@@ -380,7 +418,21 @@ export function MegaNav({
       {/* mobile stacked menu */}
       {mobileOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-card border-y border-line px-6 py-6 flex flex-col gap-7 max-h-[70vh] overflow-y-auto">
-          {menus.map((menu) => (
+          {signedIn ? (
+            <div className="flex flex-col gap-2.5">
+              {quickLinksFor(role).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-ink text-[15px]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            menus.map((menu) => (
             <div key={menu.key}>
               <div className="text-[11px] uppercase tracking-widest text-stone mb-3">
                 {menu.label}
@@ -398,7 +450,8 @@ export function MegaNav({
                 ))}
               </div>
             </div>
-          ))}
+            ))
+          )}
           {!signedIn && (
             <Link href="/login" onClick={() => setMobileOpen(false)} className="text-ink text-[15px]">
               Войти
