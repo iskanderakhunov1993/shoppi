@@ -63,10 +63,23 @@ export type FetchedProductInfo = {
  * will need a paid Microlink plan (or a different relay) once the
  * product has real usage.
  */
-async function fetchWbProductInfo(articleId: string): Promise<FetchedProductInfo | null> {
+async function fetchWbCardJson(articleId: string): Promise<{ products?: unknown[] } | null> {
   const cardUrl = `https://card.wb.ru/cards/v4/detail?appType=1&curr=rub&dest=-1257786&spp=30&nm=${articleId}`;
-  const relayUrl = `https://api.microlink.io/?url=${encodeURIComponent(cardUrl)}&meta=false&data.raw.selector=body`;
 
+  // Try a direct fetch first — cheaper and doesn't burn Microlink's
+  // 25/day free-tier quota. Whether this passes WB's fingerprint check
+  // from Vercel's runtime has flipped before (see comment below), so
+  // it's worth attempting fresh each time rather than assuming either
+  // way — the Microlink relay below is the fallback either way.
+  const direct = await fetch(cardUrl, {
+    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+  }).catch(() => null);
+  if (direct?.ok) {
+    const data = await direct.json().catch(() => null);
+    if (data?.products) return data;
+  }
+
+  const relayUrl = `https://api.microlink.io/?url=${encodeURIComponent(cardUrl)}&meta=false&data.raw.selector=body`;
   const res = await fetch(relayUrl).catch(() => null);
   if (!res || !res.ok) return null;
 
@@ -80,13 +93,15 @@ async function fetchWbProductInfo(articleId: string): Promise<FetchedProductInfo
   const jsonText = match?.[1];
   if (!jsonText) return null;
 
-  let data: { products?: unknown[] } | null;
   try {
-    data = JSON.parse(jsonText.replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+    return JSON.parse(jsonText.replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
   } catch {
     return null;
   }
+}
 
+async function fetchWbProductInfo(articleId: string): Promise<FetchedProductInfo | null> {
+  const data = await fetchWbCardJson(articleId);
   const product = data?.products?.[0] as
     | { name?: string; brand?: string; pics?: number; sizes?: { price?: { product?: number } }[] }
     | undefined;
