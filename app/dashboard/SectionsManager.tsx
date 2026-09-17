@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 type LinkRow = { id: string; title: string };
-type Section = { id: string; name: string; position: number; hidden: boolean; linkIds: string[] };
+type Section = { id: string; name: string; icon?: string; position: number; hidden: boolean; linkIds: string[] };
 
 /**
  * Lets a creator group their own products into named sections shown
@@ -19,6 +19,8 @@ export function SectionsManager({ links }: { links: LinkRow[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [iconEditingId, setIconEditingId] = useState<string | null>(null);
+  const [iconValue, setIconValue] = useState("");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/sections");
@@ -74,6 +76,16 @@ export function SectionsManager({ links }: { links: LinkRow[] }) {
       body: JSON.stringify({ name: renameValue.trim() }),
     });
     setRenamingId(null);
+    await load();
+  }
+
+  async function saveIcon(id: string) {
+    await fetch(`/api/sections/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ icon: iconValue.trim().slice(0, 4) }),
+    });
+    setIconEditingId(null);
     await load();
   }
 
@@ -135,6 +147,31 @@ export function SectionsManager({ links }: { links: LinkRow[] }) {
                     ▼
                   </button>
                 </div>
+
+                {iconEditingId === section.id ? (
+                  <input
+                    autoFocus
+                    value={iconValue}
+                    onChange={(e) => setIconValue(e.target.value)}
+                    onBlur={() => saveIcon(section.id)}
+                    onKeyDown={(e) => e.key === "Enter" && saveIcon(section.id)}
+                    placeholder="🎁"
+                    className="w-8 text-center text-[15px] bg-transparent border-b border-ink outline-none py-1"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIconEditingId(section.id);
+                      setIconValue(section.icon ?? "");
+                    }}
+                    aria-label="Иконка раздела"
+                    title="Добавить эмодзи"
+                    className="w-8 h-8 flex-none flex items-center justify-center text-[15px] text-stone hover:text-ink border border-line rounded-full cursor-pointer"
+                  >
+                    {section.icon || "+"}
+                  </button>
+                )}
 
                 {renamingId === section.id ? (
                   <input

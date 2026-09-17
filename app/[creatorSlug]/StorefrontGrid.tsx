@@ -16,7 +16,7 @@ type StorefrontLink = {
   clicks: number;
 };
 
-type Section = { id: string; name: string; links: StorefrontLink[] };
+type Section = { id: string; name: string; icon?: string; links: StorefrontLink[] };
 
 type Tab = "latest" | "popular" | string;
 
@@ -81,6 +81,7 @@ export function StorefrontGrid({
               tab === s.id ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
             }`}
           >
+            {s.icon && <span className="mr-1">{s.icon}</span>}
             {s.name}
           </button>
         ))}

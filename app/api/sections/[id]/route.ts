@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCreator } from "@/lib/require-creator";
-import { getSectionById, renameSection, setSectionHidden, deleteSection, moveSection } from "@/lib/store";
+import { getSectionById, renameSection, setSectionHidden, setSectionIcon, deleteSection, moveSection } from "@/lib/store";
 
 async function ownedSection(request: NextRequest, id: string) {
   const creator = await requireCreator(request);
@@ -23,6 +23,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   if (typeof body?.hidden === "boolean") {
     await setSectionHidden(id, body.hidden);
+  }
+  if (typeof body?.icon === "string") {
+    await setSectionIcon(id, body.icon.trim() || null);
   }
   if (body?.move === "up" || body?.move === "down") {
     await moveSection(result.creator!.id, id, body.move);

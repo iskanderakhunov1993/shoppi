@@ -28,6 +28,7 @@ export async function GET(
   const sections = publicSections.map((s) => ({
     id: s.id,
     name: s.name,
+    icon: s.icon,
     links: s.links.map((link) => ({
       id: link.id,
       title: link.title,

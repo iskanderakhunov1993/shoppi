@@ -50,7 +50,7 @@ async function getStorefront(slug: string) {
     categories?: Category[];
     hidePopular?: boolean;
     followers: number;
-    sections?: { id: string; name: string; links: StorefrontLink[] }[];
+    sections?: { id: string; name: string; icon?: string; links: StorefrontLink[] }[];
   }>;
 }
 

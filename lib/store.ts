@@ -440,6 +440,9 @@ export type Section = {
   id: string;
   creatorId: string;
   name: string;
+  // A single emoji, purely decorative — like ShopMy's per-section icon,
+  // minus the layout/social-source machinery we have no content for.
+  icon?: string;
   position: number;
   hidden: boolean;
   createdAt: string;
@@ -450,6 +453,7 @@ function toSection(r: Row): Section {
     id: str(r.id),
     creatorId: str(r.creator_id),
     name: str(r.name),
+    icon: opt(r.icon),
     position: Number(r.position),
     hidden: Boolean(r.hidden),
     createdAt: str(r.created_at),
@@ -480,6 +484,10 @@ export async function getSectionById(id: string): Promise<Section | undefined> {
 
 export async function renameSection(id: string, name: string): Promise<void> {
   await sql`UPDATE sections SET name = ${name} WHERE id = ${id}`;
+}
+
+export async function setSectionIcon(id: string, icon: string | null): Promise<void> {
+  await sql`UPDATE sections SET icon = ${icon} WHERE id = ${id}`;
 }
 
 export async function setSectionHidden(id: string, hidden: boolean): Promise<void> {
