@@ -281,7 +281,7 @@ export function CreatorDashboard({
             ["products", "Товары"],
             ["sections", "Разделы витрины"],
             ...(EARNINGS_TAB_ENABLED ? ([["earnings", "Заработок"]] as const) : []),
-            ["profile", "Профиль и медиакит"],
+            ["profile", "Профиль"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -339,40 +339,53 @@ export function CreatorDashboard({
                     </option>
                   ))}
                 </select>
-                <input
-                  placeholder="Ссылка на фото (необязательно)"
-                  type="url"
-                  className={`${inputClass} border border-line px-3 py-2.5`}
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                />
-                <input
-                  placeholder="Цена в рублях (необязательно)"
-                  type="number"
-                  min="0"
-                  step="1"
-                  className={`${inputClass} border border-line px-3 py-2.5`}
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                <input
-                  placeholder="Бренд (необязательно)"
-                  className={`${inputClass} border border-line px-3 py-2.5`}
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                />
-                <input
-                  placeholder="Тип, например «Кроссовки» (необязательно)"
-                  className={`${inputClass} border border-line px-3 py-2.5`}
-                  value={subtype}
-                  onChange={(e) => setSubtype(e.target.value)}
-                />
-                <input
-                  placeholder="Промокод от бренда (необязательно)"
-                  className={`${inputClass} border border-line px-3 py-2.5`}
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                />
+                <details className="group -mt-1">
+                  <summary className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer select-none list-none flex items-center gap-1.5">
+                    <span className="inline-block transition-transform group-open:rotate-90">›</span>
+                    Ещё поля (необязательно)
+                  </summary>
+                  <div className="flex flex-col gap-3 mt-3">
+                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Фото</label>
+                    <input
+                      placeholder="Ссылка на фото"
+                      type="url"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                    />
+                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Цена</label>
+                    <input
+                      placeholder="В рублях"
+                      type="number"
+                      min="0"
+                      step="1"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                    />
+                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Бренд</label>
+                    <input
+                      placeholder="Например, Nike"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                    />
+                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Тип</label>
+                    <input
+                      placeholder="Например, Кроссовки"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={subtype}
+                      onChange={(e) => setSubtype(e.target.value)}
+                    />
+                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Промокод</label>
+                    <input
+                      placeholder="От бренда"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                    />
+                  </div>
+                </details>
                 {error && <p className="text-error text-sm">{error}</p>}
                 <button type="submit" disabled={submitting} className={buttonClass}>
                   {submitting ? "Добавляем…" : "Добавить"}

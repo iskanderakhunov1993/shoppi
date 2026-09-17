@@ -59,6 +59,14 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+/* Keyboard-only focus ring in the product's own ink tone, instead of
+   each browser's mismatched default (blue in Chrome, etc.) — never
+   removed outright, just restyled to fit the monochrome palette. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
 /* ---------------------------------------------------- home hero: receipt */
 
 .receipt-zigzag {
