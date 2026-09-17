@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { seedDemoAccounts } from "@/lib/seed";
-import { countCreators, listCreators } from "@/lib/store";
+import { countCreators, listCreators, getSessionUserId, getUserById } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
+import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { FollowButton } from "@/app/components/FollowButton";
+import { AddToCircleButton } from "@/app/[creatorSlug]/AddToCircleButton";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +20,11 @@ export default async function CuratorsDirectoryPage({
 }) {
   const { page: pageParam, q } = await searchParams;
   await seedDemoAccounts();
+
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const viewerId = token ? await getSessionUserId(token) : null;
+  const viewerUser = viewerId ? await getUserById(viewerId) : undefined;
+  const isShopperViewer = viewerUser?.role === "shopper";
 
   const page = Math.max(1, Number(pageParam) || 1);
   const query = q?.trim() ?? "";
@@ -76,28 +85,32 @@ export default async function CuratorsDirectoryPage({
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
               {creators.map((creator) => (
-                <a
-                  key={creator.id}
-                  href={`/${creator.slug}`}
-                  className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
-                >
-                  <div className="aspect-square overflow-hidden bg-raise">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={creator.avatarUrl || placeholderAvatar(creator.slug)}
-                      alt={creator.displayName}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="font-display text-lg mb-1">{creator.displayName}</div>
-                    {creator.bio && (
-                      <p className="font-display italic text-[13px] text-stone leading-snug">
-                        {creator.bio}
-                      </p>
-                    )}
-                  </div>
-                </a>
+                <div key={creator.id} className="group bg-paper flex flex-col">
+                  <a href={`/${creator.slug}`} className="block hover:opacity-90 transition-opacity">
+                    <div className="aspect-square overflow-hidden bg-raise">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={creator.avatarUrl || placeholderAvatar(creator.slug)}
+                        alt={creator.displayName}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-4 pb-0">
+                      <div className="font-display text-lg mb-1">{creator.displayName}</div>
+                      {creator.bio && (
+                        <p className="font-display italic text-[13px] text-stone leading-snug">
+                          {creator.bio}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                  {isShopperViewer && (
+                    <div className="p-4 pt-3 flex items-center gap-2">
+                      <FollowButton creatorId={creator.id} compact />
+                      <AddToCircleButton creatorId={creator.id} />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}

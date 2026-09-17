@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export function FollowButton({
   creatorId,
   initialFollowers = 0,
+  compact = false,
 }: {
   creatorId: string;
   initialFollowers?: number;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [following, setFollowing] = useState(false);
@@ -63,14 +65,16 @@ export function FollowButton({
       onClick={handleClick}
       disabled={pending || !known}
       aria-pressed={following}
-      className={`text-[12px] uppercase tracking-wide px-5 py-2.5 transition-colors cursor-pointer disabled:opacity-60 ${
+      className={`text-[12px] uppercase tracking-wide transition-colors cursor-pointer disabled:opacity-60 ${
+        compact ? "px-3 py-1.5" : "px-5 py-2.5"
+      } ${
         following
           ? "border border-ink text-ink hover:bg-ink hover:text-paper"
           : "bg-ink text-paper hover:opacity-80"
       }`}
     >
-      {following ? "В ваших кураторах" : "Добавить в моих кураторов"}
-      {followers > 0 && <span className="opacity-70 ml-2 normal-case">· {followers}</span>}
+      {following ? (compact ? "Подписан" : "В ваших кураторах") : compact ? "Подписаться" : "Добавить в моих кураторов"}
+      {!compact && followers > 0 && <span className="opacity-70 ml-2 normal-case">· {followers}</span>}
     </button>
   );
 }
