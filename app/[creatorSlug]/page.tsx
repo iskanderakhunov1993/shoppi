@@ -2,13 +2,15 @@ import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
 import { ShareButtonIcon } from "./ShareButton";
+import { AddToCircleButton } from "./AddToCircleButton";
+import { QuickAddProductButton } from "./QuickAddProductButton";
 import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { getSessionUserId, getCreatorByUserId } from "@/lib/store";
+import { getSessionUserId, getCreatorByUserId, getUserById } from "@/lib/store";
 
 function pluralizeShoppers(n: number): string {
   const mod10 = n % 10;
@@ -108,6 +110,8 @@ export default async function StorefrontPage({
   const viewerId = token ? await getSessionUserId(token) : null;
   const viewerCreator = viewerId ? await getCreatorByUserId(viewerId) : undefined;
   const isOwner = viewerCreator?.slug === creatorSlug;
+  const viewerUser = viewerId && !isOwner ? await getUserById(viewerId) : undefined;
+  const isShopperViewer = viewerUser?.role === "shopper";
 
   const h = await headers();
   const host = h.get("host");
@@ -121,6 +125,7 @@ export default async function StorefrontPage({
       <div className="relative text-center px-8 pt-32 pb-10 border-b border-line">
         {isOwner && (
           <div className="absolute top-36 right-6 flex items-center gap-2">
+            <QuickAddProductButton />
             <ShareButtonIcon url={storefrontUrl} />
             <a
               href="/dashboard?tab=profile"
@@ -150,6 +155,7 @@ export default async function StorefrontPage({
         {!isOwner && (
           <div className="flex justify-center items-center gap-2.5 mb-5">
             <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
+            {isShopperViewer && <AddToCircleButton creatorId={creator.id} />}
           </div>
         )}
         <p className="font-display italic text-stone text-sm mb-4">
