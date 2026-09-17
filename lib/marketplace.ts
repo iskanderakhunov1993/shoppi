@@ -48,35 +48,47 @@ export type FetchedProductInfo = {
  * runtime specifically — confirmed by testing both `fetch` and the raw
  * `https` module directly against it (403 every time, vs. 200 from
  * curl on the same machine with identical headers). That is a TLS/HTTP
- * fingerprint check, not a header check, so no header we can set fixes
- * it from here.
+ * fingerprint (or IP-range) check, not a header check, so no header we
+ * can set fixes it from here — the request has to originate from a
+ * different network than Vercel's.
  *
- * Microlink (api.microlink.io) is a general-purpose link-metadata
- * service — same category as what Slack/Discord use to unfurl a
- * pasted link — and its own fetcher is not on WB's block list. Its
- * `data.<name>.selector` option lets us pull raw body text instead of
- * parsed page metadata, which is what actually makes this useful: the
- * card.wb.ru response is JSON, not HTML, so Microlink's normal
- * title/description extraction finds nothing there.
- *
- * The free tier caps out at 25 requests/day — fine for now, but this
- * will need a paid Microlink plan (or a different relay) once the
- * product has real usage.
+ * r.jina.ai is a free "reader" relay (no signup, no API key) whose own
+ * fetcher is not on WB's block list — confirmed by testing multiple
+ * WB article ids against it directly. It returns the fetched page
+ * wrapped in a small text envelope ("Title: ... URL Source: ...
+ * Markdown Content: {json}"), so we just need to grab everything after
+ * "Markdown Content:". Microlink (api.microlink.io) is kept as a
+ * second fallback in case r.jina.ai ever gets blocked too — same
+ * category of service, different provider.
  */
 async function fetchWbCardJson(articleId: string): Promise<{ products?: unknown[] } | null> {
   const cardUrl = `https://card.wb.ru/cards/v4/detail?appType=1&curr=rub&dest=-1257786&spp=30&nm=${articleId}`;
 
-  // Try a direct fetch first — cheaper and doesn't burn Microlink's
-  // 25/day free-tier quota. Whether this passes WB's fingerprint check
-  // from Vercel's runtime has flipped before (see comment below), so
-  // it's worth attempting fresh each time rather than assuming either
-  // way — the Microlink relay below is the fallback either way.
+  // Try a direct fetch first — free and doesn't depend on any relay.
+  // Whether this passes WB's block has flipped before, so it's worth
+  // attempting fresh each time rather than assuming either way.
   const direct = await fetch(cardUrl, {
     headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
   }).catch(() => null);
   if (direct?.ok) {
     const data = await direct.json().catch(() => null);
     if (data?.products) return data;
+  }
+
+  const jina = await fetch(`https://r.jina.ai/${cardUrl}`).catch(() => null);
+  if (jina?.ok) {
+    const text = await jina.text().catch(() => "");
+    const marker = "Markdown Content:";
+    const idx = text.indexOf(marker);
+    if (idx !== -1) {
+      const jsonText = text.slice(idx + marker.length).trim();
+      try {
+        const data = JSON.parse(jsonText);
+        if (data?.products) return data;
+      } catch {
+        // fall through to Microlink
+      }
+    }
   }
 
   const relayUrl = `https://api.microlink.io/?url=${encodeURIComponent(cardUrl)}&meta=false&data.raw.selector=body`;
