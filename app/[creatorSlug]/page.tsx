@@ -122,7 +122,7 @@ export default async function StorefrontPage({
     <main className="flex-1 flex flex-col">
       <LandingNav alwaysMarketing />
 
-      <div className="relative text-center px-8 pt-32 pb-10 border-b border-line">
+      <div className="relative text-center px-8 pt-36 pb-12">
         {isOwner && (
           <div className="absolute top-36 right-6 flex items-center gap-2">
             <QuickAddProductButton />
@@ -140,37 +140,37 @@ export default async function StorefrontPage({
         <img
           src={creator.avatarUrl || placeholderAvatar(creatorSlug)}
           alt={creator.displayName}
-          className="w-28 h-28 rounded-full object-cover mx-auto mb-6 bg-raise"
+          className="w-36 h-36 rounded-full object-cover mx-auto mb-7 bg-raise"
         />
         <span className="font-display italic text-stone text-base block mb-1">Курирует</span>
         <h1 className="font-display text-4xl mb-3">{creator.displayName}</h1>
         {creator.bio && (
-          <p className="text-stone text-sm max-w-md mx-auto mb-3">{creator.bio}</p>
+          <p className="text-stone text-[15px] max-w-md mx-auto mb-2">{creator.bio}</p>
         )}
         {creator.categories && creator.categories.length > 0 && (
-          <p className="font-display italic text-stone text-sm mb-6">
+          <p className="text-stone text-[15px] mb-7">
             {creator.categories.map((c) => CATEGORY_LABEL[c]).join(" · ")}
           </p>
         )}
         {!isOwner && (
-          <div className="flex justify-center items-center gap-2.5 mb-5">
+          <div className="flex justify-center items-center gap-2.5 mb-6">
             <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
             {isShopperViewer && <AddToCircleButton creatorId={creator.id} />}
           </div>
         )}
-        <p className="font-display italic text-stone text-sm mb-4">
+        <p className="font-display italic text-stone text-sm mb-5">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
           {pluralizeShoppers(creator.followers)}
         </p>
         {(creator.instagramHandle || creator.tiktokHandle) && (
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-4">
             {creator.instagramHandle && (
               <a
                 href={`https://instagram.com/${creator.instagramHandle}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors"
+                className="text-stone hover:text-ink transition-colors"
               >
                 <InstagramIcon />
               </a>
@@ -181,7 +181,7 @@ export default async function StorefrontPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="TikTok"
-                className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors"
+                className="text-stone hover:text-ink transition-colors"
               >
                 <TiktokIcon />
               </a>

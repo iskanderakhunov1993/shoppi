@@ -34,6 +34,8 @@ export function StorefrontGrid({
 }) {
   const [tab, setTab] = useState<Tab>("latest");
   const [facet, setFacet] = useState<{ field: "subtype" | "brand"; value: string } | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   const categories = useMemo(
     () => [...new Set(links.map((l) => l.category))],
@@ -64,9 +66,11 @@ export function StorefrontGrid({
   }, [tabFiltered]);
 
   const visible = useMemo(() => {
-    if (!facet) return tabFiltered;
-    return tabFiltered.filter((l) => l[facet.field] === facet.value);
-  }, [tabFiltered, facet]);
+    let result = facet ? tabFiltered.filter((l) => l[facet.field] === facet.value) : tabFiltered;
+    const q = query.trim().toLowerCase();
+    if (q) result = result.filter((l) => l.title.toLowerCase().includes(q));
+    return result;
+  }, [tabFiltered, facet, query]);
 
   function selectTab(next: Tab) {
     setTab(next);
@@ -83,11 +87,33 @@ export function StorefrontGrid({
 
   return (
     <div>
-      <div className="flex items-center gap-2 px-8 pt-6 pb-4 overflow-x-auto">
+      <div className="flex items-center gap-5 px-8 pt-6 pb-4 overflow-x-auto border-b border-line">
+        {searchOpen ? (
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onBlur={() => !query && setSearchOpen(false)}
+            placeholder="Поиск по витрине"
+            className="flex-none w-40 text-[13px] py-1 border-b border-line bg-transparent outline-none focus:border-ink"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Поиск по витрине"
+            className="flex-none text-stone hover:text-ink transition-colors cursor-pointer"
+          >
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+              <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
         <button
           onClick={() => selectTab("latest")}
-          className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-            tab === "latest" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+          className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+            tab === "latest" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
           }`}
         >
           Последние
@@ -95,8 +121,8 @@ export function StorefrontGrid({
         {!hidePopular && (
           <button
             onClick={() => selectTab("popular")}
-            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              tab === "popular" ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "popular" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
             }`}
           >
             Популярное
@@ -106,8 +132,8 @@ export function StorefrontGrid({
           <button
             key={s.id}
             onClick={() => selectTab(s.id)}
-            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              tab === s.id ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === s.id ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
             }`}
           >
             {s.icon && <span className="mr-1">{s.icon}</span>}
@@ -118,8 +144,8 @@ export function StorefrontGrid({
           <button
             key={c}
             onClick={() => selectTab(c)}
-            className={`text-[12px] px-4 py-2 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              tab === c ? "border-ink bg-ink text-paper" : "border-line text-stone hover:border-ink hover:text-ink"
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === c ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
             }`}
           >
             {CATEGORY_LABEL[c] ?? c}
@@ -128,7 +154,7 @@ export function StorefrontGrid({
       </div>
 
       {(subtypeFacets.length > 0 || brandFacets.length > 0) && (
-        <div className="flex items-center gap-2 px-8 pb-4 overflow-x-auto border-t border-line pt-4">
+        <div className="flex items-center gap-2 px-8 pb-4 pt-4 overflow-x-auto border-b border-line">
           {facet && (
             <button
               onClick={() => setFacet(null)}
@@ -170,9 +196,14 @@ export function StorefrontGrid({
           <EmptyState title="В этой категории пока пусто." />
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-9 p-6">
-          {visible.map((link) => (
-            <div key={link.id} className="flex flex-col gap-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((link, i) => (
+            <div
+              key={link.id}
+              className={`flex flex-col gap-3 p-6 border-b border-line ${
+                (i + 1) % 3 !== 0 ? "lg:border-r" : ""
+              } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
+            >
               <div className="relative aspect-square bg-line overflow-hidden">
                 <a href={link.wrappedUrl} className="block w-full h-full">
                   {link.imageUrl ? (
