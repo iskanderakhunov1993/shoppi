@@ -165,6 +165,15 @@ function quickLinksFor(role: Role | undefined): { label: string; href: string }[
   ];
 }
 
+function FindsBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="ml-1 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-error text-paper text-[10px] font-medium leading-none align-middle">
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
+
 export function MegaNav({
   signedIn,
   demoSlug,
@@ -172,6 +181,7 @@ export function MegaNav({
   onboarding,
   avatarUrl,
   role,
+  newFindsCount = 0,
 }: {
   signedIn: boolean;
   demoSlug?: string;
@@ -179,6 +189,7 @@ export function MegaNav({
   onboarding?: { done: number; total: number };
   avatarUrl?: string;
   role?: Role;
+  newFindsCount?: number;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -256,6 +267,7 @@ export function MegaNav({
                   className={`text-[13px] tracking-wide transition-opacity ${mutedColor} hover:${textColor}`}
                 >
                   {link.label}
+                  {link.href === "/finds" && <FindsBadge count={newFindsCount} />}
                 </Link>
               ))
             : menus.map((menu) => (
@@ -428,6 +440,7 @@ export function MegaNav({
                   className="text-ink text-[15px]"
                 >
                   {link.label}
+                  {link.href === "/finds" && <FindsBadge count={newFindsCount} />}
                 </Link>
               ))}
             </div>

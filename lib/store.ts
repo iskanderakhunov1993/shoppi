@@ -890,6 +890,27 @@ export async function listRecentLinks(opts: { limit?: number } = {}): Promise<Re
   }));
 }
 
+/**
+ * Count of links from followed creators added after the shopper last
+ * checked their "Мои кураторы" feed — powers the notification badge.
+ * A never-visited feed (finds_seen_at is null) counts everything so
+ * the badge doesn't silently start at 0 for new followers.
+ */
+export async function countNewFollowedLinks(userId: string): Promise<number> {
+  const rows = await sql`
+    SELECT COUNT(*) AS c
+    FROM links l
+    JOIN follows f ON f.creator_id = l.creator_id
+    JOIN users u ON u.id = ${userId}
+    WHERE f.user_id = ${userId} AND (u.finds_seen_at IS NULL OR l.created_at::timestamptz > u.finds_seen_at)
+  `;
+  return Number(rows[0].c);
+}
+
+export async function markFindsSeen(userId: string): Promise<void> {
+  await sql`UPDATE users SET finds_seen_at = ${new Date().toISOString()} WHERE id = ${userId}`;
+}
+
 /* -------------------------------------------------------------- circles */
 
 export type Circle = {

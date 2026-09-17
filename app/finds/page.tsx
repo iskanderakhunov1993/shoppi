@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { listRecentLinks, listFollowedLinks, getSessionUserId, getUserById } from "@/lib/store";
+import { listRecentLinks, listFollowedLinks, getSessionUserId, getUserById, markFindsSeen } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
@@ -26,6 +26,10 @@ export default async function FindsPage({
   const links = showFollowing
     ? await listFollowedLinks(viewerId!, { limit: 60 })
     : await listRecentLinks({ limit: 60 });
+
+  if (showFollowing) {
+    await markFindsSeen(viewerId!);
+  }
 
   return (
     <main className="flex-1 flex flex-col">

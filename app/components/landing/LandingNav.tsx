@@ -7,6 +7,7 @@ import {
   listFavoriteLinks,
   listFollowedCreators,
   listCirclesByUser,
+  countNewFollowedLinks,
 } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
 import { getDemoCreatorSlug } from "@/lib/seed";
@@ -30,18 +31,21 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   let onboarding: { done: number; total: number } | undefined;
   let avatarUrl: string | undefined;
   let role: "shopper" | "creator" | "brand" | undefined;
+  let newFindsCount = 0;
   if (userId) {
     const user = await getUserById(userId);
     role = user?.role;
     if (user?.role === "shopper") {
       avatarUrl = user.avatarUrl || placeholderAvatar(user.slug ?? user.id);
-      const [favorites, follows, circles] = await Promise.all([
+      const [favorites, follows, circles, newFinds] = await Promise.all([
         listFavoriteLinks(userId),
         listFollowedCreators(userId),
         listCirclesByUser(userId),
+        countNewFollowedLinks(userId),
       ]);
       const done = [favorites.length > 0, follows.length > 0, circles.length > 0].filter(Boolean).length;
       if (done < 3) onboarding = { done, total: 3 };
+      newFindsCount = follows.length > 0 ? newFinds : 0;
     } else if (user?.role === "creator") {
       const creator = await getCreatorByUserId(userId);
       avatarUrl = creator?.avatarUrl || placeholderAvatar(creator?.slug ?? userId);
@@ -60,6 +64,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       onboarding={onboarding}
       avatarUrl={avatarUrl}
       role={role}
+      newFindsCount={newFindsCount}
     />
   );
 }
