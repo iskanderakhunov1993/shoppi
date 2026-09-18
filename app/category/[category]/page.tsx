@@ -79,16 +79,15 @@ export default async function CategoryPage({
                     href={`/r/${link.id}`}
                     className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
                   >
-                    <div className="aspect-[4/3] overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={
-                          link.imageUrl ??
-                          `https://picsum.photos/seed/${link.id}/400/300`
-                        }
-                        alt={link.title}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                      />
+                    <div className="aspect-[4/3] bg-line overflow-hidden">
+                      {link.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={link.imageUrl}
+                          alt={link.title}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                        />
+                      )}
                     </div>
                     <div className="p-5">
                       <div className="text-sm font-medium leading-snug mb-1">{link.title}</div>
