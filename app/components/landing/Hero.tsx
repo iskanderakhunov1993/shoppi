@@ -17,19 +17,22 @@ export function Hero() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-8">
-          <a
-            href="#curators"
-            className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-85 transition-opacity"
-          >
-            Смотреть кураторов
-          </a>
           <Link
             href="/signup"
+            className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-85 transition-opacity"
+          >
+            Я покупатель
+          </Link>
+          <Link
+            href="/signup?role=creator"
             className="text-[13px] font-semibold uppercase tracking-wide text-ink border border-line px-6 py-3.5 hover:border-ink transition-colors"
           >
-            Стать куратором
+            Я куратор
           </Link>
         </div>
+        <a href="#curators" className="text-stone text-[12.5px] mt-5 underline underline-offset-4 hover:text-ink transition-colors">
+          Или просто посмотреть кураторов
+        </a>
       </div>
     </section>
   );

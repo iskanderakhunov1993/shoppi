@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
@@ -13,8 +14,21 @@ const ROLE_TABS: { role: Role; label: string; tagline: string }[] = [
   { role: "brand", label: "Бренд", tagline: "Смотрите, кто вас продвигает." },
 ];
 
+function roleFromParam(value: string | null): Role {
+  return value === "creator" || value === "brand" ? value : "shopper";
+}
+
 export default function SignupPage() {
-  const [role, setRole] = useState<Role>("shopper");
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const [role, setRole] = useState<Role>(() => roleFromParam(searchParams.get("role")));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [brandDomain, setBrandDomain] = useState("");
