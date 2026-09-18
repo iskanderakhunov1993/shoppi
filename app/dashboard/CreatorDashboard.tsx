@@ -339,6 +339,29 @@ export function CreatorDashboard({
                     </option>
                   ))}
                 </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] uppercase tracking-wider text-stone">Бренд</label>
+                    <input
+                      placeholder="Например, Nike"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] uppercase tracking-wider text-stone">Тип</label>
+                    <input
+                      placeholder="Например, Кроссовки"
+                      className={`${inputClass} border border-line px-3 py-2.5`}
+                      value={subtype}
+                      onChange={(e) => setSubtype(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-[11.5px] text-stone -mt-1.5">
+                  Необязательно — но именно по бренду и типу шоппер сможет фильтровать вашу витрину.
+                </p>
                 <details className="group -mt-1">
                   <summary className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer select-none list-none flex items-center gap-1.5">
                     <span className="inline-block transition-transform group-open:rotate-90">›</span>
@@ -362,20 +385,6 @@ export function CreatorDashboard({
                       className={`${inputClass} border border-line px-3 py-2.5`}
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                    />
-                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Бренд</label>
-                    <input
-                      placeholder="Например, Nike"
-                      className={`${inputClass} border border-line px-3 py-2.5`}
-                      value={brand}
-                      onChange={(e) => setBrand(e.target.value)}
-                    />
-                    <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Тип</label>
-                    <input
-                      placeholder="Например, Кроссовки"
-                      className={`${inputClass} border border-line px-3 py-2.5`}
-                      value={subtype}
-                      onChange={(e) => setSubtype(e.target.value)}
                     />
                     <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Промокод</label>
                     <input
