@@ -64,11 +64,11 @@ export function AddToCircleButton({ creatorId }: { creatorId: string }) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full sm:w-auto">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="text-[12px] uppercase tracking-wide border border-line px-4 py-3 hover:border-ink hover:text-ink transition-colors cursor-pointer"
+        className="text-[12px] uppercase tracking-wide border border-line px-4 py-3 hover:border-ink hover:text-ink transition-colors cursor-pointer whitespace-nowrap w-full sm:w-auto"
       >
         В круг
       </button>

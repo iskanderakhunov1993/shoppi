@@ -65,8 +65,8 @@ export function FollowButton({
       onClick={handleClick}
       disabled={pending || !known}
       aria-pressed={following}
-      className={`text-[12px] uppercase tracking-wide transition-colors cursor-pointer disabled:opacity-60 ${
-        compact ? "px-3 py-1.5" : "px-5 py-2.5"
+      className={`text-[12px] uppercase tracking-wide transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap ${
+        compact ? "px-3 py-1.5" : "px-5 py-2.5 w-full sm:w-auto"
       } ${
         following
           ? "border border-ink text-ink hover:bg-ink hover:text-paper"

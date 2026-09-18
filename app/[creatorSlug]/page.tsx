@@ -153,7 +153,7 @@ export default async function StorefrontPage({
           </p>
         )}
         {!isOwner && (
-          <div className="flex justify-center items-center gap-2.5 mb-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2.5 mb-6 px-6">
             <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
             {isShopperViewer && <AddToCircleButton creatorId={creator.id} />}
           </div>
