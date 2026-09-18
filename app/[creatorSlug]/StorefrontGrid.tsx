@@ -162,7 +162,7 @@ export function StorefrontGrid({
         ))}
       </div>
 
-      {(subtypeFacets.length > 0 || brandFacets.length > 0) && (
+      {(subtypeFacets.length > 1 || brandFacets.length > 1) && (
         <div className="flex items-center gap-2 px-8 pb-4 pt-4 overflow-x-auto border-b border-line">
           {facet && (
             <button
@@ -172,31 +172,33 @@ export function StorefrontGrid({
               {facet.value} ×
             </button>
           )}
-          {subtypeFacets.map(([value, count]) => (
-            <button
-              key={`subtype-${value}`}
-              onClick={() => setFacet({ field: "subtype", value })}
-              className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
-                facet?.field === "subtype" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
-              }`}
-            >
-              {value} <span className="text-stone">{count}</span>
-            </button>
-          ))}
-          {subtypeFacets.length > 0 && brandFacets.length > 0 && (
+          {subtypeFacets.length > 1 &&
+            subtypeFacets.map(([value, count]) => (
+              <button
+                key={`subtype-${value}`}
+                onClick={() => setFacet({ field: "subtype", value })}
+                className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
+                  facet?.field === "subtype" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
+                }`}
+              >
+                {value} <span className="text-stone">{count}</span>
+              </button>
+            ))}
+          {subtypeFacets.length > 1 && brandFacets.length > 1 && (
             <span className="text-line select-none">·</span>
           )}
-          {brandFacets.map(([value, count]) => (
-            <button
-              key={`brand-${value}`}
-              onClick={() => setFacet({ field: "brand", value })}
-              className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
-                facet?.field === "brand" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
-              }`}
-            >
-              {value} <span className="text-stone">{count}</span>
-            </button>
-          ))}
+          {brandFacets.length > 1 &&
+            brandFacets.map(([value, count]) => (
+              <button
+                key={`brand-${value}`}
+                onClick={() => setFacet({ field: "brand", value })}
+                className={`text-[11px] uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors ${
+                  facet?.field === "brand" && facet.value === value ? "text-ink" : "text-stone hover:text-ink"
+                }`}
+              >
+                {value} <span className="text-stone">{count}</span>
+              </button>
+            ))}
         </div>
       )}
 
