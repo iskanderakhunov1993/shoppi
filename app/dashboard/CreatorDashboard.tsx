@@ -352,7 +352,7 @@ export function CreatorDashboard({
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] uppercase tracking-wider text-stone">Тип</label>
                     <input
-                      placeholder="Например, Кроссовки"
+                      placeholder="Например, Крем"
                       className={`${inputClass} border border-line px-3 py-2.5`}
                       value={subtype}
                       onChange={(e) => setSubtype(e.target.value)}
