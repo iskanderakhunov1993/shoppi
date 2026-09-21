@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
-import { BRANDS_ENABLED } from "@/lib/featureFlags";
+import { BRANDS_ENABLED, DEMO_LOGIN_ENABLED } from "@/lib/featureFlags";
 
 type Role = "shopper" | "creator" | "brand";
 
@@ -108,6 +108,7 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {DEMO_LOGIN_ENABLED && (
         <div className="flex flex-col gap-3 pt-6 border-t border-line">
           <span className="text-[11px] uppercase tracking-wider text-stone">
             Быстрый вход для демо
@@ -126,6 +127,7 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
+        )}
       </div>
     </main>
   );

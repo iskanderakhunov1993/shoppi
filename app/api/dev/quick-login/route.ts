@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserByEmail, type Role } from "@/lib/store";
 import { createSession, SESSION_COOKIE } from "@/lib/auth";
 import { seedDemoAccounts, DEMO_ACCOUNTS } from "@/lib/seed";
+import { DEMO_LOGIN_ENABLED } from "@/lib/featureFlags";
 
 const ROLES: Role[] = ["shopper", "creator", "brand"];
 
 // Dev-only shortcut: logs straight into a seeded demo account for the
-// given role, skipping registration and email verification. Not gated
-// behind an env flag yet — fine for an MVP with no real data at stake.
+// given role, skipping registration, email verification and the
+// password check. Disabled in production (404) — see DEMO_LOGIN_ENABLED.
 export async function POST(request: NextRequest) {
+  if (!DEMO_LOGIN_ENABLED) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const body = await request.json().catch(() => null);
   const role = body?.role as string | undefined;
 

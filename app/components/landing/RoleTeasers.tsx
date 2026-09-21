@@ -20,7 +20,7 @@ export function RoleTeasers() {
             Ведите витрину без чужого алгоритма.
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 md:mb-0">
-            <li>— Своя страница вида shoppi.ru/вы</li>
+            <li>— Своя публичная страница с одной ссылкой для подписчиков</li>
             <li>— Добавляйте товары в один клик по ссылке</li>
             <li>— Видите клики по каждой вещи в реальном времени</li>
           </ul>

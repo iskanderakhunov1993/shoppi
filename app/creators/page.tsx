@@ -6,7 +6,7 @@ import { LandingFooter } from "@/app/components/landing/LandingFooter";
 const ITEMS = [
   {
     title: "Своя витрина",
-    body: "Публичная страница вида shoppi.ru/вы — добавляйте товары и делитесь одной ссылкой.",
+    body: "Своя публичная страница — добавляйте товары и делитесь одной ссылкой.",
   },
   {
     title: "Ссылка в один клик",
