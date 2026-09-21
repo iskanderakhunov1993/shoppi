@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireCreator } from "@/lib/require-creator";
 import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listCollectionsByCreator, listLinksByCreator, listPublicSections } from "@/lib/store";
 
 export async function GET(
@@ -29,7 +30,10 @@ export async function GET(
     saves: saves.get(link.id) ?? 0,
   }));
 
-  const publicSections = await listPublicSections(creator.id);
+  // Empty sections are hidden from visitors, but the owner needs to see
+  // (and fill) the ones they just created.
+  const viewer = await requireCreator(request);
+  const publicSections = await listPublicSections(creator.id, { includeEmpty: viewer?.id === creator.id });
   const sections = publicSections.map((s) => ({
     id: s.id,
     name: s.name,

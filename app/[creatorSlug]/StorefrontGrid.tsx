@@ -332,7 +332,13 @@ export function StorefrontGrid({
 
       {visible.length === 0 ? (
         <div className="py-16 flex justify-center">
-          <EmptyState title="В этой категории пока пусто." />
+          <EmptyState
+            title={
+              isOwner && currentSectionId
+                ? "Раздел пуст — нажмите «Добавить коллекцию +», чтобы наполнить его товарами."
+                : "В этой категории пока пусто."
+            }
+          />
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3">

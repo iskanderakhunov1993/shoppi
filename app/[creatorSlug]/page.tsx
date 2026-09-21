@@ -40,6 +40,8 @@ async function getStorefront(slug: string) {
   const protocol = host?.startsWith("localhost") ? "http" : "https";
   const res = await fetch(`${protocol}://${host}/api/creators/${slug}`, {
     cache: "no-store",
+    // Lets the API tell the owner apart from a visitor.
+    headers: { cookie: h.get("cookie") ?? "" },
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to load storefront");

@@ -569,7 +569,10 @@ export async function setLinkInSection(sectionId: string, linkId: string, includ
 }
 
 /** Every section for this creator that has at least one product, each with its links — for the public storefront. */
-export async function listPublicSections(creatorId: string): Promise<(Section & { links: Link[] })[]> {
+export async function listPublicSections(
+  creatorId: string,
+  opts: { includeEmpty?: boolean } = {}
+): Promise<(Section & { links: Link[] })[]> {
   const sections = await listSectionsByCreator(creatorId);
   const withLinks = await Promise.all(
     sections
@@ -582,7 +585,7 @@ export async function listPublicSections(creatorId: string): Promise<(Section & 
         return { ...s, links: rows.map(toLink) };
       })
   );
-  return withLinks.filter((s) => s.links.length > 0);
+  return opts.includeEmpty ? withLinks : withLinks.filter((s) => s.links.length > 0);
 }
 
 function hostnameOf(url: string): string | null {
@@ -1078,6 +1081,7 @@ export async function createCollection(
     VALUES (${id}, ${creatorId}, ${input.sectionId}, ${input.name}, ${Number(pos[0].p)})
   `;
   await replaceCollectionLinks(id, creatorId, input.linkIds);
+  await addCollectionLinksToSection(id, input.sectionId);
   return (await getCollectionById(id))!;
 }
 
@@ -1087,7 +1091,18 @@ export async function updateCollection(
   patch: { name?: string; linkIds?: string[] }
 ): Promise<void> {
   if (patch.name) await sql`UPDATE collections SET name = ${patch.name} WHERE id = ${id}`;
-  if (patch.linkIds) await replaceCollectionLinks(id, creatorId, patch.linkIds);
+  if (patch.linkIds) {
+    await replaceCollectionLinks(id, creatorId, patch.linkIds);
+    const row = await sql`SELECT section_id FROM collections WHERE id = ${id}`;
+    await addCollectionLinksToSection(id, row[0]?.section_id ? str(row[0].section_id) : null);
+  }
+}
+
+/** A collection inside a section means its products belong to that section too. */
+async function addCollectionLinksToSection(collectionId: string, sectionId: string | null): Promise<void> {
+  if (!sectionId) return;
+  const rows = await sql`SELECT link_id FROM collection_links WHERE collection_id = ${collectionId}`;
+  for (const r of rows) await setLinkInSection(sectionId, str(r.link_id), true);
 }
 
 export async function deleteCollection(id: string): Promise<void> {
