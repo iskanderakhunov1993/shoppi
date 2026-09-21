@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/store";
-import { sendVerificationEmail } from "@/lib/email";
+import { EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -22,5 +22,5 @@ export async function POST(request: NextRequest) {
   const verifyUrl = `${protocol}://${host}/verify?token=${user.verificationToken}`;
   const emailed = await sendVerificationEmail(user.email, verifyUrl);
 
-  return NextResponse.json({ ok: true, emailed, verificationToken: emailed ? undefined : user.verificationToken });
+  return NextResponse.json({ ok: true, emailed, verificationToken: emailed || !EXPOSE_LINKS ? undefined : user.verificationToken });
 }

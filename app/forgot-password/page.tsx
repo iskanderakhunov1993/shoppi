@@ -9,6 +9,7 @@ export default function ForgotPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [devResetUrl, setDevResetUrl] = useState<string | null>(null);
+  const [mailOff, setMailOff] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +26,24 @@ export default function ForgotPasswordPage() {
     // Only ever populated when RESEND_API_KEY isn't configured (local
     // dev) — never rely on this in production, where it's always undefined.
     if (data.resetUrl) setDevResetUrl(data.resetUrl);
+    if (data.mailConfigured === false && !data.resetUrl) setMailOff(true);
+  }
+
+  if (sent && mailOff) {
+    return (
+      <main className="flex-1 flex items-center justify-center px-6">
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          <h1 className="font-display text-2xl">Сброс по почте пока недоступен</h1>
+          <p className="text-stone text-sm leading-relaxed">
+            Отправка писем на сервисе ещё не настроена, поэтому мы не можем прислать ссылку.
+            Обратитесь к администратору сервиса — он поможет восстановить доступ.
+          </p>
+          <Link href="/login" className="text-ink underline underline-offset-4 text-sm w-fit">
+            Вернуться ко входу
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   if (sent) {

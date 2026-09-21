@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createUser, getUserByEmail, type Role } from "@/lib/store";
+import { createUser, getUserByEmail, markUserVerified, type Role } from "@/lib/store";
 import { hashPassword } from "@/lib/auth";
-import { sendVerificationEmail } from "@/lib/email";
+import { EMAIL_ENABLED, EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
 
 const ROLES: Role[] = ["shopper", "creator", "brand"];
 
@@ -47,9 +47,15 @@ export async function POST(request: NextRequest) {
   const verifyUrl = `${protocol}://${host}/verify?token=${user.verificationToken}`;
   const emailed = await sendVerificationEmail(user.email, verifyUrl);
 
-  // Without RESEND_API_KEY configured (local dev, or the key missing),
-  // the token is returned directly so /api/auth/verify stays testable
-  // end-to-end without external infra.
+  // Production with no mail provider configured at all: there is no way
+  // to prove ownership of the address, and returning the token would let
+  // anyone "verify" any email — so confirm the account right away rather
+  // than lock every new user out. (If mail IS configured but a send fails,
+  // the account stays unverified and the user retries via "resend".)
+  const autoVerified = !emailed && !EMAIL_ENABLED && !EXPOSE_LINKS;
+  if (autoVerified) await markUserVerified(user.id);
+
+  // Local dev only: hand the token back so /api/auth/verify stays testable.
   return NextResponse.json(
     {
       userId: user.id,
@@ -57,7 +63,8 @@ export async function POST(request: NextRequest) {
       role: user.role,
       creatorSlug: creator?.slug,
       emailed,
-      verificationToken: emailed ? undefined : user.verificationToken,
+      autoVerified,
+      verificationToken: emailed || autoVerified || !EXPOSE_LINKS ? undefined : user.verificationToken,
     },
     { status: 201 }
   );

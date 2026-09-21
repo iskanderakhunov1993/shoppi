@@ -36,6 +36,7 @@ function SignupForm() {
   const [submitting, setSubmitting] = useState(false);
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
   const [emailed, setEmailed] = useState(false);
+  const [created, setCreated] = useState(false);
   const [consent, setConsent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
@@ -73,6 +74,14 @@ function SignupForm() {
       return;
     }
 
+    if (data.autoVerified) {
+      setCreated(true);
+      return;
+    }
+    if (!data.emailed && !data.verificationToken) {
+      setError("Аккаунт создан, но письмо отправить не удалось. Попробуйте войти позже и запросить письмо ещё раз.");
+      return;
+    }
     setEmailed(Boolean(data.emailed));
     // Falls back to the link directly only when no email provider is
     // configured (RESEND_API_KEY missing) — real sends never expose it.
@@ -93,6 +102,22 @@ function SignupForm() {
     setResendCooldown(30);
     setResendNote(
       data.emailed ? "Письмо отправлено ещё раз." : "Не смогли отправить письмо — попробуйте позже."
+    );
+  }
+
+  if (created) {
+    return (
+      <main className="flex-1 flex items-center justify-center px-6">
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          <h1 className="font-display text-2xl">Аккаунт создан</h1>
+          <p className="text-stone text-sm leading-relaxed">
+            Можно входить с почтой <strong className="text-ink">{email}</strong> и вашим паролем.
+          </p>
+          <Link href="/login" className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 w-fit hover:opacity-85 transition-opacity">
+            Войти
+          </Link>
+        </div>
+      </main>
     );
   }
 

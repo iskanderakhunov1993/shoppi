@@ -1,5 +1,15 @@
 import { Resend } from "resend";
 
+/** True when a Resend key is configured. */
+export const EMAIL_ENABLED = Boolean(process.env.RESEND_API_KEY);
+
+/**
+ * Verification / reset links may be handed back in the API response only
+ * outside production. In production that would let anyone who knows an
+ * email address confirm it or reset its password without owning it.
+ */
+export const EXPOSE_LINKS = process.env.NODE_ENV !== "production";
+
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Resend's sandbox sender works without a verified domain, but only

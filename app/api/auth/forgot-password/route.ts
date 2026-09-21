@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setResetToken } from "@/lib/store";
-import { sendResetPasswordEmail } from "@/lib/email";
+import { EMAIL_ENABLED, EXPOSE_LINKS, sendResetPasswordEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   // Always respond the same way whether or not the email exists —
   // otherwise this endpoint could be used to check who's registered.
   if (!token) {
-    return NextResponse.json({ emailed: false });
+    return NextResponse.json({ emailed: false, mailConfigured: EMAIL_ENABLED });
   }
 
   const host = request.headers.get("host");
@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
   const resetUrl = `${protocol}://${host}/reset-password?token=${token}`;
   const emailed = await sendResetPasswordEmail(email, resetUrl);
 
-  // Same fallback as registration: without RESEND_API_KEY, hand back
-  // the link directly so the flow stays testable end-to-end.
-  return NextResponse.json({ emailed, resetUrl: emailed ? undefined : resetUrl });
+  // Local dev only: without RESEND_API_KEY hand the link back so the flow
+  // stays testable. Never in production — see EXPOSE_LINKS.
+  return NextResponse.json({
+    emailed,
+    mailConfigured: EMAIL_ENABLED,
+    resetUrl: emailed || !EXPOSE_LINKS ? undefined : resetUrl,
+  });
 }
