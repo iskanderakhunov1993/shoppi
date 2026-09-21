@@ -6,7 +6,7 @@ import { updateUserPasswordHash } from "@/lib/store";
 export async function PUT(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);

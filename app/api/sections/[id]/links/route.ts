@@ -6,7 +6,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
   const section = await getSectionById(id);
   if (!section || section.creatorId !== creator.id) {

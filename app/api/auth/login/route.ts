@@ -8,16 +8,16 @@ export async function POST(request: NextRequest) {
   const password = body?.password as string | undefined;
 
   if (!email || !password) {
-    return NextResponse.json({ error: "email and password are required" }, { status: 400 });
+    return NextResponse.json({ error: "Введите email и пароль" }, { status: 400 });
   }
 
   const user = await getUserByEmail(email);
   if (!user || !verifyPassword(password, user.passwordHash)) {
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    return NextResponse.json({ error: "Неверный email или пароль" }, { status: 401 });
   }
 
   if (!user.verified) {
-    return NextResponse.json({ error: "Email not verified" }, { status: 403 });
+    return NextResponse.json({ error: "Email не подтверждён — проверьте почту" }, { status: 403 });
   }
 
   const token = await createSession(user.id);

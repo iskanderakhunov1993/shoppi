@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   if (!email || !password || password.length < 6) {
     return NextResponse.json(
-      { error: "email and password (min 6 chars) are required" },
+      { error: "Введите email и пароль (не короче 6 символов)" },
       { status: 400 }
     );
   }
@@ -26,13 +26,13 @@ export async function POST(request: NextRequest) {
   }
   if (role === "brand" && !brandDomain?.trim()) {
     return NextResponse.json(
-      { error: "brandDomain is required for the brand role" },
+      { error: "Укажите домен бренда" },
       { status: 400 }
     );
   }
 
   if (await getUserByEmail(email)) {
-    return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+    return NextResponse.json({ error: "Этот email уже зарегистрирован" }, { status: 409 });
   }
 
   const { user, creator } = await createUser(

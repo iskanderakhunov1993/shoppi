@@ -5,7 +5,7 @@ import { createSection, listSectionsByCreator, listSectionLinkIds } from "@/lib/
 export async function GET(request: NextRequest) {
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const sections = await listSectionsByCreator(creator.id);
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);

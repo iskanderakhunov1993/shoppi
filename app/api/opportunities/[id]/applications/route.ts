@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params;
   const user = await requireUser(request);
   if (!user || user.role !== "brand") {
-    return NextResponse.json({ error: "Brands only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только брендам" }, { status: 403 });
   }
 
   const opportunity = await getOpportunity(id);

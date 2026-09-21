@@ -44,29 +44,14 @@ function buildMenus(demoSlug?: string): Menu[] {
             ]
           : []),
         {
-          label: "Мой вкус",
-          href: "/dashboard",
+          label: "Сохранённое",
+          href: "/dashboard?tab=saved",
           description: "Товары, которые вы сохранили, чтобы вернуться к ним позже.",
         },
         {
-          label: "Косметика",
-          href: "/category/cosmetics",
-          description: "Уход и декоративная косметика от всех кураторов сразу.",
-        },
-        {
-          label: "Мужские товары",
-          href: "/category/mens",
-          description: "Снаряжение и уход — проверенное, а не рекламное.",
-        },
-        {
-          label: "Одежда",
-          href: "/category/clothing",
-          description: "Вещи, которые кураторы носят сезон за сезоном.",
-        },
-        {
-          label: "Инструменты",
-          href: "/category/tools",
-          description: "То, что реально стоит в мастерской, а не пылится в коробке.",
+          label: "Все категории",
+          href: "/categories",
+          description: "От косметики до электроники — товары кураторов по темам.",
         },
       ],
     },

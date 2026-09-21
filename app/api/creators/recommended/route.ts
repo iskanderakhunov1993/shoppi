@@ -6,7 +6,7 @@ import { isCategory } from "@/lib/categories";
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const categoriesParam = request.nextUrl.searchParams.get("categories") ?? "";

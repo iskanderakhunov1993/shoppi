@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   const user = await verifyUser(token);
   if (!user) {
-    return NextResponse.json({ error: "Invalid or already-used token" }, { status: 400 });
+    return NextResponse.json({ error: "Ссылка недействительна или уже использована" }, { status: 400 });
   }
 
   return NextResponse.json({ email: user.email, verified: true });

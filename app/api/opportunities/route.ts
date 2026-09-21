@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "brand") {
-    return NextResponse.json({ error: "Brands only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только брендам" }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

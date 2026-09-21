@@ -7,7 +7,7 @@ import { CATEGORIES } from "@/lib/categories";
 export async function GET(request: NextRequest) {
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const rows = await listLinksByCreator(creator.id);
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   if (!title || !targetUrl || !category) {
     return NextResponse.json(
-      { error: "title, targetUrl, and category are required" },
+      { error: "Укажите название, ссылку и категорию" },
       { status: 400 }
     );
   }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     new URL(targetUrl);
   } catch {
-    return NextResponse.json({ error: "targetUrl must be a valid URL" }, { status: 400 });
+    return NextResponse.json({ error: "Введите корректную ссылку на товар" }, { status: 400 });
   }
 
   const { marketplace, articleId } = parseMarketplaceItem(targetUrl);

@@ -5,7 +5,7 @@ import { fetchProductInfo, parseMarketplaceItem } from "@/lib/marketplace";
 export async function GET(request: NextRequest) {
   const creator = await requireCreator(request);
   if (!creator) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const url = request.nextUrl.searchParams.get("url");

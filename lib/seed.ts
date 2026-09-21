@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { hashPassword } from "./auth.ts";
 import {
   addLink,
@@ -18,6 +19,13 @@ import type { Category } from "./categories.ts";
 // one-click demo logins and the landing page has real storefronts to link
 // to. Idempotent — safe to call on every request.
 const DEMO_PASSWORD = "demo1234";
+
+// In production the seeded showcase accounts get an unguessable password:
+// they exist so their storefronts can be linked from the landing page,
+// not so anyone can sign in as them.
+function seedPasswordHash(): string {
+  return hashPassword(process.env.NODE_ENV === "production" ? randomBytes(32).toString("hex") : DEMO_PASSWORD);
+}
 export const DEMO_ACCOUNTS: Record<Role, string> = {
   shopper: "demo-shopper@myshop.dev",
   creator: "demo-creator@myshop.dev",
@@ -44,7 +52,7 @@ export async function seedCreatorAccount(
   const existing = await getUserByEmail(email);
   if (existing) return getCreatorByUserId(existing.id);
 
-  const { user, creator } = await createUser(email, passwordHash ?? hashPassword(DEMO_PASSWORD), "creator");
+  const { user, creator } = await createUser(email, passwordHash ?? seedPasswordHash(), "creator");
   await markUserVerified(user.id);
   if (!creator) return undefined;
 
@@ -67,7 +75,7 @@ export async function seedCreatorAccount(
   return getCreatorByUserId(user.id);
 }
 
-export async function seedDemoAccounts(): Promise<void> {
+async function runSeed(): Promise<void> {
   await seedCreatorAccount(
     DEMO_ACCOUNTS.creator,
     "Белла",
@@ -135,14 +143,14 @@ export async function seedDemoAccounts(): Promise<void> {
   );
 
   if (!(await getUserByEmail(DEMO_ACCOUNTS.shopper))) {
-    const { user } = await createUser(DEMO_ACCOUNTS.shopper, hashPassword(DEMO_PASSWORD), "shopper");
+    const { user } = await createUser(DEMO_ACCOUNTS.shopper, seedPasswordHash(), "shopper");
     await markUserVerified(user.id);
   }
 
   if (!(await getUserByEmail(DEMO_ACCOUNTS.brand))) {
     const { user } = await createUser(
       DEMO_ACCOUNTS.brand,
-      hashPassword(DEMO_PASSWORD),
+      seedPasswordHash(),
       "brand",
       "wildberries.ru"
     );
@@ -156,6 +164,19 @@ export async function seedDemoAccounts(): Promise<void> {
 export async function getDemoCreatorSlug(): Promise<string | undefined> {
   const user = await getUserByEmail(DEMO_ACCOUNTS.creator);
   return user ? (await getCreatorByUserId(user.id))?.slug : undefined;
+}
+
+// Public pages call this on every request. The seed is idempotent but
+// costs several sequential DB round trips, so run it once per server
+// instance and let later requests reuse the result. A failure clears
+// the cache so the next request retries.
+let seeded: Promise<void> | null = null;
+export function seedDemoAccounts(): Promise<void> {
+  seeded ??= runSeed().catch((err) => {
+    seeded = null;
+    throw err;
+  });
+  return seeded;
 }
 
 export async function listLandingCreators(): Promise<Creator[]> {

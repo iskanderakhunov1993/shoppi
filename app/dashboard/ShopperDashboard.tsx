@@ -33,7 +33,7 @@ const VALID_TABS: Tab[] = ["overview", "saved", "circle", "circles"];
 
 const TAB_HINT: Record<Tab, string> = {
   overview: "Как связаны разделы ниже — и что где искать.",
-  saved: "Товары, сохранённые с любой витрины — не привязаны к кругу или куратору.",
+  saved: "Товары, сохранённые с любой витрины. Эта же подборка доступна по ссылке — «Мой вишлист» вверху.",
   circle: "Те, на кого вы подписаны напрямую — их находки собираются в ленте ниже.",
   circles: "Группируйте кураторов из «Мои кураторы» по темам — например, «Уход» или «На дачу».",
 };
@@ -130,7 +130,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
   return (
     <main className="flex-1 flex flex-col">
       <DashboardHeader
-        label="Мой вкус"
+        label="Кабинет покупателя"
         title={me.displayName}
         action={
           <div className="flex items-center gap-2">

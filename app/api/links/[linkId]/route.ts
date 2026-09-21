@@ -6,7 +6,7 @@ import { CATEGORIES } from "@/lib/categories";
 /** Both handlers refuse to touch a link that belongs to someone else. */
 async function authorize(request: NextRequest, linkId: string) {
   const creator = await requireCreator(request);
-  if (!creator) return { error: NextResponse.json({ error: "Not authenticated" }, { status: 401 }) };
+  if (!creator) return { error: NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 }) };
 
   const link = await getLink(linkId);
   if (!link) return { error: NextResponse.json({ error: "Link not found" }, { status: 404 }) };
@@ -35,7 +35,7 @@ export async function PUT(
     );
   }
   if (body?.title !== undefined && !String(body.title).trim()) {
-    return NextResponse.json({ error: "title cannot be empty" }, { status: 400 });
+    return NextResponse.json({ error: "Название не может быть пустым" }, { status: 400 });
   }
 
   const updated = await updateLink(linkId, {

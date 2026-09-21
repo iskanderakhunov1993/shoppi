@@ -5,7 +5,7 @@ import { listApplicationsForOpportunity, listOpportunitiesByBrand } from "@/lib/
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "brand") {
-    return NextResponse.json({ error: "Brands only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только брендам" }, { status: 403 });
   }
 
   const opportunities = await listOpportunitiesByBrand(user.id);

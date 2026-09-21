@@ -24,7 +24,7 @@ function normalizeHandle(value: string): string | null {
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   if (user.role === "creator") {
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -149,5 +149,5 @@ export async function PUT(request: NextRequest) {
     });
   }
 
-  return NextResponse.json({ error: "Nothing to update for this role" }, { status: 400 });
+  return NextResponse.json({ error: "Для этой роли нечего обновлять" }, { status: 400 });
 }

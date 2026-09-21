@@ -42,11 +42,9 @@ export async function LandingFooter() {
       links: [
         { label: "Обзор", href: "/shoppers" },
         { label: "Все кураторы", href: "/curators" },
-        { label: "Косметика", href: "/category/cosmetics" },
-        { label: "Мужские товары", href: "/category/mens" },
-        { label: "Одежда", href: "/category/clothing" },
-        { label: "Инструменты", href: "/category/tools" },
-        { label: "Мой вкус", href: "/dashboard" },
+        { label: "Последние находки", href: "/finds" },
+        { label: "Все категории", href: "/categories" },
+        { label: "Сохранённое", href: "/dashboard?tab=saved" },
       ],
     },
     {

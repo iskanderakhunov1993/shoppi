@@ -29,7 +29,7 @@ export default async function Home() {
 
   await seedDemoAccounts();
   const creators = await listLandingCreators();
-  const domains = await listDistinctBrandDomains();
+  const domains = BRANDS_ENABLED ? await listDistinctBrandDomains() : [];
 
   return (
     <main className="flex-1 flex flex-col">

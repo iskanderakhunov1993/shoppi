@@ -5,7 +5,7 @@ import { addFavorite, getLink, listFavoriteLinks, removeFavorite } from "@/lib/s
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
-    return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
   const links = await listFavoriteLinks(user.id);
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
-    return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
-    return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
   const linkId = request.nextUrl.searchParams.get("linkId");

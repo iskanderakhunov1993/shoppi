@@ -4,7 +4,7 @@ import { getSectionById, renameSection, setSectionHidden, setSectionIcon, delete
 
 async function ownedSection(request: NextRequest, id: string) {
   const creator = await requireCreator(request);
-  if (!creator) return { error: NextResponse.json({ error: "Not authenticated" }, { status: 401 }) };
+  if (!creator) return { error: NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 }) };
   const section = await getSectionById(id);
   if (!section || section.creatorId !== creator.id) {
     return { error: NextResponse.json({ error: "Раздел не найден" }, { status: 404 }) };

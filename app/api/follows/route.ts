@@ -14,7 +14,7 @@ import {
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
 
   const followedCreators = await listFollowedCreators(user.id);
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
-    return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "shopper") {
-    return NextResponse.json({ error: "Shoppers only" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
   const creatorId = request.nextUrl.searchParams.get("creatorId");
