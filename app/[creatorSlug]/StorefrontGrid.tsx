@@ -6,6 +6,7 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { EditSectionButton } from "./EditSectionButton";
 import { AddSectionButton } from "./AddSectionButton";
 import { CollectionEditor } from "./CollectionEditor";
+import { CopyLinkButton } from "./CopyLinkButton";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type StorefrontLink = {
@@ -233,6 +234,10 @@ export function StorefrontGrid({
             ← Назад
           </button>
           <span className="font-display text-xl">{activeCollection.name}</span>
+          <CopyLinkButton
+            path={`${new URL(storefrontUrl || "http://x").pathname}/c/${activeCollection.id}`}
+            label="Поделиться коллекцией"
+          />
           {isOwner && (
             <button
               type="button"
