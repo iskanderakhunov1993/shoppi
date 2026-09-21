@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUser, getUserByEmail, markUserVerified, type Role } from "@/lib/store";
 import { hashPassword } from "@/lib/auth";
-import { EMAIL_ENABLED, EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
+import { EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
 
 const ROLES: Role[] = ["shopper", "creator", "brand"];
 
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
   const verifyUrl = `${protocol}://${host}/verify?token=${user.verificationToken}`;
   const emailed = await sendVerificationEmail(user.email, verifyUrl);
 
-  // Production with no mail provider configured at all: there is no way
-  // to prove ownership of the address, and returning the token would let
-  // anyone "verify" any email — so confirm the account right away rather
-  // than lock every new user out. (If mail IS configured but a send fails,
-  // the account stays unverified and the user retries via "resend".)
-  const autoVerified = !emailed && !EMAIL_ENABLED && !EXPOSE_LINKS;
+  // Production and the verification email could not be delivered (no
+  // provider, or the sandbox sender only reaches the Resend account owner).
+  // Returning the token would let anyone "verify" any address, and
+  // refusing would lock every new user out — so confirm the new account
+  // right away. Stopgap until a sending domain is verified in Resend.
+  const autoVerified = !emailed && !EXPOSE_LINKS;
   if (autoVerified) await markUserVerified(user.id);
 
   // Local dev only: hand the token back so /api/auth/verify stays testable.

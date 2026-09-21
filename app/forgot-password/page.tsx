@@ -26,17 +26,18 @@ export default function ForgotPasswordPage() {
     // Only ever populated when RESEND_API_KEY isn't configured (local
     // dev) — never rely on this in production, where it's always undefined.
     if (data.resetUrl) setDevResetUrl(data.resetUrl);
-    if (data.mailConfigured === false && !data.resetUrl) setMailOff(true);
+    if (data.emailed === false && !data.resetUrl) setMailOff(true);
   }
 
   if (sent && mailOff) {
     return (
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-sm flex flex-col gap-4">
-          <h1 className="font-display text-2xl">Сброс по почте пока недоступен</h1>
+          <h1 className="font-display text-2xl">Письмо не отправлено</h1>
           <p className="text-stone text-sm leading-relaxed">
-            Отправка писем на сервисе ещё не настроена, поэтому мы не можем прислать ссылку.
-            Обратитесь к администратору сервиса — он поможет восстановить доступ.
+            Аккаунта с адресом <strong className="text-ink">{email}</strong> может не быть, либо
+            почта сервиса пока не доставляет письма на этот адрес. Обратитесь к администратору
+            сервиса — он поможет восстановить доступ.
           </p>
           <Link href="/login" className="text-ink underline underline-offset-4 text-sm w-fit">
             Вернуться ко входу
