@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
@@ -131,12 +131,15 @@ type Role = "shopper" | "creator" | "brand";
  * deciding whether to join. Mirrors how shopmy's own nav swaps
  * "For Shoppers/For Creators" for direct links (Curators, Circles,
  * Wishlists...) once you're logged in. */
-function quickLinksFor(role: Role | undefined): { label: string; href: string }[] {
+function quickLinksFor(role: Role | undefined, creatorSlug?: string): { label: string; href: string }[] {
   if (role === "creator") {
+    // Mirrors ShopMy's "My Shop | Links": the storefront first, then the
+    // place where products are managed.
     return [
+      { label: "Моя витрина", href: creatorSlug ? `/${creatorSlug}` : "/dashboard" },
+      { label: "Ссылки", href: "/dashboard?tab=products" },
       { label: "Кураторы", href: "/curators" },
       { label: "Находки", href: "/finds" },
-      { label: "Разделы витрины", href: "/dashboard?tab=sections" },
     ];
   }
   // shopper, brand, or unknown role — brands have no dedicated quick
@@ -166,6 +169,7 @@ export function MegaNav({
   onboarding,
   avatarUrl,
   role,
+  creatorSlug,
   newFindsCount = 0,
 }: {
   signedIn: boolean;
@@ -174,6 +178,7 @@ export function MegaNav({
   onboarding?: { done: number; total: number };
   avatarUrl?: string;
   role?: Role;
+  creatorSlug?: string;
   newFindsCount?: number;
 }) {
   const [open, setOpen] = useState<string | null>(null);
@@ -183,6 +188,8 @@ export function MegaNav({
   const [searchQuery, setSearchQuery] = useState("");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isActive = (href: string) => href.split("?")[0] === pathname;
   const menus = buildMenus(demoSlug).filter((menu) => BRANDS_ENABLED || menu.key !== "brands");
 
   function submitSearch(e: React.FormEvent) {
@@ -242,14 +249,34 @@ export function MegaNav({
           Shoppi
         </Link>
 
-        {/* desktop triggers — quick links once signed in, marketing dropdowns for guests */}
-        <div className="hidden md:flex items-center gap-8">
-          {signedIn
-            ? quickLinksFor(role).map((link) => (
+        {signedIn && role === "creator" && (
+          <div className="flex md:hidden items-center gap-4">
+            {quickLinksFor(role, creatorSlug)
+              .slice(0, 2)
+              .map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[13px] tracking-wide transition-opacity ${mutedColor} hover:${textColor}`}
+                  className={`text-[13px] whitespace-nowrap pb-0.5 border-b ${
+                    isActive(link.href) ? `${textColor} border-current` : `${mutedColor} border-transparent`
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+          </div>
+        )}
+
+        {/* desktop triggers — quick links once signed in, marketing dropdowns for guests */}
+        <div className="hidden md:flex items-center gap-8">
+          {signedIn
+            ? quickLinksFor(role, creatorSlug).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-[13px] tracking-wide transition-opacity pb-0.5 border-b ${
+                    isActive(link.href) ? `${textColor} border-current` : `${mutedColor} border-transparent hover:${textColor}`
+                  }`}
                 >
                   {link.label}
                   {link.href === "/finds" && <FindsBadge count={newFindsCount} />}
@@ -417,7 +444,7 @@ export function MegaNav({
         <div className="md:hidden absolute top-full left-0 right-0 bg-card border-y border-line px-6 py-6 flex flex-col gap-7 max-h-[70vh] overflow-y-auto">
           {signedIn ? (
             <div className="flex flex-col gap-2.5">
-              {quickLinksFor(role).map((link) => (
+              {quickLinksFor(role, creatorSlug).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

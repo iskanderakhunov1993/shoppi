@@ -31,6 +31,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   let onboarding: { done: number; total: number } | undefined;
   let avatarUrl: string | undefined;
   let role: "shopper" | "creator" | "brand" | undefined;
+  let creatorSlug: string | undefined;
   let newFindsCount = 0;
   if (userId) {
     const user = await getUserById(userId);
@@ -48,6 +49,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       newFindsCount = follows.length > 0 ? newFinds : 0;
     } else if (user?.role === "creator") {
       const creator = await getCreatorByUserId(userId);
+      creatorSlug = creator?.slug;
       avatarUrl = creator?.avatarUrl || placeholderAvatar(creator?.slug ?? userId);
     } else {
       // Brands have no avatar concept yet — still need something in
@@ -64,6 +66,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
       onboarding={onboarding}
       avatarUrl={avatarUrl}
       role={role}
+      creatorSlug={creatorSlug}
       newFindsCount={newFindsCount}
     />
   );

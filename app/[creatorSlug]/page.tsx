@@ -9,6 +9,7 @@ import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { SOCIALS } from "@/app/components/SocialIcons";
+import { TrustInfo } from "./TrustInfo";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { getSessionUserId, getCreatorByUserId, getUserById } from "@/lib/store";
@@ -152,6 +153,7 @@ export default async function StorefrontPage({
         <p className="font-display italic text-stone text-sm mb-5">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
           {pluralizeShoppers(creator.followers)}
+          <TrustInfo text="Столько покупателей подписались на этого куратора. Это реальные подписки, а не просмотры." />
         </p>
         {SOCIALS.some((n) => creator[n.key]) && (
           <div className="flex justify-center gap-4">
