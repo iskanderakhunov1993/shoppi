@@ -243,7 +243,7 @@ export function MegaNav({
       }`}
       onMouseLeave={scheduleClose}
     >
-      <div className="px-6 md:px-10">
+      <div className="px-4 sm:px-6 md:px-10">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3 py-5">
         <Link href="/" className={`font-display text-lg ${textColor}`}>
           Shoppi
