@@ -57,6 +57,8 @@ export async function GET(
     avatarUrl: creator.avatarUrl,
     instagramHandle: creator.instagramHandle,
     tiktokHandle: creator.tiktokHandle,
+    telegramHandle: creator.telegramHandle,
+    youtubeHandle: creator.youtubeHandle,
     categories: creator.categories ?? [],
     hidePopular: creator.hidePopular,
     followers: await countFollowers(creator.id),

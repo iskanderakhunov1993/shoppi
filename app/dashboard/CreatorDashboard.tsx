@@ -36,12 +36,14 @@ export function CreatorDashboard({
     avatarUrl?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    telegramHandle?: string;
+    youtubeHandle?: string;
+    onboarded?: boolean;
     categories?: Category[];
     hidePopular?: boolean;
   };
   onProfileSaved: () => void;
 }) {
-  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [links, setLinks] = useState<LinkRow[] | null>(null);
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
@@ -205,20 +207,10 @@ export function CreatorDashboard({
   const totalHuman = links.reduce((s, l) => s + l.clicks, 0);
   const totalAll = links.reduce((s, l) => s + l.clicksTotal, 0);
 
-  // A brand-new account (no bio, no products yet) gets the guided
-  // onboarding instead of dropping straight into the full dashboard.
-  const isNewAccount = !me.bio?.trim() && links.length === 0;
-  if (isNewAccount && !onboardingDismissed) {
-    return (
-      <CreatorOnboardingWizard
-        me={me}
-        onDone={async () => {
-          onProfileSaved();
-          setOnboardingDismissed(true);
-          await loadLinks();
-        }}
-      />
-    );
+  // A brand-new account gets the guided onboarding first; finishing or
+  // skipping it is remembered on the server (`onboarded`).
+  if (!me.onboarded) {
+    return <CreatorOnboardingWizard me={me} />;
   }
 
   return (

@@ -16,9 +16,9 @@ import { isCategory } from "@/lib/categories";
 function normalizeHandle(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
-  const fromUrl = trimmed.match(/(?:instagram\.com|tiktok\.com)\/@?([\w.]+)/i);
+  const fromUrl = trimmed.match(/(?:instagram\.com|tiktok\.com|t\.me|youtube\.com|youtu\.be)\/(?:@|c\/|channel\/|user\/)?([\w.-]+)/i);
   if (fromUrl) return fromUrl[1];
-  return trimmed.replace(/^@/, "");
+  return trimmed.replace(/^@/, "").slice(0, 64);
 }
 
 export async function GET(request: NextRequest) {
@@ -38,6 +38,9 @@ export async function GET(request: NextRequest) {
       avatarUrl: creator?.avatarUrl ?? "",
       instagramHandle: creator?.instagramHandle ?? "",
       tiktokHandle: creator?.tiktokHandle ?? "",
+      telegramHandle: creator?.telegramHandle ?? "",
+      youtubeHandle: creator?.youtubeHandle ?? "",
+      onboarded: creator?.onboarded ?? false,
       categories: creator?.categories ?? [],
       hidePopular: creator?.hidePopular ?? false,
     });
@@ -87,6 +90,9 @@ export async function PUT(request: NextRequest) {
       avatarUrl: body?.avatarUrl,
       instagramHandle: body?.instagramHandle !== undefined ? normalizeHandle(body.instagramHandle) : undefined,
       tiktokHandle: body?.tiktokHandle !== undefined ? normalizeHandle(body.tiktokHandle) : undefined,
+      telegramHandle: body?.telegramHandle !== undefined ? normalizeHandle(body.telegramHandle) : undefined,
+      youtubeHandle: body?.youtubeHandle !== undefined ? normalizeHandle(body.youtubeHandle) : undefined,
+      onboarded: typeof body?.onboarded === "boolean" ? body.onboarded : undefined,
       categories: Array.isArray(body?.categories) ? body.categories.filter(isCategory) : undefined,
       hidePopular: typeof body?.hidePopular === "boolean" ? body.hidePopular : undefined,
     });
@@ -98,6 +104,9 @@ export async function PUT(request: NextRequest) {
       slug: updated?.slug,
       instagramHandle: updated?.instagramHandle ?? "",
       tiktokHandle: updated?.tiktokHandle ?? "",
+      telegramHandle: updated?.telegramHandle ?? "",
+      youtubeHandle: updated?.youtubeHandle ?? "",
+      onboarded: updated?.onboarded ?? false,
       categories: updated?.categories ?? [],
       hidePopular: updated?.hidePopular ?? false,
     });

@@ -18,6 +18,9 @@ type Me = {
   affiliateTemplate?: string;
   instagramHandle?: string;
   tiktokHandle?: string;
+  telegramHandle?: string;
+  youtubeHandle?: string;
+  onboarded?: boolean;
   categories?: Category[];
   hidePopular?: boolean;
 };

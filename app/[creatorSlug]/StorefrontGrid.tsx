@@ -83,7 +83,13 @@ export function StorefrontGrid({
   if (links.length === 0) {
     return (
       <div className="py-16 flex justify-center">
-        <EmptyState title="Куратор пока не добавил товары." />
+        <EmptyState
+          title={
+            isOwner
+              ? "Витрина пока пуста — добавьте первый товар кнопкой «+» вверху справа."
+              : "Куратор пока не добавил товары."
+          }
+        />
       </div>
     );
   }

@@ -40,6 +40,10 @@ export type Creator = {
   avatarUrl?: string;
   instagramHandle?: string;
   tiktokHandle?: string;
+  telegramHandle?: string;
+  youtubeHandle?: string;
+  // False until the creator finishes (or skips) the first-run wizard.
+  onboarded: boolean;
   // What the creator says they mostly post about — set once during
   // onboarding, shown on the storefront as a light orientation cue.
   // Not a claim of expertise or a ranking signal, just a filter hint.
@@ -114,6 +118,9 @@ function toCreator(r: Row): Creator {
     avatarUrl: opt(r.avatar_url),
     instagramHandle: opt(r.instagram_handle),
     tiktokHandle: opt(r.tiktok_handle),
+    telegramHandle: opt(r.telegram_handle),
+    youtubeHandle: opt(r.youtube_handle),
+    onboarded: Boolean(r.onboarded),
     categories: r.categories ? (JSON.parse(str(r.categories)) as Category[]) : undefined,
     hidePopular: Boolean(r.hide_popular),
   };
@@ -314,6 +321,9 @@ export async function updateCreator(
     slug?: string;
     instagramHandle?: string | null;
     tiktokHandle?: string | null;
+    telegramHandle?: string | null;
+    youtubeHandle?: string | null;
+    onboarded?: boolean;
     categories?: Category[] | null;
     hidePopular?: boolean;
   }
@@ -333,12 +343,31 @@ export async function updateCreator(
         slug = ${patch.slug ?? current.slug},
         instagram_handle = ${patch.instagramHandle === undefined ? (current.instagramHandle ?? null) : patch.instagramHandle},
         tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle},
+        telegram_handle = ${patch.telegramHandle === undefined ? (current.telegramHandle ?? null) : patch.telegramHandle},
+        youtube_handle = ${patch.youtubeHandle === undefined ? (current.youtubeHandle ?? null) : patch.youtubeHandle},
+        onboarded = ${patch.onboarded ?? current.onboarded},
         categories = ${nextCategories ? JSON.stringify(nextCategories) : null},
         hide_popular = ${patch.hidePopular ?? current.hidePopular}
     WHERE id = ${creatorId}
   `;
 
   return getCreatorById(creatorId);
+}
+
+/** Uploaded profile photos live in their own table so creator listings
+ * (which SELECT *) never drag image bytes along. */
+export async function saveCreatorAvatar(creatorId: string, mime: string, base64: string): Promise<void> {
+  await sql`
+    INSERT INTO creator_avatars (creator_id, mime, data, updated_at)
+    VALUES (${creatorId}, ${mime}, ${base64}, now())
+    ON CONFLICT (creator_id) DO UPDATE SET mime = EXCLUDED.mime, data = EXCLUDED.data, updated_at = now()
+  `;
+}
+
+export async function getCreatorAvatar(creatorId: string): Promise<{ mime: string; bytes: Buffer } | undefined> {
+  const rows = await sql`SELECT mime, data FROM creator_avatars WHERE creator_id = ${creatorId}`;
+  if (!rows[0]) return undefined;
+  return { mime: str(rows[0].mime), bytes: Buffer.from(str(rows[0].data), "base64") };
 }
 
 /** Paginated creator directory — the landing and /curators must never load all 500. */

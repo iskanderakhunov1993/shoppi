@@ -8,6 +8,7 @@ import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { SOCIALS } from "@/app/components/SocialIcons";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { getSessionUserId, getCreatorByUserId, getUserById } from "@/lib/store";
@@ -52,6 +53,8 @@ async function getStorefront(slug: string) {
     avatarUrl?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    telegramHandle?: string;
+    youtubeHandle?: string;
     categories?: Category[];
     hidePopular?: boolean;
     followers: number;
@@ -66,30 +69,6 @@ function PencilIcon() {
         d="M11.3 2.3a1.4 1.4 0 0 1 2 2L5.4 12.2l-2.8.7.7-2.8L11.3 2.3z"
         stroke="currentColor"
         strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function InstagramIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
-
-function TiktokIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M14 3v10.6a3.4 3.4 0 1 1-2.6-3.3M14 3c.4 2.2 2 3.9 4.2 4.2"
-        stroke="currentColor"
-        strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -162,29 +141,21 @@ export default async function StorefrontPage({
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
           {pluralizeShoppers(creator.followers)}
         </p>
-        {(creator.instagramHandle || creator.tiktokHandle) && (
+        {SOCIALS.some((n) => creator[n.key]) && (
           <div className="flex justify-center gap-4">
-            {creator.instagramHandle && (
-              <a
-                href={`https://instagram.com/${creator.instagramHandle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="text-stone hover:text-ink transition-colors"
-              >
-                <InstagramIcon />
-              </a>
-            )}
-            {creator.tiktokHandle && (
-              <a
-                href={`https://tiktok.com/@${creator.tiktokHandle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="text-stone hover:text-ink transition-colors"
-              >
-                <TiktokIcon />
-              </a>
+            {SOCIALS.map(({ key, label, Icon, url }) =>
+              creator[key] ? (
+                <a
+                  key={key}
+                  href={url(creator[key]!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="text-stone hover:text-ink transition-colors"
+                >
+                  <Icon />
+                </a>
+              ) : null
             )}
           </div>
         )}

@@ -1,24 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { inputClass, buttonClass } from "@/app/components/Field";
 import { placeholderAvatar } from "@/lib/avatar";
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
+import type { SocialKey } from "@/app/components/SocialIcons";
+import { AvatarUpload } from "./AvatarUpload";
+import { SocialFields } from "./SocialFields";
 
 /**
  * Shown once, right after registration, instead of the full tabbed
- * dashboard: welcome → fill in the profile → add the first product.
- * Modeled on the reference onboarding flow, minus the parts that don't
- * apply here — no discoverability tags or trust tiers (nothing to back
- * them with yet), no product-catalog search (WB/Ozon block server-side
- * scraping, see the PRD) — just the steps that are actually real for us.
- * Instagram/TikTok handles are optional here since a creator may not
- * have them at hand yet — they can always add them later from Профиль
- * и медиакит.
+ * dashboard: welcome → profile → what the storefront is about. Then the
+ * creator lands on their own storefront (where the "+" button adds the
+ * first product) rather than in a form-heavy dashboard. Completion is
+ * stored on the server (`onboarded`), so skipping any field never brings
+ * the wizard back.
  */
 export function CreatorOnboardingWizard({
   me,
-  onDone,
 }: {
   me: {
     displayName: string;
@@ -27,98 +27,70 @@ export function CreatorOnboardingWizard({
     slug?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    telegramHandle?: string;
+    youtubeHandle?: string;
     categories?: Category[];
   };
-  onDone: () => void;
 }) {
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+  const router = useRouter();
+  const [step, setStep] = useState<0 | 1 | 2>(0);
 
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
-  const [instagramHandle, setInstagramHandle] = useState(me.instagramHandle ?? "");
-  const [tiktokHandle, setTiktokHandle] = useState(me.tiktokHandle ?? "");
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
+  const [socials, setSocials] = useState<Record<SocialKey, string>>({
+    instagramHandle: me.instagramHandle ?? "",
+    tiktokHandle: me.tiktokHandle ?? "",
+    telegramHandle: me.telegramHandle ?? "",
+    youtubeHandle: me.youtubeHandle ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [niche, setNiche] = useState<Category[]>(me.categories ?? []);
-  const [savingNiche, setSavingNiche] = useState(false);
-
-  const [title, setTitle] = useState("");
-  const [targetUrl, setTargetUrl] = useState("");
-  const [category, setCategory] = useState<Category>("cosmetics");
-  const [savingProduct, setSavingProduct] = useState(false);
-  const [productError, setProductError] = useState<string | null>(null);
-  const [addedCount, setAddedCount] = useState(0);
 
   function toggleNiche(c: Category) {
     setNiche((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   }
 
-  async function saveNiche() {
-    setSavingNiche(true);
-    await fetch("/api/me", {
+  async function put(body: Record<string, unknown>) {
+    return fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ categories: niche }),
+      body: JSON.stringify(body),
     });
-    setSavingNiche(false);
-    if (niche[0]) setCategory(niche[0]);
-    setStep(3);
   }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
-    setProfileError(null);
-    setSavingProfile(true);
-
-    const res = await fetch("/api/me", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle }),
-    });
-    setSavingProfile(false);
-
+    setError(null);
+    setSaving(true);
+    const res = await put({ displayName, bio, ...socials });
+    setSaving(false);
     if (!res.ok) {
-      setProfileError((await res.json()).error ?? "Не удалось сохранить");
+      setError((await res.json()).error ?? "Не удалось сохранить");
       return;
     }
     setStep(2);
   }
 
-
-
-  async function addProduct(e: React.FormEvent) {
-    e.preventDefault();
-    setProductError(null);
-    setSavingProduct(true);
-
-    const res = await fetch("/api/links", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, targetUrl, category }),
-    });
-    setSavingProduct(false);
-
+  async function finish(withNiche: boolean) {
+    setError(null);
+    setSaving(true);
+    const res = await put({ onboarded: true, ...(withNiche ? { categories: niche } : {}) });
     if (!res.ok) {
-      setProductError((await res.json()).error ?? "Не удалось добавить товар");
+      setSaving(false);
+      setError((await res.json()).error ?? "Не удалось сохранить");
       return;
     }
-
-    // A single product leaves an almost-empty storefront, so the flow
-    // pauses here instead of exiting straight to the dashboard — the
-    // creator explicitly chooses to add another or wrap up.
-    setAddedCount((n) => n + 1);
-    setTitle("");
-    setTargetUrl("");
-    setProductError(null);
+    router.push(me.slug ? `/${me.slug}` : "/dashboard");
   }
 
   return (
     <main className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm flex flex-col gap-8">
         <div className="flex gap-1">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2].map((i) => (
             <span
               key={i}
               className={`h-[3px] flex-1 rounded-full transition-colors ${i <= step ? "bg-ink" : "bg-line"}`}
@@ -139,7 +111,6 @@ export function CreatorOnboardingWizard({
               <p className="text-stone text-sm leading-relaxed">
                 Ведите витрину с товарами, которые правда советуете, и видите честную
                 статистику переходов — без чужого алгоритма между вами и аудиторией.
-                Пара шагов — и готово.
               </p>
             </div>
             <button onClick={() => setStep(1)} className={`${buttonClass} w-fit`}>
@@ -149,68 +120,35 @@ export function CreatorOnboardingWizard({
         )}
 
         {step === 1 && (
-          <form onSubmit={saveProfile} className="flex flex-col gap-4">
-            <div>
-              <h1 className="font-display text-2xl mb-1">Расскажите о себе</h1>
-              <p className="text-stone text-sm">Это увидят на вашей витрине.</p>
-            </div>
+          <form onSubmit={saveProfile} className="flex flex-col gap-6">
+            <h1 className="font-display text-2xl text-center">Расскажите о себе</h1>
 
-            <label className="text-[11px] uppercase tracking-wider text-stone">Имя на витрине</label>
-            <input
-              className={`${inputClass}`}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              required
-            />
+            <AvatarUpload avatarUrl={avatarUrl} seed={me.slug ?? me.displayName} onChange={setAvatarUrl} />
 
-            <label className="text-[11px] uppercase tracking-wider text-stone">О себе</label>
-            <textarea
-              className={`${inputClass} resize-y min-h-20`}
-              value={bio}
-              placeholder="Одна строка о том, что вы советуете"
-              onChange={(e) => setBio(e.target.value)}
-            />
-
-            <label className="text-[11px] uppercase tracking-wider text-stone">
-              Фото профиля (необязательно)
-            </label>
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={avatarUrl || placeholderAvatar(me.slug ?? me.displayName)}
-                alt=""
-                className="w-12 h-12 rounded-full object-cover bg-raise flex-none border border-line"
+            <div className="flex flex-col gap-3">
+              <input
+                className={inputClass}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Имя на витрине"
+                aria-label="Имя на витрине"
+                required
               />
               <input
-                className={`${inputClass} flex-1 min-w-0`}
-                value={avatarUrl}
-                placeholder="Ссылка на фото"
-                onChange={(e) => setAvatarUrl(e.target.value)}
+                className={inputClass}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Пара слов о том, что вы советуете"
+                aria-label="О себе"
+                maxLength={140}
               />
             </div>
 
-            <label className="text-[11px] uppercase tracking-wider text-stone pt-2 border-t border-line">
-              Соцсети (необязательно)
-            </label>
-            <p className="text-stone text-[12px] leading-relaxed -mt-2">
-              Появятся значками на витрине рядом с именем.
-            </p>
-            <input
-              className={`${inputClass}`}
-              value={instagramHandle}
-              placeholder="Instagram: имя_аккаунта"
-              onChange={(e) => setInstagramHandle(e.target.value)}
-            />
-            <input
-              className={`${inputClass}`}
-              value={tiktokHandle}
-              placeholder="TikTok: имя_аккаунта"
-              onChange={(e) => setTiktokHandle(e.target.value)}
-            />
+            <SocialFields values={socials} onChange={(key, value) => setSocials((s) => ({ ...s, [key]: value }))} />
 
-            {profileError && <p className="text-error text-sm">{profileError}</p>}
-            <button type="submit" disabled={savingProfile} className={buttonClass}>
-              {savingProfile ? "Сохраняем…" : "Далее"}
+            {error && <p className="text-error text-sm">{error}</p>}
+            <button type="submit" disabled={saving} className={buttonClass}>
+              {saving ? "Сохраняем…" : "Далее"}
             </button>
           </form>
         )}
@@ -220,8 +158,7 @@ export function CreatorOnboardingWizard({
             <div>
               <h1 className="font-display text-2xl mb-1">О чём ваша витрина?</h1>
               <p className="text-stone text-sm leading-relaxed">
-                Выберите одну или несколько категорий — покажем их на витрине, чтобы покупатели
-                сразу понимали, чего от вас ждать. Можно изменить позже.
+                Выберите категории — покупатели сразу поймут, чего от вас ждать. Можно изменить позже.
               </p>
             </div>
 
@@ -231,6 +168,7 @@ export function CreatorOnboardingWizard({
                   key={c}
                   type="button"
                   onClick={() => toggleNiche(c)}
+                  aria-pressed={niche.includes(c)}
                   className={`text-[13px] px-4 py-2 rounded-full border transition-colors cursor-pointer ${
                     niche.includes(c) ? "border-ink bg-ink text-paper" : "border-line hover:border-ink"
                   }`}
@@ -240,129 +178,25 @@ export function CreatorOnboardingWizard({
               ))}
             </div>
 
-            <div className="flex gap-3">
+            {error && <p className="text-error text-sm">{error}</p>}
+            <div className="flex items-center gap-4">
               <button
                 type="button"
-                onClick={saveNiche}
-                disabled={savingNiche || niche.length === 0}
+                onClick={() => finish(true)}
+                disabled={saving || niche.length === 0}
                 className={`${buttonClass} disabled:opacity-40 disabled:cursor-not-allowed`}
               >
-                {savingNiche ? "Сохраняем…" : "Далее"}
+                {saving ? "Открываем…" : "Открыть витрину"}
               </button>
               <button
                 type="button"
-                onClick={() => setStep(3)}
+                onClick={() => finish(false)}
+                disabled={saving}
                 className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
               >
                 Пропустить
               </button>
             </div>
-          </div>
-        )}
-
-        {step === 3 && addedCount === 0 && (
-          <form onSubmit={addProduct} className="flex flex-col gap-4">
-            <div>
-              <h1 className="font-display text-2xl mb-1">Добавьте первый товар</h1>
-              <p className="text-stone text-sm">
-                Вставьте ссылку на товар, который сами купили бы снова.
-              </p>
-            </div>
-
-            <input
-              placeholder="Название товара"
-              required
-              className={`${inputClass}`}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              placeholder="Ссылка на товар"
-              type="url"
-              required
-              className={`${inputClass}`}
-              value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
-            />
-            <select
-              className={`${inputClass}`}
-              value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {CATEGORY_LABEL[c]}
-                </option>
-              ))}
-            </select>
-
-            {productError && <p className="text-error text-sm">{productError}</p>}
-            <button type="submit" disabled={savingProduct} className={buttonClass}>
-              {savingProduct ? "Добавляем…" : "Добавить товар"}
-            </button>
-            <button
-              type="button"
-              onClick={onDone}
-              className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
-            >
-              Пропустить, заполню позже
-            </button>
-          </form>
-        )}
-
-        {step === 3 && addedCount > 0 && (
-          <div className="flex flex-col gap-5">
-            <div>
-              <h1 className="font-display text-2xl mb-1">
-                {addedCount === 1 ? "Товар добавлен" : `Добавлено товаров: ${addedCount}`}
-              </h1>
-              <p className="text-stone text-sm leading-relaxed">
-                {addedCount === 1
-                  ? "Одного товара достаточно для старта, но витрина выглядит убедительнее с 3–5. Добавите ещё?"
-                  : "Отличная витрина складывается. Можно продолжить или перейти в кабинет прямо сейчас."}
-              </p>
-            </div>
-
-            <form onSubmit={addProduct} className="flex flex-col gap-4">
-              <input
-                placeholder="Название товара"
-                required
-                className={`${inputClass}`}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <input
-                placeholder="Ссылка на товар"
-                type="url"
-                required
-                className={`${inputClass}`}
-                value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
-              />
-              <select
-                className={`${inputClass}`}
-                value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {CATEGORY_LABEL[c]}
-                  </option>
-                ))}
-              </select>
-              {productError && <p className="text-error text-sm">{productError}</p>}
-              <button type="submit" disabled={savingProduct} className={buttonClass}>
-                {savingProduct ? "Добавляем…" : "Добавить ещё один"}
-              </button>
-            </form>
-
-            <button
-              type="button"
-              onClick={onDone}
-              className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
-            >
-              Готово, перейти в кабинет
-            </button>
           </div>
         )}
       </div>

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { inputClass } from "@/app/components/Field";
-import { placeholderAvatar } from "@/lib/avatar";
+import type { SocialKey } from "@/app/components/SocialIcons";
+import { AvatarUpload } from "./AvatarUpload";
+import { SocialFields } from "./SocialFields";
 
 export function ProfileEditor({
   me,
@@ -16,6 +18,8 @@ export function ProfileEditor({
     slug?: string;
     instagramHandle?: string;
     tiktokHandle?: string;
+    telegramHandle?: string;
+    youtubeHandle?: string;
     hidePopular?: boolean;
   };
   onSaved: () => void;
@@ -25,8 +29,12 @@ export function ProfileEditor({
   const [displayName, setDisplayName] = useState(me.displayName);
   const [bio, setBio] = useState(me.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me.avatarUrl ?? "");
-  const [instagramHandle, setInstagramHandle] = useState(me.instagramHandle ?? "");
-  const [tiktokHandle, setTiktokHandle] = useState(me.tiktokHandle ?? "");
+  const [socials, setSocials] = useState<Record<SocialKey, string>>({
+    instagramHandle: me.instagramHandle ?? "",
+    tiktokHandle: me.tiktokHandle ?? "",
+    telegramHandle: me.telegramHandle ?? "",
+    youtubeHandle: me.youtubeHandle ?? "",
+  });
   const [hidePopular, setHidePopular] = useState(me.hidePopular ?? false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -40,7 +48,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, avatarUrl, instagramHandle, tiktokHandle, hidePopular }),
+      body: JSON.stringify({ displayName, bio, ...socials, hidePopular }),
     });
     const data = await res.json();
     setSaving(false);
@@ -83,25 +91,7 @@ export function ProfileEditor({
       <section className="flex flex-col gap-4 p-5 border border-line">
         <h3 className="text-[11px] uppercase tracking-wider text-stone">Основное</h3>
 
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={avatarUrl || placeholderAvatar(me.slug ?? me.displayName)}
-            alt=""
-            className="w-14 h-14 rounded-full object-cover bg-raise flex-none border border-line"
-          />
-          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-            <input
-              className={`${inputClass} border border-line px-3 py-2`}
-              value={avatarUrl}
-              placeholder="Ссылка на фото профиля"
-              onChange={(e) => setAvatarUrl(e.target.value)}
-            />
-            <p className="text-stone text-[11.5px] leading-relaxed">
-              Пусто — покажем нарисованный портрет, одинаковый при каждом заходе.
-            </p>
-          </div>
-        </div>
+        <AvatarUpload avatarUrl={avatarUrl} seed={me.slug ?? me.displayName} onChange={setAvatarUrl} size={88} />
 
         <label className="text-[11px] uppercase tracking-wider text-stone -mb-2">Имя на витрине</label>
         <input
@@ -121,24 +111,8 @@ export function ProfileEditor({
       </section>
 
       <section className="flex flex-col gap-4 p-5 border border-line">
-        <div>
-          <h3 className="text-[11px] uppercase tracking-wider text-stone">Соцсети</h3>
-          <p className="text-stone text-[11.5px] leading-relaxed mt-1">
-            Необязательно. Появятся значками на витрине рядом с именем.
-          </p>
-        </div>
-        <input
-          className={`${inputClass} border border-line px-3 py-2.5`}
-          value={instagramHandle}
-          placeholder="Instagram: имя_аккаунта"
-          onChange={(e) => setInstagramHandle(e.target.value)}
-        />
-        <input
-          className={`${inputClass} border border-line px-3 py-2.5`}
-          value={tiktokHandle}
-          placeholder="TikTok: имя_аккаунта"
-          onChange={(e) => setTiktokHandle(e.target.value)}
-        />
+        <h3 className="text-[11px] uppercase tracking-wider text-stone">Соцсети</h3>
+        <SocialFields values={socials} onChange={(key, value) => setSocials((s) => ({ ...s, [key]: value }))} />
       </section>
 
       <section className="flex flex-col gap-3 p-5 border border-line">
