@@ -244,13 +244,13 @@ export function MegaNav({
       onMouseLeave={scheduleClose}
     >
       <div className="px-6 md:px-10">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between py-5">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3 py-5">
         <Link href="/" className={`font-display text-lg ${textColor}`}>
           Shoppi
         </Link>
 
         {signedIn && role === "creator" && (
-          <div className="flex md:hidden items-center gap-4">
+          <div className="flex md:hidden items-center gap-3">
             {quickLinksFor(role, creatorSlug)
               .slice(0, 2)
               .map((link) => (
