@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdLabel } from "@/app/components/AdLabel";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -116,6 +117,7 @@ export default async function CollectionPage({ params }: { params: Promise<Param
                   {link.brand && ` · ${link.brand}`}
                 </span>
                 <span className="text-sm font-medium leading-snug">{link.title}</span>
+                <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
                 {link.price && <span className="text-[13.5px] text-stone">{link.price.toLocaleString("ru-RU")} ₽</span>}
               </a>
             </div>

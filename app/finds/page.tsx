@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdLabel } from "@/app/components/AdLabel";
 import { cookies } from "next/headers";
 import { listRecentLinks, listFollowedLinks, getSessionUserId, getUserById, markFindsSeen } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
@@ -97,6 +98,7 @@ export default async function FindsPage({
                 {CATEGORY_LABEL[link.category] ?? link.category}
               </span>
               <div className="text-sm font-medium leading-snug">{link.title}</div>
+              <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
               <div className="flex items-center justify-between mt-auto pt-1">
                 <div className="flex items-center gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

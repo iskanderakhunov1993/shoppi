@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdLabel } from "@/app/components/AdLabel";
 import { seedDemoAccounts } from "@/lib/seed";
 import { listLinksByCategory, getCreatorById, type Link as ShopLink } from "@/lib/store";
 import { LandingNav } from "@/app/components/landing/LandingNav";
@@ -91,6 +92,7 @@ export default async function CategoryPage({
                     </div>
                     <div className="p-5">
                       <div className="text-sm font-medium leading-snug mb-1">{link.title}</div>
+                      <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
                       {creator && (
                         <span className="text-[11px] text-stone">от {creator.displayName}</span>
                       )}

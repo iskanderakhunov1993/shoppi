@@ -1,5 +1,6 @@
 "use client";
 
+import { AdLabel } from "@/app/components/AdLabel";
 import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { EmptyState } from "@/app/components/EmptyState";
@@ -22,6 +23,8 @@ type StorefrontLink = {
   wrappedUrl: string;
   clicks: number;
   saves: number;
+  isAd?: boolean;
+  adInfo?: string;
 };
 
 type Section = { id: string; name: string; icon?: string; links: StorefrontLink[] };
@@ -424,6 +427,7 @@ export function StorefrontGrid({
                   {link.subtype && ` · ${link.subtype}`}
                 </span>
                 <div className="text-sm font-medium leading-snug">{link.title}</div>
+                <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
                 {link.price && (
                   <div className="text-[13.5px] text-stone">
                     {link.price.toLocaleString("ru-RU")} ₽

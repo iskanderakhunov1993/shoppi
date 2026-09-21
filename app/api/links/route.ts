@@ -65,6 +65,8 @@ export async function POST(request: NextRequest) {
     promoCode: body?.promoCode || undefined,
     brand: body?.brand || undefined,
     subtype: body?.subtype || undefined,
+    isAd: body?.isAd === true,
+    adInfo: body?.isAd === true ? String(body?.adInfo ?? "").trim().slice(0, 200) || undefined : undefined,
     marketplace,
     articleId,
   });

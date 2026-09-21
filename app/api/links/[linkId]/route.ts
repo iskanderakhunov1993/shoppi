@@ -46,6 +46,14 @@ export async function PUT(
     promoCode: body?.promoCode === null ? null : body?.promoCode,
     brand: body?.brand === null ? null : body?.brand,
     subtype: body?.subtype === null ? null : body?.subtype,
+    isAd: typeof body?.isAd === "boolean" ? body.isAd : undefined,
+    // Advertiser details only make sense while the link is marked as ad.
+    adInfo:
+      body?.isAd === false
+        ? null
+        : body?.adInfo === undefined
+          ? undefined
+          : String(body.adInfo ?? "").trim().slice(0, 200) || null,
   });
 
   return NextResponse.json({ ...updated, wrappedUrl: `/r/${linkId}` });

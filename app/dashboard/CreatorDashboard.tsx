@@ -9,6 +9,7 @@ import { OnboardingProgress } from "./OnboardingProgress";
 import { OpportunitiesFeed } from "./OpportunitiesFeed";
 import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
 import { SectionsManager } from "./SectionsManager";
+import { AdFields } from "./AdFields";
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type LinkRow = {
@@ -20,6 +21,8 @@ type LinkRow = {
   imageUrl?: string;
   price?: number;
   promoCode?: string;
+  isAd?: boolean;
+  adInfo?: string;
   clicks: number;
   clicksTotal: number;
   wrappedUrl: string;
@@ -54,6 +57,7 @@ export function CreatorDashboard({
   const [promoCode, setPromoCode] = useState("");
   const [brand, setBrand] = useState("");
   const [subtype, setSubtype] = useState("");
+  const [ad, setAd] = useState({ isAd: false, adInfo: "" });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
@@ -66,6 +70,7 @@ export function CreatorDashboard({
   const [editPromoCode, setEditPromoCode] = useState("");
   const [editBrand, setEditBrand] = useState("");
   const [editSubtype, setEditSubtype] = useState("");
+  const [editAd, setEditAd] = useState({ isAd: false, adInfo: "" });
   const [origin, setOrigin] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const [tab, setTab] = useState<"products" | "earnings" | "profile" | "sections">("products");
@@ -135,6 +140,8 @@ export function CreatorDashboard({
         promoCode: promoCode.trim() || undefined,
         brand: brand.trim() || undefined,
         subtype: subtype.trim() || undefined,
+        isAd: ad.isAd || undefined,
+        adInfo: ad.isAd ? ad.adInfo.trim() || undefined : undefined,
       }),
     });
     const data = await res.json();
@@ -152,6 +159,7 @@ export function CreatorDashboard({
     setPromoCode("");
     setBrand("");
     setSubtype("");
+    setAd({ isAd: false, adInfo: "" });
     setLookupNote(null);
     await loadLinks();
   }
@@ -165,6 +173,7 @@ export function CreatorDashboard({
     setEditPromoCode(link.promoCode ?? "");
     setEditBrand(link.brand ?? "");
     setEditSubtype(link.subtype ?? "");
+    setEditAd({ isAd: Boolean(link.isAd), adInfo: link.adInfo ?? "" });
   }
 
   async function saveEdit(id: string) {
@@ -179,6 +188,8 @@ export function CreatorDashboard({
         promoCode: editPromoCode.trim() || null,
         brand: editBrand.trim() || null,
         subtype: editSubtype.trim() || null,
+        isAd: editAd.isAd,
+        adInfo: editAd.isAd ? editAd.adInfo.trim() || null : null,
       }),
     });
     if (res.ok) {
@@ -388,6 +399,7 @@ export function CreatorDashboard({
                     />
                   </div>
                 </details>
+                <AdFields isAd={ad.isAd} adInfo={ad.adInfo} onChange={setAd} />
                 {error && <p className="text-error text-sm">{error}</p>}
                 <button type="submit" disabled={submitting || lookingUp} className={buttonClass}>
                   {submitting ? "Добавляем…" : lookingUp ? "Секунду…" : "Добавить"}
@@ -460,6 +472,7 @@ export function CreatorDashboard({
                           placeholder="Тип, например «Кроссовки»"
                           onChange={(e) => setEditSubtype(e.target.value)}
                         />
+                        <AdFields isAd={editAd.isAd} adInfo={editAd.adInfo} onChange={setEditAd} />
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveEdit(link.id)}
@@ -494,6 +507,11 @@ export function CreatorDashboard({
                             {link.promoCode && (
                               <span className="ml-2 text-ink border border-line px-1.5 py-0.5 normal-case">
                                 промокод {link.promoCode}
+                              </span>
+                            )}
+                            {link.isAd && (
+                              <span className="ml-2 text-ink border border-line px-1.5 py-0.5 normal-case">
+                                реклама
                               </span>
                             )}
                           </span>

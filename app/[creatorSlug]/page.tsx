@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { AdLabel } from "@/app/components/AdLabel";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
 import { AddToCircleButton } from "./AddToCircleButton";
@@ -32,6 +33,8 @@ type StorefrontLink = {
   wrappedUrl: string;
   clicks: number;
   saves: number;
+  isAd?: boolean;
+  adInfo?: string;
 };
 
 async function getStorefront(slug: string) {

@@ -29,6 +29,8 @@ export async function GET(
       price: link.price,
       category: link.category,
       wrappedUrl: `/r/${link.id}`,
+      isAd: link.isAd,
+      adInfo: link.adInfo,
       creatorName: creator?.displayName,
       creatorSlug: creator?.slug,
     };

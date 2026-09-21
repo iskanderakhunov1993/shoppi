@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdLabel } from "@/app/components/AdLabel";
 import { seedDemoAccounts } from "@/lib/seed";
 import { listCreators, searchLinks } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
@@ -98,6 +99,7 @@ export default async function SearchPage({
                           <a href={`/r/${link.id}`} className="text-[13.5px] font-medium hover:underline">
                             {link.title}
                           </a>
+                          <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
                           <span className="block text-[10.5px] uppercase tracking-wide text-stone mt-0.5">
                             {CATEGORY_LABEL[link.category] ?? link.category} · от{" "}
                             <Link href={`/${link.creatorSlug}`} className="hover:underline">

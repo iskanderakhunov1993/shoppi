@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { AdLabel } from "@/app/components/AdLabel";
 import { notFound } from "next/navigation";
 import { EmptyState } from "@/app/components/EmptyState";
 import { placeholderAvatar } from "@/lib/avatar";
@@ -13,6 +14,8 @@ type WishlistLink = {
   price?: number;
   category: Category;
   wrappedUrl: string;
+  isAd?: boolean;
+  adInfo?: string;
   creatorName?: string;
   creatorSlug?: string;
 };
@@ -87,6 +90,7 @@ export default async function WishlistPage({
                 {link.creatorSlug && <> · от {link.creatorName}</>}
               </span>
               <div className="text-sm font-medium leading-snug">{link.title}</div>
+              <AdLabel isAd={link.isAd} adInfo={link.adInfo} />
               {link.price && (
                 <div className="text-[13.5px] text-stone">
                   {link.price.toLocaleString("ru-RU")} ₽

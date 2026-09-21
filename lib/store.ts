@@ -74,6 +74,11 @@ export type Link = {
   // Not surfaced in any UI yet — see the note on the `promo_code` column
   // in the init migration.
   promoCode?: string;
+  // Advertising marking ("Реклама"): set by the creator when the link is a
+  // paid / partner placement. adInfo carries the advertiser and erid the
+  // law asks to show next to the label; free text, entered by the creator.
+  isAd: boolean;
+  adInfo?: string;
   createdAt: string;
 };
 
@@ -143,6 +148,8 @@ function toLink(r: Row): Link {
     marketplace: opt(r.marketplace),
     articleId: opt(r.article_id),
     promoCode: opt(r.promo_code),
+    isAd: Boolean(r.is_ad),
+    adInfo: opt(r.ad_info),
     createdAt: str(r.created_at),
   };
 }
@@ -410,13 +417,15 @@ export async function countCreators(query?: string): Promise<number> {
 
 /* ---------------------------------------------------------------- links */
 
-export async function addLink(input: Omit<Link, "id" | "createdAt">): Promise<Link> {
+export async function addLink(
+  input: Omit<Link, "id" | "createdAt" | "isAd"> & { isAd?: boolean }
+): Promise<Link> {
   const id = randomUUID();
   const now = new Date().toISOString();
   const seq = await nextSeq();
   await sql`
-    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, brand, subtype, target_url, marketplace, article_id, promo_code, created_at, seq)
-    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.brand ?? null}, ${input.subtype ?? null}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${input.promoCode ?? null}, ${now}, ${seq})
+    INSERT INTO links (id, creator_id, title, title_lower, image_url, price, category, brand, subtype, target_url, marketplace, article_id, promo_code, is_ad, ad_info, created_at, seq)
+    VALUES (${id}, ${input.creatorId}, ${input.title}, ${input.title.toLowerCase()}, ${input.imageUrl ?? null}, ${input.price ?? null}, ${input.category}, ${input.brand ?? null}, ${input.subtype ?? null}, ${input.targetUrl}, ${input.marketplace ?? null}, ${input.articleId ?? null}, ${input.promoCode ?? null}, ${input.isAd ?? false}, ${input.adInfo ?? null}, ${now}, ${seq})
   `;
   return (await getLink(id))!;
 }
@@ -436,6 +445,8 @@ export async function updateLink(
     promoCode?: string | null;
     brand?: string | null;
     subtype?: string | null;
+    isAd?: boolean;
+    adInfo?: string | null;
   }
 ): Promise<Link | undefined> {
   const current = await getLink(id);
@@ -451,7 +462,9 @@ export async function updateLink(
         image_url = ${patch.imageUrl === undefined ? (current.imageUrl ?? null) : patch.imageUrl},
         promo_code = ${patch.promoCode === undefined ? (current.promoCode ?? null) : patch.promoCode},
         brand = ${patch.brand === undefined ? (current.brand ?? null) : patch.brand},
-        subtype = ${patch.subtype === undefined ? (current.subtype ?? null) : patch.subtype}
+        subtype = ${patch.subtype === undefined ? (current.subtype ?? null) : patch.subtype},
+        is_ad = ${patch.isAd ?? current.isAd},
+        ad_info = ${patch.adInfo === undefined ? (current.adInfo ?? null) : patch.adInfo}
     WHERE id = ${id}
   `;
 
