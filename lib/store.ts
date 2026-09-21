@@ -1010,6 +1010,90 @@ export async function circleMembersFeed(circleId: string, opts: { limit?: number
   return rows.map(toLink);
 }
 
+/* ---------------------------------------------------------- collections */
+
+// A collection is a named, hand-picked group of a creator's products that
+// lives inside a section (or on the main "Последние" tab when sectionId is
+// null) — ShopMy's "Add Collection". Products stay in the section too;
+// the collection is an extra way to group and browse them.
+export type Collection = {
+  id: string;
+  creatorId: string;
+  sectionId: string | null;
+  name: string;
+  position: number;
+  linkIds: string[];
+};
+
+export async function listCollectionsByCreator(creatorId: string): Promise<Collection[]> {
+  const cols = await sql`SELECT * FROM collections WHERE creator_id = ${creatorId} ORDER BY position ASC, created_at ASC`;
+  if (cols.length === 0) return [];
+  const ids = cols.map((c) => str(c.id));
+  const rows = await sql`
+    SELECT collection_id, link_id FROM collection_links
+    WHERE collection_id IN ${sql(ids)} ORDER BY position ASC
+  `;
+  const byCollection = new Map<string, string[]>();
+  for (const r of rows) {
+    const key = str(r.collection_id);
+    byCollection.set(key, [...(byCollection.get(key) ?? []), str(r.link_id)]);
+  }
+  return cols.map((c) => ({
+    id: str(c.id),
+    creatorId: str(c.creator_id),
+    sectionId: c.section_id === null ? null : str(c.section_id),
+    name: str(c.name),
+    position: Number(c.position),
+    linkIds: byCollection.get(str(c.id)) ?? [],
+  }));
+}
+
+export async function getCollectionById(id: string): Promise<Collection | undefined> {
+  const rows = await sql`SELECT creator_id FROM collections WHERE id = ${id}`;
+  if (!rows[0]) return undefined;
+  return (await listCollectionsByCreator(str(rows[0].creator_id))).find((c) => c.id === id);
+}
+
+async function replaceCollectionLinks(collectionId: string, creatorId: string, linkIds: string[]): Promise<void> {
+  // Only the creator's own products can go in — never trust ids from the client.
+  const own = linkIds.length
+    ? await sql`SELECT id FROM links WHERE creator_id = ${creatorId} AND id IN ${sql(linkIds)}`
+    : [];
+  const valid = new Set(own.map((r) => str(r.id)));
+  const ordered = linkIds.filter((id) => valid.has(id));
+  await sql`DELETE FROM collection_links WHERE collection_id = ${collectionId}`;
+  for (let i = 0; i < ordered.length; i++) {
+    await sql`INSERT INTO collection_links (collection_id, link_id, position) VALUES (${collectionId}, ${ordered[i]}, ${i})`;
+  }
+}
+
+export async function createCollection(
+  creatorId: string,
+  input: { name: string; sectionId: string | null; linkIds: string[] }
+): Promise<Collection> {
+  const id = randomUUID();
+  const pos = await sql`SELECT COALESCE(MAX(position), -1) + 1 AS p FROM collections WHERE creator_id = ${creatorId}`;
+  await sql`
+    INSERT INTO collections (id, creator_id, section_id, name, position)
+    VALUES (${id}, ${creatorId}, ${input.sectionId}, ${input.name}, ${Number(pos[0].p)})
+  `;
+  await replaceCollectionLinks(id, creatorId, input.linkIds);
+  return (await getCollectionById(id))!;
+}
+
+export async function updateCollection(
+  id: string,
+  creatorId: string,
+  patch: { name?: string; linkIds?: string[] }
+): Promise<void> {
+  if (patch.name) await sql`UPDATE collections SET name = ${patch.name} WHERE id = ${id}`;
+  if (patch.linkIds) await replaceCollectionLinks(id, creatorId, patch.linkIds);
+}
+
+export async function deleteCollection(id: string): Promise<void> {
+  await sql`DELETE FROM collections WHERE id = ${id}`;
+}
+
 /* ------------------------------------------------------------- sessions */
 
 export async function createSessionRow(token: string, userId: string): Promise<void> {

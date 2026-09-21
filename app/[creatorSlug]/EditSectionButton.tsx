@@ -13,10 +13,12 @@ export function EditSectionButton({
   sectionId,
   name,
   onHidden,
+  variant = "icon",
 }: {
   sectionId: string;
   name: string;
   onHidden: () => void;
+  variant?: "icon" | "pill";
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -64,9 +66,14 @@ export function EditSectionButton({
           setOpen((v) => !v);
         }}
         aria-label="Управлять разделом"
-        className="ml-1 -mr-1 text-stone hover:text-ink transition-colors cursor-pointer align-middle"
+        className={
+          variant === "pill"
+            ? "inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-raise text-ink hover:opacity-80 transition-opacity cursor-pointer whitespace-nowrap"
+            : "ml-1 -mr-1 text-stone hover:text-ink transition-colors cursor-pointer align-middle"
+        }
       >
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        {variant === "pill" && "Изменить раздел"}
+        <svg width={variant === "pill" ? 13 : 11} height={variant === "pill" ? 13 : 11} viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path
             d="M11.3 2.3a1.4 1.4 0 0 1 2 2L5.4 12.2l-2.8.7.7-2.8L11.3 2.3z"
             stroke="currentColor"
@@ -80,7 +87,7 @@ export function EditSectionButton({
       {open && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute z-20 top-full mt-2 left-1/2 -translate-x-1/2 w-56 bg-card border border-line shadow-[0_16px_40px_-16px_rgba(0,0,0,0.3)] p-3 flex flex-col gap-2 text-left normal-case"
+          className="absolute z-20 top-full mt-2 left-0 w-56 bg-card border border-line shadow-[0_16px_40px_-16px_rgba(0,0,0,0.3)] p-3 flex flex-col gap-2 text-left normal-case"
         >
           <label className="text-[10px] uppercase tracking-wider text-stone">Название</label>
           <input

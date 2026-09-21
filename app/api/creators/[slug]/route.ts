@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listLinksByCreator, listPublicSections } from "@/lib/store";
+import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listCollectionsByCreator, listLinksByCreator, listPublicSections } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -64,5 +64,11 @@ export async function GET(
     followers: await countFollowers(creator.id),
     links,
     sections,
+    collections: (await listCollectionsByCreator(creator.id)).map((c) => ({
+      id: c.id,
+      name: c.name,
+      sectionId: c.sectionId,
+      linkIds: c.linkIds,
+    })),
   });
 }

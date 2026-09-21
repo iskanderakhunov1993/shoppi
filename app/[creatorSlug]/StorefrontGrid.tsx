@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { EmptyState } from "@/app/components/EmptyState";
 import { EditSectionButton } from "./EditSectionButton";
+import { AddSectionButton } from "./AddSectionButton";
+import { CollectionEditor } from "./CollectionEditor";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type StorefrontLink = {
@@ -21,17 +23,22 @@ type StorefrontLink = {
 };
 
 type Section = { id: string; name: string; icon?: string; links: StorefrontLink[] };
+type Collection = { id: string; name: string; sectionId: string | null; linkIds: string[] };
 
 type Tab = "latest" | "popular" | string;
 
 export function StorefrontGrid({
   links,
   sections = [],
+  collections = [],
+  storefrontUrl = "",
   hidePopular = false,
   isOwner = false,
 }: {
   links: StorefrontLink[];
   sections?: Section[];
+  collections?: Collection[];
+  storefrontUrl?: string;
   hidePopular?: boolean;
   isOwner?: boolean;
 }) {
@@ -39,19 +46,37 @@ export function StorefrontGrid({
   const [facet, setFacet] = useState<{ field: "subtype" | "brand"; value: string } | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [collectionId, setCollectionId] = useState<string | null>(null);
+  const [editor, setEditor] = useState<{ collection?: Collection } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const categories = useMemo(
     () => [...new Set(links.map((l) => l.category))],
     [links]
   );
 
+  // Collections live in one section (or on the main tab when sectionId is
+  // null); other tabs — "Популярное", categories — don't show any.
+  const tabCollections = useMemo(() => {
+    const sectionIds = new Set(sections.map((s) => s.id));
+    if (tab === "latest") return collections.filter((c) => !c.sectionId);
+    return collections.filter((c) => c.sectionId === tab && sectionIds.has(c.sectionId));
+  }, [collections, sections, tab]);
+
+  const activeCollection = collections.find((c) => c.id === collectionId) ?? null;
+  const currentSectionId = sections.some((s) => s.id === tab) ? tab : null;
+
   const tabFiltered = useMemo(() => {
+    if (activeCollection) {
+      const byId = new Map(links.map((l) => [l.id, l]));
+      return activeCollection.linkIds.map((id) => byId.get(id)).filter((l): l is StorefrontLink => Boolean(l));
+    }
     if (tab === "latest") return links;
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
     const section = sections.find((s) => s.id === tab);
     if (section) return section.links;
     return links.filter((l) => l.category === tab);
-  }, [links, tab, sections]);
+  }, [links, tab, sections, activeCollection]);
 
   // Secondary facets (тип/бренд) — only built from products in the
   // current tab that actually have the field set, so an empty facet
@@ -78,6 +103,13 @@ export function StorefrontGrid({
   function selectTab(next: Tab) {
     setTab(next);
     setFacet(null);
+    setCollectionId(null);
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(storefrontUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   }
 
   if (links.length === 0) {
@@ -148,11 +180,6 @@ export function StorefrontGrid({
               {s.icon && <span className="mr-1">{s.icon}</span>}
               {s.name}
             </button>
-            {isOwner && tab === s.id && (
-              <span className="pr-2.5">
-                <EditSectionButton sectionId={s.id} name={s.name} onHidden={() => selectTab("latest")} />
-              </span>
-            )}
           </span>
         ))}
         {categories.map((c) => (
@@ -166,7 +193,102 @@ export function StorefrontGrid({
             {CATEGORY_LABEL[c] ?? c}
           </button>
         ))}
+        {isOwner && <AddSectionButton />}
       </div>
+
+      {isOwner && (
+        <div className="flex items-center gap-2 px-8 py-3 overflow-x-auto border-b border-line">
+          <button
+            type="button"
+            onClick={copyLink}
+            className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-raise text-ink hover:opacity-80 transition-opacity cursor-pointer whitespace-nowrap"
+          >
+            {copied ? "Ссылка скопирована" : "Поделиться"}
+          </button>
+          {currentSectionId && (
+            <EditSectionButton
+              variant="pill"
+              sectionId={currentSectionId}
+              name={sections.find((x) => x.id === currentSectionId)?.name ?? ""}
+              onHidden={() => selectTab("latest")}
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setEditor({})}
+            className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-ink text-paper hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap"
+          >
+            Добавить коллекцию +
+          </button>
+        </div>
+      )}
+
+      {activeCollection ? (
+        <div className="flex items-center gap-4 px-8 py-4 border-b border-line">
+          <button
+            type="button"
+            onClick={() => setCollectionId(null)}
+            className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+          >
+            ← Назад
+          </button>
+          <span className="font-display text-xl">{activeCollection.name}</span>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setEditor({ collection: activeCollection })}
+              className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+            >
+              Изменить
+            </button>
+          )}
+        </div>
+      ) : (
+        tabCollections.length > 0 && (
+          <div className="px-8 py-6 border-b border-line">
+            <p className="text-[11px] uppercase tracking-wider text-stone mb-4">Коллекции</p>
+            <div className="flex gap-4 overflow-x-auto pb-1">
+              {tabCollections.map((c) => {
+                const byId = new Map(links.map((l) => [l.id, l]));
+                const items = c.linkIds.map((id) => byId.get(id)).filter((l): l is StorefrontLink => Boolean(l));
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCollectionId(c.id)}
+                    className="flex-none w-44 text-left cursor-pointer group"
+                  >
+                    <div className="grid grid-cols-2 gap-px bg-line aspect-square overflow-hidden">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div key={i} className="bg-raise overflow-hidden">
+                          {items[i]?.imageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={items[i].imageUrl} alt="" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-[13.5px] font-medium leading-snug group-hover:underline">{c.name}</div>
+                    <div className="text-[11.5px] text-stone">{items.length} шт.</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )
+      )}
+
+      {editor && (
+        <CollectionEditor
+          products={links.map((l) => ({ id: l.id, title: l.title, imageUrl: l.imageUrl }))}
+          sectionId={editor.collection ? (editor.collection.sectionId ?? null) : currentSectionId}
+          collection={editor.collection}
+          onClose={() => {
+            setEditor(null);
+            setCollectionId(null);
+          }}
+        />
+      )}
 
       {(subtypeFacets.length > 1 || brandFacets.length > 1) && (
         <div className="flex items-center gap-2 px-8 pb-4 pt-4 overflow-x-auto border-b border-line">
