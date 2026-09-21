@@ -8,6 +8,7 @@ import { EditSectionButton } from "./EditSectionButton";
 import { AddSectionButton } from "./AddSectionButton";
 import { CollectionEditor } from "./CollectionEditor";
 import { CopyLinkButton } from "./CopyLinkButton";
+import { QuickAddProductButton } from "./QuickAddProductButton";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { pluralizeProducts } from "@/lib/plural";
 
@@ -129,7 +130,9 @@ export function StorefrontGrid({
     setTimeout(() => setCopied(false), 1800);
   }
 
-  if (links.length === 0) {
+  // An empty storefront is only a dead end for visitors; the owner still
+  // needs the tabs and toolbar to start building it.
+  if (links.length === 0 && !isOwner) {
     return (
       <div className="py-16 flex justify-center">
         <EmptyState
@@ -176,7 +179,7 @@ export function StorefrontGrid({
         >
           Последние
         </button>
-        {!hidePopular && (
+        {!hidePopular && links.length > 0 && (
           <button
             onClick={() => selectTab("popular")}
             className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
@@ -230,13 +233,17 @@ export function StorefrontGrid({
               onHidden={() => selectTab("latest")}
             />
           )}
-          <button
-            type="button"
-            onClick={() => setEditor({})}
-            className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-ink text-paper hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap"
-          >
-            Добавить коллекцию +
-          </button>
+          {links.length === 0 ? (
+            <QuickAddProductButton variant="pill" />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditor({})}
+              className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-ink text-paper hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap"
+            >
+              Добавить коллекцию +
+            </button>
+          )}
         </div>
       )}
 
@@ -384,7 +391,9 @@ export function StorefrontGrid({
             title={
               query.trim() || facet
                 ? "Ничего не найдено — попробуйте другой запрос или сбросьте фильтр."
-                : isOwner && currentSectionId
+                : isOwner && links.length === 0
+                  ? "Витрина пока пуста — добавьте первый товар кнопкой «Добавить товар +» выше."
+                  : isOwner && currentSectionId
                   ? "Раздел пуст — нажмите «Добавить коллекцию +», чтобы наполнить его товарами."
                   : "В этой категории пока пусто."
             }

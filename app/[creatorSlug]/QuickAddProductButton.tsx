@@ -9,7 +9,7 @@ import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
  * the full form with brand/type/promo still lives in the dashboard;
  * this is the fast path for the common case (paste a link, save).
  */
-export function QuickAddProductButton() {
+export function QuickAddProductButton({ variant = "icon" }: { variant?: "icon" | "pill" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -61,17 +61,25 @@ export function QuickAddProductButton() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Добавить товар"
         title="Добавить товар"
-        className="w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
+        className={
+          variant === "pill"
+            ? "inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-ink text-paper hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap"
+            : "w-8 h-8 flex items-center justify-center border border-line rounded-full text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
+        }
       >
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
+        {variant === "pill" ? (
+          "Добавить товар +"
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        )}
       </button>
 
       {open && (
         <form
           onSubmit={handleSubmit}
-          className="absolute z-20 top-full mt-2 right-0 w-72 bg-card border border-line shadow-[0_16px_40px_-16px_rgba(0,0,0,0.3)] p-4 flex flex-col gap-2.5 text-left"
+          className={`absolute z-20 top-full mt-2 ${variant === "pill" ? "left-0" : "right-0"} w-72 max-w-[calc(100vw-2rem)] bg-card border border-line shadow-[0_16px_40px_-16px_rgba(0,0,0,0.3)] p-4 flex flex-col gap-2.5 text-left`}
         >
           <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
           <input

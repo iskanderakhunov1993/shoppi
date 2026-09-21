@@ -127,7 +127,7 @@ export default async function StorefrontPage({
           className="w-36 h-36 rounded-full object-cover mx-auto mb-7 bg-raise"
         />
         <span className="font-display italic text-stone text-base block mb-1">Курирует</span>
-        <h1 className="font-display text-4xl mb-3">{creator.displayName}</h1>
+        <h1 className="font-display text-3xl sm:text-4xl mb-3 [overflow-wrap:anywhere]">{creator.displayName}</h1>
         {creator.bio && (
           <p className="text-stone text-[15px] max-w-md mx-auto mb-2">{creator.bio}</p>
         )}
