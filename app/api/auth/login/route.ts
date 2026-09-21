@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByEmail } from "@/lib/store";
+import { homePathFor } from "@/lib/landing";
+import { getCreatorByUserId, getUserByEmail } from "@/lib/store";
 import { createSession, verifyPassword, SESSION_COOKIE } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -21,7 +22,8 @@ export async function POST(request: NextRequest) {
   }
 
   const token = await createSession(user.id);
-  const response = NextResponse.json({ email: user.email });
+  const creator = user.role === "creator" ? await getCreatorByUserId(user.id) : undefined;
+  const response = NextResponse.json({ email: user.email, next: homePathFor(user, creator) });
   response.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",

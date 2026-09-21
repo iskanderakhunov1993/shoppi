@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { seedDemoAccounts, listLandingCreators } from "@/lib/seed";
-import { listDistinctBrandDomains, getSessionUserId, getUserById } from "@/lib/store";
+import { getCreatorByUserId, listDistinctBrandDomains, getSessionUserId, getUserById } from "@/lib/store";
+import { homePathFor } from "@/lib/landing";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { Hero } from "@/app/components/landing/Hero";
@@ -24,7 +25,9 @@ export default async function Home() {
   if (userId) {
     const user = await getUserById(userId);
     if (user?.role === "shopper") redirect("/finds");
-    if (user?.role === "creator") redirect("/dashboard");
+    if (user?.role === "creator") {
+      redirect(homePathFor(user, await getCreatorByUserId(userId)));
+    }
   }
 
   await seedDemoAccounts();
