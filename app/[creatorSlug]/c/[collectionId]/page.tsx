@@ -87,9 +87,9 @@ export default async function CollectionPage({ params }: { params: Promise<Param
           {isOwner && (
             <Link
               href={`/${creator.slug}`}
-              className="inline-flex items-center text-[13px] px-3.5 py-1.5 rounded-full border border-line text-stone hover:text-ink hover:border-ink transition-colors"
+              className="inline-flex items-center text-[13px] px-3.5 py-1.5 rounded-full border border-line text-stone hover:text-ink hover:border-ink transition-colors whitespace-nowrap"
             >
-              Изменить на витрине
+              Изменить
             </Link>
           )}
         </div>
