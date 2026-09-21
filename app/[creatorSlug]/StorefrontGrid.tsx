@@ -262,7 +262,7 @@ export function StorefrontGrid({
           )}
         </div>
       ) : (
-        tabCollections.length > 0 && !collectionsMode && (
+        tabCollections.length > 0 && !collectionsMode && !query.trim() && !facet && (
           <div className="px-8 py-6 border-b border-line">
             <p className="text-[11px] uppercase tracking-wider text-stone mb-4">Коллекции</p>
             <div className="flex gap-4 overflow-x-auto pb-1">
@@ -379,9 +379,11 @@ export function StorefrontGrid({
         <div className="py-16 flex justify-center">
           <EmptyState
             title={
-              isOwner && currentSectionId
-                ? "Раздел пуст — нажмите «Добавить коллекцию +», чтобы наполнить его товарами."
-                : "В этой категории пока пусто."
+              query.trim() || facet
+                ? "Ничего не найдено — попробуйте другой запрос или сбросьте фильтр."
+                : isOwner && currentSectionId
+                  ? "Раздел пуст — нажмите «Добавить коллекцию +», чтобы наполнить его товарами."
+                  : "В этой категории пока пусто."
             }
           />
         </div>
