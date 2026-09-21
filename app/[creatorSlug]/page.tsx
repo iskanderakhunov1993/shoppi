@@ -56,6 +56,7 @@ async function getStorefront(slug: string) {
     tiktokHandle?: string;
     telegramHandle?: string;
     youtubeHandle?: string;
+    contactEmail?: string;
     categories?: Category[];
     hidePopular?: boolean;
     followers: number;
@@ -130,6 +131,13 @@ export default async function StorefrontPage({
         {creator.categories && creator.categories.length > 0 && (
           <p className="text-stone text-[15px] mb-7">
             {creator.categories.map((c) => CATEGORY_LABEL[c]).join(" · ")}
+          </p>
+        )}
+        {creator.contactEmail && (
+          <p className="text-[13px] mb-6">
+            <a href={`mailto:${creator.contactEmail}`} className="text-stone hover:text-ink underline underline-offset-4 transition-colors">
+              {creator.contactEmail}
+            </a>
           </p>
         )}
         {!isOwner && (

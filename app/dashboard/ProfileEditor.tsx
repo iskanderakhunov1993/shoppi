@@ -20,6 +20,7 @@ export function ProfileEditor({
     tiktokHandle?: string;
     telegramHandle?: string;
     youtubeHandle?: string;
+    contactEmail?: string;
     hidePopular?: boolean;
   };
   onSaved: () => void;
@@ -35,6 +36,7 @@ export function ProfileEditor({
     telegramHandle: me.telegramHandle ?? "",
     youtubeHandle: me.youtubeHandle ?? "",
   });
+  const [contactEmail, setContactEmail] = useState(me.contactEmail ?? "");
   const [hidePopular, setHidePopular] = useState(me.hidePopular ?? false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -48,7 +50,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, ...socials, hidePopular }),
+      body: JSON.stringify({ displayName, bio, ...socials, contactEmail, hidePopular }),
     });
     const data = await res.json();
     setSaving(false);
@@ -113,6 +115,23 @@ export function ProfileEditor({
       <section className="flex flex-col gap-4 p-5 border border-line">
         <h3 className="text-[11px] uppercase tracking-wider text-stone">Соцсети</h3>
         <SocialFields values={socials} onChange={(key, value) => setSocials((s) => ({ ...s, [key]: value }))} />
+        <div className="flex flex-col gap-1.5 pt-2">
+          <label className="text-[11px] uppercase tracking-wider text-stone" htmlFor="contact-email">
+            Почта для сотрудничества
+          </label>
+          <input
+            id="contact-email"
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="name@example.com"
+            autoCapitalize="none"
+            className={`${inputClass} border border-line px-3 py-2.5`}
+          />
+          <p className="text-stone text-[11.5px] leading-relaxed">
+            Необязательно. Будет видна всем на вашей витрине — сюда пишут бренды.
+          </p>
+        </div>
       </section>
 
       <section className="flex flex-col gap-3 p-5 border border-line">

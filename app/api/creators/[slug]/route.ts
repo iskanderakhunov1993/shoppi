@@ -63,6 +63,7 @@ export async function GET(
     tiktokHandle: creator.tiktokHandle,
     telegramHandle: creator.telegramHandle,
     youtubeHandle: creator.youtubeHandle,
+    contactEmail: creator.contactEmail,
     categories: creator.categories ?? [],
     hidePopular: creator.hidePopular,
     followers: await countFollowers(creator.id),

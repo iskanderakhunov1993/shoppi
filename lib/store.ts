@@ -42,6 +42,8 @@ export type Creator = {
   tiktokHandle?: string;
   telegramHandle?: string;
   youtubeHandle?: string;
+  // Optional public address for brand/collab enquiries, shown on the storefront.
+  contactEmail?: string;
   // False until the creator finishes (or skips) the first-run wizard.
   onboarded: boolean;
   // What the creator says they mostly post about — set once during
@@ -120,6 +122,7 @@ function toCreator(r: Row): Creator {
     tiktokHandle: opt(r.tiktok_handle),
     telegramHandle: opt(r.telegram_handle),
     youtubeHandle: opt(r.youtube_handle),
+    contactEmail: opt(r.contact_email),
     onboarded: Boolean(r.onboarded),
     categories: r.categories ? (JSON.parse(str(r.categories)) as Category[]) : undefined,
     hidePopular: Boolean(r.hide_popular),
@@ -323,6 +326,7 @@ export async function updateCreator(
     tiktokHandle?: string | null;
     telegramHandle?: string | null;
     youtubeHandle?: string | null;
+    contactEmail?: string | null;
     onboarded?: boolean;
     categories?: Category[] | null;
     hidePopular?: boolean;
@@ -345,6 +349,7 @@ export async function updateCreator(
         tiktok_handle = ${patch.tiktokHandle === undefined ? (current.tiktokHandle ?? null) : patch.tiktokHandle},
         telegram_handle = ${patch.telegramHandle === undefined ? (current.telegramHandle ?? null) : patch.telegramHandle},
         youtube_handle = ${patch.youtubeHandle === undefined ? (current.youtubeHandle ?? null) : patch.youtubeHandle},
+        contact_email = ${patch.contactEmail === undefined ? (current.contactEmail ?? null) : patch.contactEmail},
         onboarded = ${patch.onboarded ?? current.onboarded},
         categories = ${nextCategories ? JSON.stringify(nextCategories) : null},
         hide_popular = ${patch.hidePopular ?? current.hidePopular}

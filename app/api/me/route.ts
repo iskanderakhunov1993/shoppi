@@ -21,6 +21,8 @@ function normalizeHandle(value: string): string | null {
   return trimmed.replace(/^@/, "").slice(0, 64);
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 export async function GET(request: NextRequest) {
   const user = await requireUser(request);
   if (!user) {
@@ -40,6 +42,7 @@ export async function GET(request: NextRequest) {
       tiktokHandle: creator?.tiktokHandle ?? "",
       telegramHandle: creator?.telegramHandle ?? "",
       youtubeHandle: creator?.youtubeHandle ?? "",
+      contactEmail: creator?.contactEmail ?? "",
       onboarded: creator?.onboarded ?? false,
       categories: creator?.categories ?? [],
       hidePopular: creator?.hidePopular ?? false,
@@ -84,7 +87,17 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Имя не может быть пустым" }, { status: 400 });
     }
 
+    let contactEmail: string | null | undefined;
+    if (body?.contactEmail !== undefined) {
+      const value = String(body.contactEmail).trim().slice(0, 120);
+      if (value && !EMAIL_RE.test(value)) {
+        return NextResponse.json({ error: "Введите корректную почту для сотрудничества" }, { status: 400 });
+      }
+      contactEmail = value || null;
+    }
+
     const updated = await updateCreator(creator.id, {
+      contactEmail,
       displayName: body?.displayName?.trim(),
       bio: body?.bio,
       avatarUrl: body?.avatarUrl,
@@ -106,6 +119,7 @@ export async function PUT(request: NextRequest) {
       tiktokHandle: updated?.tiktokHandle ?? "",
       telegramHandle: updated?.telegramHandle ?? "",
       youtubeHandle: updated?.youtubeHandle ?? "",
+      contactEmail: updated?.contactEmail ?? "",
       onboarded: updated?.onboarded ?? false,
       categories: updated?.categories ?? [],
       hidePopular: updated?.hidePopular ?? false,

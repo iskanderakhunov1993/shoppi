@@ -8,6 +8,7 @@ import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { CopyLinkButton } from "../../CopyLinkButton";
 import { CATEGORY_LABEL } from "@/lib/categories";
 import { placeholderAvatar } from "@/lib/avatar";
+import { pluralizeProducts } from "@/lib/plural";
 import { SESSION_COOKIE } from "@/lib/auth";
 import {
   getCollectionById,
@@ -49,14 +50,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: `${data.collection.name} — ${data.creator.displayName} — Shoppi`,
     description: `Коллекция куратора ${data.creator.displayName}: ${data.links.length} товаров.`,
   };
-}
-
-function pluralizeProducts(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return "товар";
-  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return "товара";
-  return "товаров";
 }
 
 export default async function CollectionPage({ params }: { params: Promise<Params> }) {

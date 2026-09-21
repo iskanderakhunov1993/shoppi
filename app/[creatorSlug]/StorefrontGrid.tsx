@@ -8,6 +8,7 @@ import { AddSectionButton } from "./AddSectionButton";
 import { CollectionEditor } from "./CollectionEditor";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { pluralizeProducts } from "@/lib/plural";
 
 type StorefrontLink = {
   id: string;
@@ -100,6 +101,18 @@ export function StorefrontGrid({
     if (q) result = result.filter((l) => l.title.toLowerCase().includes(q));
     return result;
   }, [tabFiltered, facet, query]);
+
+  // Like ShopMy's "Gift Guides": a section that has collections shows them
+  // as its main content — a grid of cards — with only the products that
+  // aren't in any collection listed below. Searching or filtering switches
+  // back to plain product results.
+  const collectionsMode =
+    currentSectionId !== null && tabCollections.length > 0 && !activeCollection && !query.trim() && !facet;
+  const leftovers = useMemo(() => {
+    const inCollections = new Set(tabCollections.flatMap((c) => c.linkIds));
+    return tabFiltered.filter((l) => !inCollections.has(l.id));
+  }, [tabFiltered, tabCollections]);
+  const shown = collectionsMode ? leftovers : visible;
 
   function selectTab(next: Tab) {
     setTab(next);
@@ -249,7 +262,7 @@ export function StorefrontGrid({
           )}
         </div>
       ) : (
-        tabCollections.length > 0 && (
+        tabCollections.length > 0 && !collectionsMode && (
           <div className="px-8 py-6 border-b border-line">
             <p className="text-[11px] uppercase tracking-wider text-stone mb-4">Коллекции</p>
             <div className="flex gap-4 overflow-x-auto pb-1">
@@ -281,6 +294,33 @@ export function StorefrontGrid({
             </div>
           </div>
         )
+      )}
+
+      {collectionsMode && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 px-8 py-8 border-b border-line">
+          {tabCollections.map((c) => {
+            const byId = new Map(links.map((l) => [l.id, l]));
+            const items = c.linkIds.map((id) => byId.get(id)).filter((l): l is StorefrontLink => Boolean(l));
+            return (
+              <button key={c.id} type="button" onClick={() => setCollectionId(c.id)} className="text-left cursor-pointer group">
+                <div className="grid grid-cols-2 gap-px bg-line aspect-square overflow-hidden">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="bg-raise overflow-hidden">
+                      {items[i]?.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={items[i].imageUrl} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-[15px] font-medium leading-snug group-hover:underline">{c.name}</div>
+                <div className="text-[11.5px] uppercase tracking-wider text-stone mt-0.5">
+                  {items.length} {pluralizeProducts(items.length)}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       )}
 
       {editor && (
@@ -335,7 +375,7 @@ export function StorefrontGrid({
         </div>
       )}
 
-      {visible.length === 0 ? (
+      {collectionsMode && shown.length === 0 ? null : shown.length === 0 ? (
         <div className="py-16 flex justify-center">
           <EmptyState
             title={
@@ -347,7 +387,7 @@ export function StorefrontGrid({
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((link, i) => (
+          {shown.map((link, i) => (
             <div
               key={link.id}
               className={`flex flex-col gap-3 p-6 border-b border-line ${

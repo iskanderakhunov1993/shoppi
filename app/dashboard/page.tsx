@@ -20,6 +20,7 @@ type Me = {
   tiktokHandle?: string;
   telegramHandle?: string;
   youtubeHandle?: string;
+  contactEmail?: string;
   onboarded?: boolean;
   categories?: Category[];
   hidePopular?: boolean;
