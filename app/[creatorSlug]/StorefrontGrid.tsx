@@ -4,8 +4,6 @@ import { AdLabel } from "@/app/components/AdLabel";
 import { useMemo, useState } from "react";
 import { FavoriteButton } from "@/app/components/FavoriteButton";
 import { EmptyState } from "@/app/components/EmptyState";
-import { EditSectionButton } from "./EditSectionButton";
-import { AddSectionButton } from "./AddSectionButton";
 import { CollectionEditor } from "./CollectionEditor";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { QuickAddProductButton } from "./QuickAddProductButton";
@@ -28,21 +26,18 @@ type StorefrontLink = {
   adInfo?: string;
 };
 
-type Section = { id: string; name: string; icon?: string; links: StorefrontLink[] };
-type Collection = { id: string; name: string; sectionId: string | null; linkIds: string[] };
+type Collection = { id: string; name: string; linkIds: string[] };
 
 type Tab = "latest" | "popular" | string;
 
 export function StorefrontGrid({
   links,
-  sections = [],
   collections = [],
   storefrontUrl = "",
   hidePopular = false,
   isOwner = false,
 }: {
   links: StorefrontLink[];
-  sections?: Section[];
   collections?: Collection[];
   storefrontUrl?: string;
   hidePopular?: boolean;
@@ -61,16 +56,7 @@ export function StorefrontGrid({
     [links]
   );
 
-  // Collections live in one section (or on the main tab when sectionId is
-  // null); other tabs — "Популярное", categories — don't show any.
-  const tabCollections = useMemo(() => {
-    const sectionIds = new Set(sections.map((s) => s.id));
-    if (tab === "latest") return collections.filter((c) => !c.sectionId);
-    return collections.filter((c) => c.sectionId === tab && sectionIds.has(c.sectionId));
-  }, [collections, sections, tab]);
-
   const activeCollection = collections.find((c) => c.id === collectionId) ?? null;
-  const currentSectionId = sections.some((s) => s.id === tab) ? tab : null;
 
   const tabFiltered = useMemo(() => {
     if (activeCollection) {
@@ -79,10 +65,8 @@ export function StorefrontGrid({
     }
     if (tab === "latest") return links;
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
-    const section = sections.find((s) => s.id === tab);
-    if (section) return section.links;
     return links.filter((l) => l.category === tab);
-  }, [links, tab, sections, activeCollection]);
+  }, [links, tab, activeCollection]);
 
   // Secondary facets (тип/бренд) — only built from products in the
   // current tab that actually have the field set, so an empty facet
@@ -106,16 +90,15 @@ export function StorefrontGrid({
     return result;
   }, [tabFiltered, facet, query]);
 
-  // Like ShopMy's "Gift Guides": a section that has collections shows them
-  // as its main content — a grid of cards — with only the products that
-  // aren't in any collection listed below. Searching or filtering switches
-  // back to plain product results.
-  const collectionsMode =
-    currentSectionId !== null && tabCollections.length > 0 && !activeCollection && !query.trim() && !facet;
+  // Like ShopMy: collections sit directly on "Последние" as cover cards,
+  // one flat level (no section wrapper around them). Only the products
+  // that aren't in any collection show as plain cards below. Searching,
+  // filtering, or switching to another tab drops back to a plain grid.
+  const collectionsMode = tab === "latest" && collections.length > 0 && !activeCollection && !query.trim() && !facet;
   const leftovers = useMemo(() => {
-    const inCollections = new Set(tabCollections.flatMap((c) => c.linkIds));
+    const inCollections = new Set(collections.flatMap((c) => c.linkIds));
     return tabFiltered.filter((l) => !inCollections.has(l.id));
-  }, [tabFiltered, tabCollections]);
+  }, [tabFiltered, collections]);
   const shown = collectionsMode ? leftovers : visible;
 
   function selectTab(next: Tab) {
@@ -189,19 +172,6 @@ export function StorefrontGrid({
             Популярное
           </button>
         )}
-        {sections.map((s) => (
-          <span
-            key={s.id}
-            className={`inline-flex items-center rounded-full whitespace-nowrap transition-colors ${
-              tab === s.id ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
-            }`}
-          >
-            <button onClick={() => selectTab(s.id)} className="text-[13px] pl-3 pr-1.5 py-1.5 cursor-pointer">
-              {s.icon && <span className="mr-1">{s.icon}</span>}
-              {s.name}
-            </button>
-          </span>
-        ))}
         {categories.map((c) => (
           <button
             key={c}
@@ -213,7 +183,6 @@ export function StorefrontGrid({
             {CATEGORY_LABEL[c] ?? c}
           </button>
         ))}
-        {isOwner && <AddSectionButton />}
       </div>
 
       {isOwner && (
@@ -225,14 +194,6 @@ export function StorefrontGrid({
           >
             {copied ? "Ссылка скопирована" : "Поделиться"}
           </button>
-          {currentSectionId && (
-            <EditSectionButton
-              variant="pill"
-              sectionId={currentSectionId}
-              name={sections.find((x) => x.id === currentSectionId)?.name ?? ""}
-              onHidden={() => selectTab("latest")}
-            />
-          )}
           {links.length === 0 ? (
             <QuickAddProductButton variant="pill" />
           ) : (
@@ -247,7 +208,7 @@ export function StorefrontGrid({
         </div>
       )}
 
-      {activeCollection ? (
+      {activeCollection && (
         <div className="flex items-center gap-4 px-8 py-4 border-b border-line">
           <button
             type="button"
@@ -271,44 +232,11 @@ export function StorefrontGrid({
             </button>
           )}
         </div>
-      ) : (
-        tabCollections.length > 0 && !collectionsMode && !query.trim() && !facet && (
-          <div className="px-8 py-6 border-b border-line">
-            <p className="text-[11px] uppercase tracking-wider text-stone mb-4">Коллекции</p>
-            <div className="flex gap-4 overflow-x-auto pb-1">
-              {tabCollections.map((c) => {
-                const byId = new Map(links.map((l) => [l.id, l]));
-                const items = c.linkIds.map((id) => byId.get(id)).filter((l): l is StorefrontLink => Boolean(l));
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setCollectionId(c.id)}
-                    className="flex-none w-44 text-left cursor-pointer group"
-                  >
-                    <div className="grid grid-cols-2 gap-px bg-line aspect-square overflow-hidden">
-                      {[0, 1, 2, 3].map((i) => (
-                        <div key={i} className="bg-raise overflow-hidden">
-                          {items[i]?.imageUrl && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={items[i].imageUrl} alt="" className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-2 text-[13.5px] font-medium leading-snug group-hover:underline">{c.name}</div>
-                    <div className="text-[11.5px] text-stone">{items.length} шт.</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )
       )}
 
       {collectionsMode && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 px-8 py-8 border-b border-line">
-          {tabCollections.map((c) => {
+          {collections.map((c) => {
             const byId = new Map(links.map((l) => [l.id, l]));
             const items = c.linkIds.map((id) => byId.get(id)).filter((l): l is StorefrontLink => Boolean(l));
             return (
@@ -336,7 +264,6 @@ export function StorefrontGrid({
       {editor && (
         <CollectionEditor
           products={links.map((l) => ({ id: l.id, title: l.title, imageUrl: l.imageUrl }))}
-          sectionId={editor.collection ? (editor.collection.sectionId ?? null) : currentSectionId}
           collection={editor.collection}
           onClose={() => {
             setEditor(null);
@@ -393,8 +320,6 @@ export function StorefrontGrid({
                 ? "Ничего не найдено — попробуйте другой запрос или сбросьте фильтр."
                 : isOwner && links.length === 0
                   ? "Витрина пока пуста — добавьте первый товар кнопкой «Добавить товар +» выше."
-                  : isOwner && currentSectionId
-                  ? "Раздел пуст — нажмите «Добавить коллекцию +», чтобы наполнить его товарами."
                   : "В этой категории пока пусто."
             }
           />

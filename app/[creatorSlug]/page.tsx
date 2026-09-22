@@ -63,8 +63,7 @@ async function getStorefront(slug: string) {
     categories?: Category[];
     hidePopular?: boolean;
     followers: number;
-    sections?: { id: string; name: string; icon?: string; links: StorefrontLink[] }[];
-    collections?: { id: string; name: string; sectionId: string | null; linkIds: string[] }[];
+    collections?: { id: string; name: string; linkIds: string[] }[];
   }>;
 }
 
@@ -178,7 +177,6 @@ export default async function StorefrontPage({
 
       <StorefrontGrid
         links={creator.links}
-        sections={creator.sections}
         collections={creator.collections}
         storefrontUrl={storefrontUrl}
         hidePopular={creator.hidePopular}

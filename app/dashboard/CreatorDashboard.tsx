@@ -8,7 +8,6 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { OpportunitiesFeed } from "./OpportunitiesFeed";
 import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
-import { SectionsManager } from "./SectionsManager";
 import { AdFields } from "./AdFields";
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
@@ -73,7 +72,7 @@ export function CreatorDashboard({
   const [editAd, setEditAd] = useState({ isAd: false, adInfo: "" });
   const [origin, setOrigin] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
-  const [tab, setTab] = useState<"products" | "earnings" | "profile" | "sections">("products");
+  const [tab, setTab] = useState<"products" | "earnings" | "profile">("products");
   // Paused while the monetization approach (promo codes / CPA / opportunities)
   // is still being decided — set back to true to bring the tab back.
   const EARNINGS_TAB_ENABLED = false;
@@ -85,7 +84,7 @@ export function CreatorDashboard({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const fromUrl = params.get("tab");
-    if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile" || fromUrl === "sections") {
+    if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile") {
       setTab(fromUrl);
     }
 
@@ -302,7 +301,6 @@ export function CreatorDashboard({
         {(
           [
             ["products", "Товары"],
-            ["sections", "Разделы витрины"],
             ...(EARNINGS_TAB_ENABLED ? ([["earnings", "Заработок"]] as const) : []),
             ["profile", "Профиль"],
           ] as const
@@ -568,12 +566,6 @@ export function CreatorDashboard({
               </ul>
             )}
           </div>
-        </div>
-      )}
-
-      {tab === "sections" && (
-        <div className="px-8 py-8 max-w-xl mx-auto w-full">
-          <SectionsManager links={links ?? []} />
         </div>
       )}
 

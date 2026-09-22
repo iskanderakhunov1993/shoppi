@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireCreator } from "@/lib/require-creator";
-import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listCollectionsByCreator, listLinksByCreator, listPublicSections } from "@/lib/store";
+import { countClicksForLinks, countFavoritesForLinks, countFollowers, getCreatorBySlug, listCollectionsByCreator, listLinksByCreator } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
@@ -32,31 +31,6 @@ export async function GET(
     saves: saves.get(link.id) ?? 0,
   }));
 
-  // Empty sections are hidden from visitors, but the owner needs to see
-  // (and fill) the ones they just created.
-  const viewer = await requireCreator(request);
-  const publicSections = await listPublicSections(creator.id, { includeEmpty: viewer?.id === creator.id });
-  const sections = publicSections.map((s) => ({
-    id: s.id,
-    name: s.name,
-    icon: s.icon,
-    links: s.links.map((link) => ({
-      id: link.id,
-      title: link.title,
-      imageUrl: link.imageUrl,
-      price: link.price,
-      category: link.category,
-      brand: link.brand,
-      subtype: link.subtype,
-      promoCode: link.promoCode,
-    isAd: link.isAd,
-    adInfo: link.adInfo,
-      wrappedUrl: `/r/${link.id}`,
-      clicks: counts.get(link.id)?.human ?? 0,
-      saves: saves.get(link.id) ?? 0,
-    })),
-  }));
-
   return NextResponse.json({
     id: creator.id,
     slug: creator.slug,
@@ -72,11 +46,9 @@ export async function GET(
     hidePopular: creator.hidePopular,
     followers: await countFollowers(creator.id),
     links,
-    sections,
     collections: (await listCollectionsByCreator(creator.id)).map((c) => ({
       id: c.id,
       name: c.name,
-      sectionId: c.sectionId,
       linkIds: c.linkIds,
     })),
   });

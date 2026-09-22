@@ -12,12 +12,10 @@ type Product = { id: string; title: string; imageUrl?: string };
  */
 export function CollectionEditor({
   products,
-  sectionId,
   collection,
   onClose,
 }: {
   products: Product[];
-  sectionId: string | null;
   collection?: { id: string; name: string; linkIds: string[] };
   onClose: () => void;
 }) {
@@ -42,7 +40,7 @@ export function CollectionEditor({
     const res = await fetch(collection ? `/api/collections/${collection.id}` : "/api/collections", {
       method: collection ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), linkIds: picked, sectionId }),
+      body: JSON.stringify({ name: name.trim(), linkIds: picked }),
     });
     setSaving(false);
     if (!res.ok) {
