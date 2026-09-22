@@ -19,7 +19,16 @@ function bookmarkletBody(origin: string) {
       var m = t.match(/^(.*)\\s\\d+\\s+купить за\\s+([\\d\\s]+)\\s*\\u20bd/);
       var title = m ? m[1].trim() : "";
       var price = m ? m[2].replace(/\\s/g, "") : "";
-      var img = document.querySelector('img[src*="wbbasket.ru"][src*="/images/big/1"]');
+      // WB serves gallery images from several CDN hosts (wbbasket.ru,
+      // geobasket.ru, ...) that rotate over time, so match on the article
+      // id in the path instead of a fixed host.
+      var idMatch = location.pathname.match(/\\/catalog\\/(\\d+)/);
+      var articleId = idMatch ? idMatch[1] : "";
+      var img = articleId
+        ? [].slice.call(document.querySelectorAll("img")).find(function (el) {
+            return el.src.indexOf("/" + articleId + "/images/big/1") !== -1;
+          })
+        : null;
       var imageUrl = img ? img.src.replace(/^http:/, "https:") : "";
       var url = location.href.split("?")[0];
       if (!title) {
