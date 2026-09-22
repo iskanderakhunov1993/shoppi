@@ -83,9 +83,28 @@ export function CreatorDashboard({
   // Lets the storefront's own "edit profile" icon deep-link straight
   // into this tab instead of always landing on "Товары".
   useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("tab");
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("tab");
     if (fromUrl === "products" || fromUrl === "earnings" || fromUrl === "profile" || fromUrl === "sections") {
       setTab(fromUrl);
+    }
+
+    // The WB bookmarklet (see /bookmarklet) reads the product page in the
+    // creator's own browser — already past WB's bot check as an ordinary
+    // visitor — and hands the scraped fields back here via the URL so the
+    // add-product form opens pre-filled instead of blank.
+    if (params.get("prefill") === "1") {
+      setTab("products");
+      const prefTitle = params.get("title");
+      const prefUrl = params.get("targetUrl");
+      const prefImage = params.get("imageUrl");
+      const prefPrice = params.get("price");
+      if (prefTitle) setTitle(prefTitle);
+      if (prefUrl) setTargetUrl(prefUrl);
+      if (prefImage) setImageUrl(prefImage);
+      if (prefPrice) setPrice(prefPrice);
+      setLookupNote("Данные подтянуты со страницы товара букмарклетом — проверьте перед сохранением.");
+      window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
 
@@ -304,7 +323,12 @@ export function CreatorDashboard({
         <div className="grid md:grid-cols-[300px_1fr] flex-1 max-w-[1400px] w-full mx-auto">
           <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8">
             <div className="flex flex-col gap-4">
-              <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
+                <a href="/bookmarklet" className="text-[11px] underline underline-offset-4 text-stone hover:text-ink transition-colors">
+                  Кнопка для WB ↗
+                </a>
+              </div>
               <form onSubmit={handleAdd} className="flex flex-col gap-3">
                 <input
                   placeholder="Название товара"
