@@ -54,6 +54,15 @@ export function YoutubeIcon(props: IconProps) {
   );
 }
 
+export function MailIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="2" y="4" width="20" height="16" rx="3" />
+      <path d="m3 6 9 7 9-7" />
+    </Svg>
+  );
+}
+
 export const SOCIALS = [
   { key: "instagramHandle", label: "Instagram", Icon: InstagramIcon, url: (h: string) => `https://instagram.com/${h}` },
   { key: "tiktokHandle", label: "TikTok", Icon: TiktokIcon, url: (h: string) => `https://tiktok.com/@${h}` },

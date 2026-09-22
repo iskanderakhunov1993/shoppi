@@ -7,7 +7,7 @@ import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
-import { SOCIALS } from "@/app/components/SocialIcons";
+import { SOCIALS, MailIcon } from "@/app/components/SocialIcons";
 import { TrustInfo } from "./TrustInfo";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { SESSION_COOKIE } from "@/lib/auth";
@@ -135,13 +135,6 @@ export default async function StorefrontPage({
             {creator.categories.map((c) => CATEGORY_LABEL[c]).join(" · ")}
           </p>
         )}
-        {creator.contactEmail && (
-          <p className="text-[13px] mb-6">
-            <a href={`mailto:${creator.contactEmail}`} className="text-stone hover:text-ink underline underline-offset-4 transition-colors">
-              {creator.contactEmail}
-            </a>
-          </p>
-        )}
         {!isOwner && (
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2.5 mb-6 px-6">
             <FollowButton creatorId={creator.id} initialFollowers={creator.followers} />
@@ -153,8 +146,18 @@ export default async function StorefrontPage({
           {pluralizeShoppers(creator.followers)}
           <TrustInfo text="Столько покупателей подписались на этого куратора. Это реальные подписки, а не просмотры." />
         </p>
-        {SOCIALS.some((n) => creator[n.key]) && (
+        {(creator.contactEmail || SOCIALS.some((n) => creator[n.key])) && (
           <div className="flex justify-center gap-4">
+            {creator.contactEmail && (
+              <a
+                href={`mailto:${creator.contactEmail}`}
+                aria-label={`Написать на ${creator.contactEmail}`}
+                title={creator.contactEmail}
+                className="text-stone hover:text-ink transition-colors"
+              >
+                <MailIcon />
+              </a>
+            )}
             {SOCIALS.map(({ key, label, Icon, url }) =>
               creator[key] ? (
                 <a
