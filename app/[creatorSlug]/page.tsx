@@ -34,6 +34,8 @@ type StorefrontLink = {
   clicks: number;
   clicksWeek: number;
   clicksMonth: number;
+  sameProductCreators?: number;
+  sameProductAvatars?: string[];
   saves: number;
   isAd?: boolean;
   adInfo?: string;

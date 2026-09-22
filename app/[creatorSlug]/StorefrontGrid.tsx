@@ -8,7 +8,7 @@ import { CollectionEditor } from "./CollectionEditor";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { QuickAddProductButton } from "./QuickAddProductButton";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
-import { pluralizeProducts } from "@/lib/plural";
+import { pluralizeProducts, pluralizeCreators } from "@/lib/plural";
 
 type StorefrontLink = {
   id: string;
@@ -23,6 +23,8 @@ type StorefrontLink = {
   clicks: number;
   clicksWeek: number;
   clicksMonth: number;
+  sameProductCreators?: number;
+  sameProductAvatars?: string[];
   saves: number;
   isAd?: boolean;
   adInfo?: string;
@@ -461,6 +463,24 @@ export function StorefrontGrid({
                 {link.promoCode && (
                   <div className="text-[11.5px] text-ink border border-line w-fit px-2 py-0.5">
                     Промокод: {link.promoCode}
+                  </div>
+                )}
+                {!!link.sameProductCreators && link.sameProductCreators > 1 && (
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex -space-x-2">
+                      {(link.sameProductAvatars ?? []).slice(0, 3).map((src, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={i}
+                          src={src}
+                          alt=""
+                          className="w-5 h-5 rounded-full object-cover border-2 border-card bg-raise"
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[11px] text-stone">
+                      Выбор {link.sameProductCreators} {pluralizeCreators(link.sameProductCreators)}
+                    </span>
                   </div>
                 )}
               </a>

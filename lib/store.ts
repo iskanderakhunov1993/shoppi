@@ -635,6 +635,51 @@ export async function listLinksByArticles(articles: string[], opts: { limit?: nu
   return rows.map(toLink);
 }
 
+export type SameProductStat = { creatorCount: number; sampleAvatars: string[] };
+
+/**
+ * For each (marketplace, articleId) pair, how many *distinct* creators on
+ * the platform have posted that same product — the "chosen by N curators"
+ * social-proof badge. Only pairs picked up by more than one creator are
+ * worth showing, so callers should skip anything with creatorCount <= 1.
+ */
+export async function countCreatorsByArticle(
+  items: { marketplace?: string; articleId?: string }[]
+): Promise<Map<string, SameProductStat>> {
+  const articleIds = [...new Set(items.filter((i) => i.marketplace && i.articleId).map((i) => i.articleId!))];
+  if (articleIds.length === 0) return new Map();
+
+  const rows = await sql`
+    SELECT marketplace, article_id, creator_id
+    FROM links
+    WHERE article_id IN ${sql(articleIds)} AND marketplace IS NOT NULL
+  `;
+
+  const byKey = new Map<string, Set<string>>();
+  for (const r of rows) {
+    const key = `${str(r.marketplace)}:${str(r.article_id)}`;
+    if (!byKey.has(key)) byKey.set(key, new Set());
+    byKey.get(key)!.add(str(r.creator_id));
+  }
+
+  const result = new Map<string, SameProductStat>();
+  const creatorIdsNeeded = new Set<string>();
+  for (const [key, creatorIds] of byKey) {
+    if (creatorIds.size <= 1) continue;
+    const sample = [...creatorIds].slice(0, 3);
+    sample.forEach((id) => creatorIdsNeeded.add(id));
+    result.set(key, { creatorCount: creatorIds.size, sampleAvatars: sample });
+  }
+
+  const creators = await Promise.all([...creatorIdsNeeded].map((id) => getCreatorById(id)));
+  const avatarById = new Map(creators.filter((c): c is Creator => Boolean(c)).map((c) => [c.id, c.avatarUrl ?? ""]));
+  for (const stat of result.values()) {
+    stat.sampleAvatars = stat.sampleAvatars.map((id) => avatarById.get(id) ?? "").filter(Boolean);
+  }
+
+  return result;
+}
+
 export async function listLinksByCategory(
   category: Link["category"],
   opts: { limit?: number; offset?: number } = {}
