@@ -32,8 +32,6 @@ export const DEMO_ACCOUNTS: Record<Role, string> = {
   brand: "demo-brand@myshop.dev",
 };
 
-const LANDING_CREATORS = ["landing-maxim@shoppi.dev", "landing-sonya@shoppi.dev"];
-
 type SeedLink = {
   title: string;
   category: Category;
@@ -98,50 +96,6 @@ async function runSeed(): Promise<void> {
     ]
   );
 
-  await seedCreatorAccount(
-    LANDING_CREATORS[0],
-    "Максим",
-    "Инструменты и снаряжение, которые проверил сам — ничего лишнего.",
-    [
-      {
-        title: "Складной нож для кемпинга",
-        category: "mens",
-        url: "https://www.wildberries.ru/catalog/183920144/detail.aspx",
-        image: "https://picsum.photos/seed/shoppi-knife/600/450",
-        price: 4200,
-      },
-      {
-        title: "Механический триммер для бороды",
-        category: "mens",
-        url: "https://www.ozon.ru/product/trimmer-dlya-borody-1284900733/",
-        image: "https://picsum.photos/seed/shoppi-trimmer/600/450",
-        price: 3190,
-      },
-    ]
-  );
-
-  await seedCreatorAccount(
-    LANDING_CREATORS[1],
-    "Соня",
-    "Базовый гардероб на каждый день — вещи, которые ношу сезон за сезоном.",
-    [
-      {
-        title: "Пальто из шерсти, серое",
-        category: "clothing",
-        url: "https://www.lamoda.ru/p/palto-sherstyanoe-770211/",
-        image: "https://picsum.photos/seed/shoppi-coat/600/450",
-        price: 14900,
-      },
-      {
-        title: "Свитер оверсайз, бежевый",
-        category: "clothing",
-        url: "https://www.ozon.ru/product/sviter-overrazmer-1102938471/",
-        image: "https://picsum.photos/seed/shoppi-sweater/600/450",
-        price: 5400,
-      },
-    ]
-  );
-
   if (!(await getUserByEmail(DEMO_ACCOUNTS.shopper))) {
     const { user } = await createUser(DEMO_ACCOUNTS.shopper, seedPasswordHash(), "shopper");
     await markUserVerified(user.id);
@@ -180,12 +134,10 @@ export function seedDemoAccounts(): Promise<void> {
 }
 
 export async function listLandingCreators(): Promise<Creator[]> {
-  const emails = [DEMO_ACCOUNTS.creator, ...LANDING_CREATORS];
-  const users = (await Promise.all(emails.map((email) => getUserByEmail(email)))).filter(
-    (u): u is NonNullable<typeof u> => Boolean(u)
-  );
-  const creators = await Promise.all(users.map((u) => getCreatorByUserId(u.id)));
-  return creators.filter((c): c is Creator => Boolean(c));
+  const user = await getUserByEmail(DEMO_ACCOUNTS.creator);
+  if (!user) return [];
+  const creator = await getCreatorByUserId(user.id);
+  return creator ? [creator] : [];
 }
 
 export { DEMO_PASSWORD };
