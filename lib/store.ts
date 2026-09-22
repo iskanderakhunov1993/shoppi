@@ -1031,6 +1031,32 @@ export async function listCircleMembers(circleId: string): Promise<Creator[]> {
   return rows.map(toCreator);
 }
 
+export type CircleFollower = { userId: string; displayName?: string; avatarUrl?: string; addedAt: string };
+
+/**
+ * The shoppers who've put this creator in one of their own circles — the
+ * creator's-eye view of "Круги": who cares enough to have organized them
+ * into a personal list, not just a follow. One row per shopper (their
+ * earliest add, across all their circles), newest first.
+ */
+export async function listCreatorCircleFollowers(creatorId: string): Promise<CircleFollower[]> {
+  const rows = await sql`
+    SELECT u.id AS user_id, u.display_name, u.avatar_url, MIN(cm.added_at) AS added_at
+    FROM circle_members cm
+    JOIN circles ci ON ci.id = cm.circle_id
+    JOIN users u ON u.id = ci.user_id
+    WHERE cm.creator_id = ${creatorId}
+    GROUP BY u.id, u.display_name, u.avatar_url
+    ORDER BY added_at DESC
+  `;
+  return rows.map((r) => ({
+    userId: str(r.user_id),
+    displayName: r.display_name ? str(r.display_name) : undefined,
+    avatarUrl: r.avatar_url ? str(r.avatar_url) : undefined,
+    addedAt: str(r.added_at),
+  }));
+}
+
 /** Every link from every creator in this circle, newest first. */
 export async function circleMembersFeed(circleId: string, opts: { limit?: number } = {}): Promise<Link[]> {
   const limit = Math.min(opts.limit ?? 60, 200);
