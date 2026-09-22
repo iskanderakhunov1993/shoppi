@@ -313,16 +313,27 @@ export function StorefrontGrid({
       )}
 
       {collectionsMode && shown.length === 0 ? null : shown.length === 0 ? (
-        <div className="py-16 flex justify-center">
+        <div className="py-16 flex flex-col items-center gap-4">
           <EmptyState
             title={
               query.trim() || facet
                 ? "Ничего не найдено — попробуйте другой запрос или сбросьте фильтр."
-                : isOwner && links.length === 0
-                  ? "Витрина пока пуста — добавьте первый товар кнопкой «Добавить товар +» выше."
-                  : "В этой категории пока пусто."
+                : isOwner && activeCollection
+                  ? "В этой коллекции пока нет товаров."
+                  : isOwner && links.length === 0
+                    ? "Витрина пока пуста — добавьте первый товар кнопкой «Добавить товар +» выше."
+                    : "В этой категории пока пусто."
             }
           />
+          {isOwner && activeCollection && !query.trim() && !facet && (
+            <button
+              type="button"
+              onClick={() => setEditor({ collection: activeCollection })}
+              className="text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              Добавить товар в коллекцию
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3">
