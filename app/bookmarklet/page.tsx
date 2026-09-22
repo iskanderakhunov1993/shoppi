@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 // Reads the product open in the creator's own browser — already past
@@ -45,10 +45,19 @@ function bookmarkletBody(origin: string) {
 
 export default function BookmarkletPage() {
   const [origin, setOrigin] = useState("");
+  const linkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
-  const href = origin ? `javascript:${encodeURIComponent(bookmarkletBody(origin))}` : undefined;
+  // React sanitizes any href passed through JSX that starts with
+  // "javascript:" — as an XSS precaution it swaps the whole URL for a
+  // stub that just throws when clicked, which is exactly what a dragged
+  // bookmarklet needs to run. Setting the attribute straight on the DOM
+  // node after render sidesteps that diffing/sanitizing pass entirely.
+  useEffect(() => {
+    if (!origin || !linkRef.current) return;
+    linkRef.current.setAttribute("href", `javascript:${encodeURIComponent(bookmarkletBody(origin))}`);
+  }, [origin]);
 
   return (
     <main className="flex-1 px-6 md:px-10 py-16 md:py-20">
@@ -66,9 +75,9 @@ export default function BookmarkletPage() {
 
         <div className="border border-line p-6 flex flex-col items-center gap-4 bg-card">
           <a
-            href={href}
+            ref={linkRef}
+            href="#"
             onClick={(e) => {
-              if (!href) return;
               e.preventDefault();
               alert("Перетащите эту кнопку на панель закладок браузера, а не нажимайте на неё.");
             }}
