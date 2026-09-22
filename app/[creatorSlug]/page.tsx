@@ -32,6 +32,8 @@ type StorefrontLink = {
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
+  clicksWeek: number;
+  clicksMonth: number;
   saves: number;
   isAd?: boolean;
   adInfo?: string;
@@ -181,6 +183,17 @@ export default async function StorefrontPage({
         storefrontUrl={storefrontUrl}
         hidePopular={creator.hidePopular}
         isOwner={isOwner}
+        socials={[
+          ...(creator.contactEmail
+            ? [{ key: "email", label: "Email", handle: creator.contactEmail, href: `mailto:${creator.contactEmail}` }]
+            : []),
+          ...SOCIALS.filter((s) => creator[s.key]).map((s) => ({
+            key: s.key,
+            label: s.label,
+            handle: creator[s.key]!,
+            href: s.url(creator[s.key]!),
+          })),
+        ]}
       />
 
       <LandingFooter />

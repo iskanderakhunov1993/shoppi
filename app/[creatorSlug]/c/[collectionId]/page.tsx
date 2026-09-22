@@ -100,11 +100,11 @@ export default async function CollectionPage({ params }: { params: Promise<Param
                 (i + 1) % 3 !== 0 ? "lg:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
             >
-              <div className="relative aspect-square bg-line overflow-hidden">
-                <a href={`/r/${link.id}`} className="block w-full h-full">
+              <div className="relative bg-line overflow-hidden">
+                <a href={`/r/${link.id}`} className="block w-full">
                   {link.imageUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={link.imageUrl} alt={link.title} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
+                    <img src={link.imageUrl} alt={link.title} className="w-full h-auto object-contain hover:opacity-90 transition-opacity" />
                   )}
                 </a>
                 <div className="absolute top-3 right-3">

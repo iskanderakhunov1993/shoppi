@@ -13,8 +13,14 @@ export async function GET(
 
   const linkRows = await listLinksByCreator(creator.id);
   const linkIds = linkRows.map((l) => l.id);
-  const counts = await countClicksForLinks(linkIds);
-  const saves = await countFavoritesForLinks(linkIds);
+  const weekSince = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
+  const monthSince = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
+  const [counts, countsWeek, countsMonth, saves] = await Promise.all([
+    countClicksForLinks(linkIds),
+    countClicksForLinks(linkIds, weekSince),
+    countClicksForLinks(linkIds, monthSince),
+    countFavoritesForLinks(linkIds),
+  ]);
   const links = linkRows.map((link) => ({
     id: link.id,
     title: link.title,
@@ -28,6 +34,8 @@ export async function GET(
     adInfo: link.adInfo,
     wrappedUrl: `/r/${link.id}`,
     clicks: counts.get(link.id)?.human ?? 0,
+    clicksWeek: countsWeek.get(link.id)?.human ?? 0,
+    clicksMonth: countsMonth.get(link.id)?.human ?? 0,
     saves: saves.get(link.id) ?? 0,
   }));
 

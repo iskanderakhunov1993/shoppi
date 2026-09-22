@@ -21,24 +21,29 @@ type StorefrontLink = {
   promoCode?: string;
   wrappedUrl: string;
   clicks: number;
+  clicksWeek: number;
+  clicksMonth: number;
   saves: number;
   isAd?: boolean;
   adInfo?: string;
 };
 
 type Collection = { id: string; name: string; linkIds: string[] };
+type Social = { key: string; label: string; handle: string; href: string };
 
-type Tab = "latest" | "popular" | string;
+type Tab = "latest" | "popular" | "popular_month" | "popular_week" | "collections" | "social" | "for_you" | string;
 
 export function StorefrontGrid({
   links,
   collections = [],
+  socials = [],
   storefrontUrl = "",
   hidePopular = false,
   isOwner = false,
 }: {
   links: StorefrontLink[];
   collections?: Collection[];
+  socials?: Social[];
   storefrontUrl?: string;
   hidePopular?: boolean;
   isOwner?: boolean;
@@ -65,6 +70,10 @@ export function StorefrontGrid({
     }
     if (tab === "latest") return links;
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
+    if (tab === "popular_month") return [...links].sort((a, b) => b.clicksMonth - a.clicksMonth);
+    if (tab === "popular_week") return [...links].sort((a, b) => b.clicksWeek - a.clicksWeek);
+    if (tab === "for_you") return [...links].sort(() => Math.random() - 0.5);
+    if (tab === "collections" || tab === "social") return [];
     return links.filter((l) => l.category === tab);
   }, [links, tab, activeCollection]);
 
@@ -172,6 +181,56 @@ export function StorefrontGrid({
             Популярное
           </button>
         )}
+        {!hidePopular && links.length > 0 && (
+          <button
+            onClick={() => selectTab("popular_month")}
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "popular_month" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            Популярное за месяц
+          </button>
+        )}
+        {!hidePopular && links.length > 0 && (
+          <button
+            onClick={() => selectTab("popular_week")}
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "popular_week" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            Популярное за неделю
+          </button>
+        )}
+        {collections.length > 0 && (
+          <button
+            onClick={() => selectTab("collections")}
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "collections" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            Коллекции
+          </button>
+        )}
+        {socials.length > 0 && (
+          <button
+            onClick={() => selectTab("social")}
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "social" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            Соцсети
+          </button>
+        )}
+        {links.length > 0 && (
+          <button
+            onClick={() => selectTab("for_you")}
+            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+              tab === "for_you" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+            }`}
+          >
+            Для вас
+          </button>
+        )}
         {categories.map((c) => (
           <button
             key={c}
@@ -234,7 +293,7 @@ export function StorefrontGrid({
         </div>
       )}
 
-      {collectionsMode && (
+      {(collectionsMode || tab === "collections") && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 px-8 py-8 border-b border-line">
           {collections.map((c) => {
             const byId = new Map(links.map((l) => [l.id, l]));
@@ -258,6 +317,27 @@ export function StorefrontGrid({
               </button>
             );
           })}
+        </div>
+      )}
+
+      {tab === "social" && (
+        <div className="flex flex-col gap-3 px-8 py-8 border-b border-line max-w-md">
+          {socials.length === 0 ? (
+            <EmptyState title="Соцсети пока не добавлены." />
+          ) : (
+            socials.map((s) => (
+              <a
+                key={s.key}
+                href={s.href}
+                target={s.key === "email" ? undefined : "_blank"}
+                rel={s.key === "email" ? undefined : "noopener noreferrer"}
+                className="flex items-center justify-between px-4 py-3 border border-line hover:border-ink transition-colors"
+              >
+                <span className="text-[13px] font-medium">{s.label}</span>
+                <span className="text-stone text-[13px]">{s.handle}</span>
+              </a>
+            ))
+          )}
         </div>
       )}
 
@@ -312,7 +392,7 @@ export function StorefrontGrid({
         </div>
       )}
 
-      {collectionsMode && shown.length === 0 ? null : shown.length === 0 ? (
+      {tab === "collections" || tab === "social" ? null : collectionsMode && shown.length === 0 ? null : shown.length === 0 ? (
         <div className="py-16 flex flex-col items-center gap-4">
           <EmptyState
             title={
@@ -344,17 +424,17 @@ export function StorefrontGrid({
                 (i + 1) % 3 !== 0 ? "lg:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
             >
-              <div className="relative aspect-square bg-line overflow-hidden">
-                <a href={link.wrappedUrl} className="block w-full h-full">
+              <div className="relative bg-line overflow-hidden">
+                <a href={link.wrappedUrl} className="block w-full">
                   {link.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={link.imageUrl}
                       alt={link.title}
-                      className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                      className="w-full h-auto object-contain hover:opacity-90 transition-opacity"
                     />
                   ) : (
-                    <div className="w-full h-full" aria-hidden="true" />
+                    <div className="w-full aspect-square" aria-hidden="true" />
                   )}
                 </a>
                 <div className="absolute top-3 right-3 flex flex-col items-center gap-1">

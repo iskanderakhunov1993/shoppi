@@ -741,16 +741,26 @@ export async function countClicksForLink(linkId: string, opts: { humanOnly?: boo
  * loop is an N+1 query, which is what breaks first at a few hundred
  * creators.
  */
-export async function countClicksForLinks(linkIds: string[]): Promise<Map<string, { total: number; human: number }>> {
+export async function countClicksForLinks(
+  linkIds: string[],
+  sinceISO?: string
+): Promise<Map<string, { total: number; human: number }>> {
   const result = new Map<string, { total: number; human: number }>();
   if (linkIds.length === 0) return result;
 
-  const rows = await sql`
-    SELECT link_id,
-           COUNT(*) AS total,
-           SUM(CASE WHEN is_bot = false THEN 1 ELSE 0 END) AS human
-    FROM clicks WHERE link_id IN ${sql(linkIds)} GROUP BY link_id
-  `;
+  const rows = sinceISO
+    ? await sql`
+        SELECT link_id,
+               COUNT(*) AS total,
+               SUM(CASE WHEN is_bot = false THEN 1 ELSE 0 END) AS human
+        FROM clicks WHERE link_id IN ${sql(linkIds)} AND clicked_at > ${sinceISO} GROUP BY link_id
+      `
+    : await sql`
+        SELECT link_id,
+               COUNT(*) AS total,
+               SUM(CASE WHEN is_bot = false THEN 1 ELSE 0 END) AS human
+        FROM clicks WHERE link_id IN ${sql(linkIds)} GROUP BY link_id
+      `;
 
   for (const id of linkIds) result.set(id, { total: 0, human: 0 });
   for (const r of rows) {
