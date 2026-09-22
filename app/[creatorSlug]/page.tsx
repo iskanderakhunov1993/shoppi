@@ -3,7 +3,6 @@ import { AdLabel } from "@/app/components/AdLabel";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
 import { AddToCircleButton } from "./AddToCircleButton";
-import { QuickAddProductButton } from "./QuickAddProductButton";
 import { StorefrontGrid } from "./StorefrontGrid";
 import { placeholderAvatar } from "@/lib/avatar";
 import { LandingNav } from "@/app/components/landing/LandingNav";
@@ -111,7 +110,6 @@ export default async function StorefrontPage({
       <div className="relative text-center px-8 pt-36 pb-12">
         {isOwner && (
           <div className="absolute top-36 right-6 flex items-center gap-2">
-            <QuickAddProductButton />
             <a
               href="/dashboard?tab=profile"
               aria-label="Редактировать профиль"
