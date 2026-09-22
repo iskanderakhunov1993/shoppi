@@ -23,16 +23,16 @@ export default function CreatorsPage() {
     <main className="flex-1 flex flex-col">
       <LandingNav overlay />
       <RoleHero
-        eyebrow="Для кураторов"
+        eyebrow="Для креаторов"
         titlePrefix="Твой вкус —"
         titleEmphasis="теперь"
         titleSuffix="витрина."
         subhead="Публикуйте то, что реально выбрали сами — без чужого алгоритма между вами и вашей аудиторией."
-        ctaLabel="Стать куратором"
+        ctaLabel="Стать креатором"
         ctaHref="/signup"
         imageSeed="shoppi-creators"
       />
-      <ValueList eyebrow="Что вы получаете" title="Инструменты куратора" items={ITEMS} />
+      <ValueList eyebrow="Что вы получаете" title="Инструменты креатора" items={ITEMS} />
       <section className="px-6 md:px-10 py-14 text-center">
         <p className="text-stone text-sm max-w-md mx-auto mb-2">
           Регистрация открыта всем — без заявки и модерации.

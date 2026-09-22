@@ -98,10 +98,10 @@ export function BrandOpportunities() {
     <div className="grid md:grid-cols-[320px_1fr] gap-8">
       <div className="flex flex-col gap-4">
         <h3 className="text-[11px] uppercase tracking-wider text-stone">
-          Предложить сотрудничество куратору
+          Предложить сотрудничество креатору
         </h3>
         <p className="text-stone text-[13px] leading-relaxed">
-          Опубликуйте предложение — кураторы увидят его в своём кабинете и смогут откликнуться.
+          Опубликуйте предложение — креаторы увидят его в своём кабинете и смогут откликнуться.
         </p>
         <form onSubmit={handleCreate} className="flex flex-col gap-3">
           <input
@@ -152,7 +152,7 @@ export function BrandOpportunities() {
         {opportunities === null ? (
           <p className="text-stone text-sm">Загрузка…</p>
         ) : opportunities.length === 0 ? (
-          <EmptyState title="Вы ещё не публиковали предложения кураторам." />
+          <EmptyState title="Вы ещё не публиковали предложения креаторам." />
         ) : (
           <ul className="flex flex-col">
             {opportunities.map((o) => (
@@ -187,7 +187,7 @@ export function BrandOpportunities() {
                               href={a.creator ? `/${a.creator.slug}` : undefined}
                               className="text-[13px] font-medium hover:underline"
                             >
-                              {a.creator?.displayName ?? "Куратор"}
+                              {a.creator?.displayName ?? "Креатор"}
                             </a>
                             {a.status === "pending" ? (
                               <div className="flex gap-2">

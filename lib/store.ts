@@ -942,7 +942,7 @@ export async function listRecentLinks(opts: { limit?: number } = {}): Promise<Re
 
 /**
  * Count of links from followed creators added after the shopper last
- * checked their "Мои кураторы" feed — powers the notification badge.
+ * checked their "Мои креаторы" feed — powers the notification badge.
  * A never-visited feed (finds_seen_at is null) counts everything so
  * the badge doesn't silently start at 0 for new followers.
  */

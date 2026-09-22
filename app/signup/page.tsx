@@ -10,7 +10,7 @@ type Role = "shopper" | "creator" | "brand";
 
 const ROLE_TABS: { role: Role; label: string; tagline: string }[] = [
   { role: "shopper", label: "Покупатель", tagline: "Покупай у своих людей, не у алгоритма." },
-  { role: "creator", label: "Куратор", tagline: "Твой вкус — теперь витрина." },
+  { role: "creator", label: "Креатор", tagline: "Твой вкус — теперь витрина." },
   { role: "brand", label: "Бренд", tagline: "Смотрите, кто вас продвигает." },
 ];
 

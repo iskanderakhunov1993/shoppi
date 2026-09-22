@@ -16,7 +16,7 @@ export function ShopByBrand({
             <h2 className="font-display text-4xl md:text-5xl">Магазину</h2>
           </div>
           <p className="text-stone text-sm max-w-xs">
-            Сайты, куда чаще всего ведут ссылки кураторов — не партнёрства, а
+            Сайты, куда чаще всего ведут ссылки креаторов — не партнёрства, а
             то, где они реально покупают.
           </p>
         </div>

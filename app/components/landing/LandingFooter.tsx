@@ -16,12 +16,12 @@ export async function LandingFooter() {
 
   const columns: Column[] = [
     {
-      title: "Кураторам",
+      title: "Креаторам",
       links: [
         { label: "Обзор", href: "/creators" },
         { label: "Пример витрины", href: example },
         { label: "Пример медиакита", href: exampleStats },
-        { label: "Стать куратором", href: "/signup" },
+        { label: "Стать креатором", href: "/signup" },
         { label: "Войти в кабинет", href: "/login" },
       ],
     },
@@ -41,7 +41,7 @@ export async function LandingFooter() {
       title: "Покупателям",
       links: [
         { label: "Обзор", href: "/shoppers" },
-        { label: "Все кураторы", href: "/curators" },
+        { label: "Все креаторы", href: "/curators" },
         { label: "Последние находки", href: "/finds" },
         { label: "Все категории", href: "/categories" },
         { label: "Сохранённое", href: "/dashboard?tab=saved" },

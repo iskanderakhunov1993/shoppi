@@ -22,24 +22,24 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Обзор",
           href: "/shoppers",
-          description: "Зачем покупать по рекомендации куратора, а не по ленте алгоритма.",
+          description: "Зачем покупать по рекомендации креатора, а не по ленте алгоритма.",
         },
         {
-          label: "По куратору",
+          label: "По креатору",
           href: "/curators",
           description: "Витрины людей, чьему вкусу вы доверяете, а не лента алгоритма.",
         },
         {
           label: "Последние находки",
           href: "/finds",
-          description: "Товары от всех кураторов сразу, по порядку добавления.",
+          description: "Товары от всех креаторов сразу, по порядку добавления.",
         },
         ...(BRANDS_ENABLED
           ? [
               {
                 label: "По магазину",
                 href: "/#brands-catalog",
-                description: "Сайты, куда чаще всего ведут ссылки кураторов.",
+                description: "Сайты, куда чаще всего ведут ссылки креаторов.",
               },
             ]
           : []),
@@ -51,13 +51,13 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Все категории",
           href: "/categories",
-          description: "От косметики до электроники — товары кураторов по темам.",
+          description: "От косметики до электроники — товары креаторов по темам.",
         },
       ],
     },
     {
       key: "creators",
-      label: "Кураторам",
+      label: "Креаторам",
       align: "center",
       items: [
         {
@@ -73,7 +73,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Пример витрины",
           href: example,
-          description: "Живая страница куратора — ровно то, что получите вы.",
+          description: "Живая страница креатора — ровно то, что получите вы.",
         },
         {
           label: "Пример медиакита",
@@ -81,7 +81,7 @@ function buildMenus(demoSlug?: string): Menu[] {
           description: "Страница со статистикой, которую можно показать рекламодателю.",
         },
         {
-          label: "Стать куратором",
+          label: "Стать креатором",
           href: "/signup",
           description: "Регистрация открыта всем — без заявки и модерации.",
         },
@@ -95,7 +95,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Обзор",
           href: "/brands",
-          description: "Кто из кураторов уже ссылается на ваши товары, привязка по артикулу и честные живые переходы.",
+          description: "Кто из креаторов уже ссылается на ваши товары, привязка по артикулу и честные живые переходы.",
         },
         {
           label: "Подключить домен",
@@ -138,7 +138,7 @@ function quickLinksFor(role: Role | undefined, creatorSlug?: string): { label: s
     return [
       { label: "Моя витрина", href: creatorSlug ? `/${creatorSlug}` : "/dashboard" },
       { label: "Ссылки", href: "/dashboard?tab=products" },
-      { label: "Кураторы", href: "/curators" },
+      { label: "Креаторы", href: "/curators" },
       { label: "Находки", href: "/finds" },
     ];
   }
@@ -146,7 +146,7 @@ function quickLinksFor(role: Role | undefined, creatorSlug?: string): { label: s
   // links yet since the role is paused (BRANDS_ENABLED), so they get
   // the same shopper-facing shortcuts.
   return [
-    { label: "Кураторы", href: "/curators" },
+    { label: "Креаторы", href: "/curators" },
     { label: "Находки", href: "/finds" },
     { label: "Круги", href: "/dashboard?tab=circles" },
     { label: "Сохранённое", href: "/dashboard?tab=saved" },
@@ -331,7 +331,7 @@ export function MegaNav({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onBlur={() => !searchQuery && setSearchOpen(false)}
-                placeholder="Товары и кураторы"
+                placeholder="Товары и креаторы"
                 className={`text-[13px] w-48 px-3 py-1.5 border-b bg-transparent outline-none ${
                   transparent ? "border-white text-white placeholder:text-white/60" : "border-ink text-ink placeholder:text-stone"
                 }`}

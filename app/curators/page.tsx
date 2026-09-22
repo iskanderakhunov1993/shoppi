@@ -43,14 +43,14 @@ export default async function CuratorsDirectoryPage({
       <section className="px-6 md:px-10 pt-32 pb-12 md:py-16 border-b border-line">
         <div className="max-w-[1200px] mx-auto">
           <span className="font-display italic text-lg text-stone block mb-1">По</span>
-          <h1 className="font-display text-4xl md:text-5xl mb-6">Куратору</h1>
+          <h1 className="font-display text-4xl md:text-5xl mb-6">Креатору</h1>
 
           <form action="/curators" method="get" className="flex gap-2 max-w-md">
             <input
               type="search"
               name="q"
               defaultValue={query}
-              placeholder="Имя куратора"
+              placeholder="Имя креатора"
               className="flex-1 text-[14px] px-3 py-2.5 border border-line bg-card text-ink outline-none focus:border-ink transition-colors"
             />
             <button
@@ -70,7 +70,7 @@ export default async function CuratorsDirectoryPage({
                 </Link>
               </>
             ) : (
-              <>Всего кураторов: {total}</>
+              <>Всего креаторов: {total}</>
             )}
           </p>
         </div>
@@ -80,7 +80,7 @@ export default async function CuratorsDirectoryPage({
         <div className="max-w-[1200px] mx-auto">
           {creators.length === 0 ? (
             <p className="font-display italic text-stone">
-              По этому запросу кураторов не нашлось.
+              По этому запросу креаторов не нашлось.
             </p>
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">

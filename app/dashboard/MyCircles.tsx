@@ -62,7 +62,7 @@ export function MyCircles({
   }
 
   async function deleteCircle(id: string) {
-    const confirmed = window.confirm("Удалить этот круг? Кураторов и находки в нём это не затронет.");
+    const confirmed = window.confirm("Удалить этот круг? Креаторов и находки в нём это не затронет.");
     if (!confirmed) return;
     await fetch(`/api/circles/${id}`, { method: "DELETE" });
     if (openId === id) {
@@ -151,7 +151,7 @@ export function MyCircles({
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                   <span className="text-[13.5px] font-medium truncate group-hover:underline">{circle.name}</span>
                   <span className="text-[11.5px] text-stone flex-none">
-                    {circle.members.length} {circle.members.length === 1 ? "куратор" : "кураторов"}
+                    {circle.members.length} {circle.members.length === 1 ? "креатор" : "креаторов"}
                   </span>
                 </div>
               </button>
@@ -200,7 +200,7 @@ export function MyCircles({
                           onChange={(e) => addMember(circle.id, e.target.value)}
                           className="text-[12.5px] border border-dashed border-line px-2 py-1.5 bg-transparent text-stone cursor-pointer"
                         >
-                          <option value="">+ Добавить куратора</option>
+                          <option value="">+ Добавить креатора</option>
                           {availableCreators
                             .filter((c) => !detail.members.some((m) => m.id === c.id))
                             .map((c) => (
@@ -217,7 +217,7 @@ export function MyCircles({
                         </h4>
                         {detail.feed.length === 0 ? (
                           <p className="text-stone text-[13px]">
-                            Пока пусто — добавьте куратора с товарами на витрине.
+                            Пока пусто — добавьте креатора с товарами на витрине.
                           </p>
                         ) : (
                           <ul className="flex flex-col">

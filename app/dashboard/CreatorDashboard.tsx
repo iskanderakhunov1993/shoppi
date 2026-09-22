@@ -246,7 +246,7 @@ export function CreatorDashboard({
   return (
     <main className="flex-1 flex flex-col">
       <DashboardHeader
-        label="Кабинет куратора"
+        label="Кабинет креатора"
         title={me.displayName}
         action={
           me.slug && (

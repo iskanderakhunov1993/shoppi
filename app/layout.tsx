@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shoppi — витрина куратора",
+  title: "Shoppi — витрина креатора",
   description: "Покупай у своих людей, не у алгоритма.",
 };
 

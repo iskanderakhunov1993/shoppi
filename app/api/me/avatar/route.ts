@@ -10,11 +10,11 @@ const DATA_URL = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
   if (!user || user.role !== "creator") {
-    return NextResponse.json({ error: "Доступно только кураторам" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только креаторам" }, { status: 403 });
   }
   const creator = await getCreatorByUserId(user.id);
   if (!creator) {
-    return NextResponse.json({ error: "Профиль куратора не найден" }, { status: 404 });
+    return NextResponse.json({ error: "Профиль креатора не найден" }, { status: 404 });
   }
 
   const body = await request.json().catch(() => null);

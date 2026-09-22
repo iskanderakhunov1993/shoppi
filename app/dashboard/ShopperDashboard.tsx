@@ -35,7 +35,7 @@ const TAB_HINT: Record<Tab, string> = {
   overview: "Как связаны разделы ниже — и что где искать.",
   saved: "Товары, сохранённые с любой витрины. Эта же подборка доступна по ссылке — «Мой вишлист» вверху.",
   circle: "Те, на кого вы подписаны напрямую — их находки собираются в ленте ниже.",
-  circles: "Группируйте кураторов из «Мои кураторы» по темам — например, «Уход» или «На дачу».",
+  circles: "Группируйте креаторов из «Мои креаторы» по темам — например, «Уход» или «На дачу».",
 };
 
 export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
@@ -147,7 +147,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               href="/curators"
               className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
             >
-              Все кураторы
+              Все креаторы
             </Link>
             {me.slug && favorites && favorites.length > 0 && (
               <>
@@ -202,7 +202,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             tab === "circle" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
           }`}
         >
-          Мои кураторы{circle ? ` · ${circle.creators.length}` : ""}
+          Мои креаторы{circle ? ` · ${circle.creators.length}` : ""}
         </button>
         <button
           onClick={() => setTab("circles")}
@@ -229,8 +229,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             <li className="flex-1 flex gap-3">
               <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">1</span>
               <p className="text-[13px] text-stone leading-snug">
-                <span className="text-ink font-medium">Подпишитесь</span> на кураторов, чьему вкусу
-                доверяете — вкладка «Мои кураторы».
+                <span className="text-ink font-medium">Подпишитесь</span> на креаторов, чьему вкусу
+                доверяете — вкладка «Мои креаторы».
               </p>
             </li>
             <li className="flex-1 flex gap-3">
@@ -244,7 +244,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">3</span>
               <p className="text-[13px] text-stone leading-snug">
                 <span className="text-ink font-medium">Сохраняйте</span> конкретные товары в
-                «Сохранённое» — с любой витрины, не только от своих кураторов.
+                «Сохранённое» — с любой витрины, не только от своих креаторов.
               </p>
             </li>
           </ol>
@@ -257,7 +257,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             >
               <span className="block font-display text-3xl">{circle ? circle.creators.length : "–"}</span>
               <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">
-                Мои кураторы →
+                Мои креаторы →
               </span>
             </button>
             <button
@@ -283,7 +283,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] uppercase tracking-wider text-stone">
-                Последние находки от ваших кураторов
+                Последние находки от ваших креаторов
               </h3>
               {circle && circle.feed.length > 0 && (
                 <button
@@ -299,7 +299,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <p className="text-stone text-sm">Загрузка…</p>
             ) : circle.feed.length === 0 ? (
               <p className="font-display italic text-stone text-sm">
-                Пока пусто — как только кто-то из ваших кураторов добавит товар, он появится тут.{" "}
+                Пока пусто — как только кто-то из ваших креаторов добавит товар, он появится тут.{" "}
                 <a href="/finds" className="not-italic underline underline-offset-4">
                   Посмотрите находки всей площадки
                 </a>
@@ -347,8 +347,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           ) : favorites.length === 0 ? (
             <EmptyState
               title="Пока пусто."
-              description="Откройте витрину куратора и нажмите «Сохранить» на товаре — он появится здесь, и к нему можно будет вернуться позже."
-              cta={{ label: "Смотреть кураторов", href: "/curators" }}
+              description="Откройте витрину креатора и нажмите «Сохранить» на товаре — он появится здесь, и к нему можно будет вернуться позже."
+              cta={{ label: "Смотреть креаторов", href: "/curators" }}
             />
           ) : (
             <ul className="flex flex-col">
@@ -397,9 +397,9 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 <span className="bg-line" />
                 <span className="bg-line" />
               </div>
-              <p className="font-display italic text-base text-stone">Пока нет кураторов</p>
+              <p className="font-display italic text-base text-stone">Пока нет креаторов</p>
               <p className="text-stone text-sm leading-relaxed">
-                Соберите первый круг кураторов, чьему вкусу доверяете — их находки соберутся в одну
+                Соберите первый круг креаторов, чьему вкусу доверяете — их находки соберутся в одну
                 ленту, вместо того чтобы проверять каждую витрину по отдельности.
               </p>
               <button
@@ -415,7 +415,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-[11px] uppercase tracking-wider text-stone">
-                    В ваших кураторах
+                    В ваших креаторах
                   </h3>
                   <button
                     type="button"
@@ -442,7 +442,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                       </a>
                       <button
                         onClick={() => unfollow(c.id)}
-                        aria-label={`Убрать ${c.displayName} из кураторов`}
+                        aria-label={`Убрать ${c.displayName} из креаторов`}
                         className="text-stone hover:text-error transition-colors cursor-pointer text-[15px] leading-none"
                       >
                         ×
@@ -458,7 +458,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 </h3>
                 {circle.feed.length === 0 ? (
                   <p className="font-display italic text-stone">
-                    Ваши кураторы пока ничего не добавили.
+                    Ваши креаторы пока ничего не добавили.
                   </p>
                 ) : (
                   <ul className="flex flex-col">
@@ -521,7 +521,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           steps={[
             {
               n: 1,
-              title: "Подпишитесь на куратора",
+              title: "Подпишитесь на креатора",
               description: "Добавьте того, чьему вкусу доверяете — его находки появятся у вас в ленте.",
               done: hasFollow,
               cta: {
@@ -532,7 +532,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 },
               },
               secondaryCta: {
-                label: "Все кураторы",
+                label: "Все креаторы",
                 onClick: () => {
                   window.location.href = "/curators";
                 },
@@ -541,7 +541,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             {
               n: 2,
               title: "Соберите свой круг",
-              description: "Назовите круг и добавьте туда кураторов — например, «Уход» или «На дачу».",
+              description: "Назовите круг и добавьте туда креаторов — например, «Уход» или «На дачу».",
               done: hasCircle,
               cta: {
                 label: "Создать круг",
@@ -554,10 +554,10 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             {
               n: 3,
               title: "Сохраните товар в избранное",
-              description: "На любой витрине куратора нажмите «Сохранить» — товар появится в «Сохранённом».",
+              description: "На любой витрине креатора нажмите «Сохранить» — товар появится в «Сохранённом».",
               done: hasFavorite,
               cta: {
-                label: "Смотреть кураторов",
+                label: "Смотреть креаторов",
                 onClick: () => {
                   window.location.href = "/curators";
                 },

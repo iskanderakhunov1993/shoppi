@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
           <h1 className="font-display text-2xl mb-1">Забыли пароль?</h1>
           <p className="text-stone text-sm">
             Укажите email — пришлём ссылку для сброса пароля. Подходит для любой роли: покупателя
-            и куратора.
+            и креатора.
           </p>
         </div>
         <Field label="Email">

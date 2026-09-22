@@ -13,9 +13,9 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
         <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
             <span className="text-[11px] uppercase tracking-widest text-stone">
-              По куратору
+              По креатору
             </span>
-            <h2 className="font-display text-4xl md:text-5xl mt-2">Кураторы</h2>
+            <h2 className="font-display text-4xl md:text-5xl mt-2">Креаторы</h2>
           </div>
           <p className="text-stone text-sm max-w-xs">
             Люди, чьему вкусу вы доверяете больше, чем ленте алгоритма.

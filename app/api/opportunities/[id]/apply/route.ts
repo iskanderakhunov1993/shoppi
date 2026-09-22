@@ -9,7 +9,7 @@ export async function POST(
   const { id } = await params;
   const user = await requireUser(request);
   if (!user || user.role !== "creator") {
-    return NextResponse.json({ error: "Доступно только кураторам" }, { status: 403 });
+    return NextResponse.json({ error: "Доступно только креаторам" }, { status: 403 });
   }
 
   const creator = await getCreatorByUserId(user.id);

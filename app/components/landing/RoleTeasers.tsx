@@ -14,7 +14,7 @@ export function RoleTeasers() {
       >
         <div className={BRANDS_ENABLED ? "" : "max-w-md"}>
           <span className="text-[11px] uppercase tracking-widest text-stone mb-3 block">
-            Для кураторов
+            Для креаторов
           </span>
           <h2 className="font-display text-2xl md:text-3xl mb-5 max-w-xs">
             Ведите витрину без чужого алгоритма.
@@ -29,7 +29,7 @@ export function RoleTeasers() {
           href="/signup"
           className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-80 transition-opacity w-fit mt-auto md:mt-0 md:flex-none"
         >
-          Стать куратором
+          Стать креатором
         </Link>
       </div>
       {BRANDS_ENABLED && (

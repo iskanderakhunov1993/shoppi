@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!data) return { title: "Коллекция не найдена — Shoppi" };
   return {
     title: `${data.collection.name} — ${data.creator.displayName} — Shoppi`,
-    description: `Коллекция куратора ${data.creator.displayName}: ${data.links.length} товаров.`,
+    description: `Коллекция креатора ${data.creator.displayName}: ${data.links.length} товаров.`,
   };
 }
 
@@ -70,7 +70,7 @@ export default async function CollectionPage({ params }: { params: Promise<Param
             alt=""
             className="w-6 h-6 rounded-full object-cover bg-raise"
           />
-          Курирует {creator.displayName}
+          Креатор: {creator.displayName}
         </Link>
         <h1 className="font-display text-4xl md:text-5xl mt-5 mb-3">{collection.name}</h1>
         <p className="text-stone text-[13px] uppercase tracking-wider">

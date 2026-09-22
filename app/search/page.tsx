@@ -38,7 +38,7 @@ export default async function SearchPage({
               type="search"
               name="q"
               defaultValue={query}
-              placeholder="Товар, категория или куратор"
+              placeholder="Товар, категория или креатор"
               className="flex-1 text-[14px] px-3 py-2.5 border border-line bg-card text-ink outline-none focus:border-ink transition-colors"
             />
             <button
@@ -54,7 +54,7 @@ export default async function SearchPage({
       <section className="px-6 md:px-10 py-12 flex-1">
         <div className="max-w-[1200px] mx-auto flex flex-col gap-14">
           {!query ? (
-            <p className="text-stone text-sm">Введите запрос выше — ищем среди товаров и кураторов.</p>
+            <p className="text-stone text-sm">Введите запрос выше — ищем среди товаров и креаторов.</p>
           ) : !hasResults ? (
             <EmptyState title="Ничего не нашлось." description="Попробуйте другое слово или проверьте, нет ли опечатки." />
           ) : (
@@ -62,7 +62,7 @@ export default async function SearchPage({
               {creators.length > 0 && (
                 <div>
                   <h2 className="text-[11px] uppercase tracking-wider text-stone mb-5">
-                    Кураторы · {creators.length}
+                    Креаторы · {creators.length}
                   </h2>
                   <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-px bg-line">
                     {creators.map((c) => (

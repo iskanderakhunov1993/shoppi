@@ -124,7 +124,7 @@ export default async function StorefrontPage({
           alt={creator.displayName}
           className="w-36 h-36 rounded-full object-cover mx-auto mb-7 bg-raise"
         />
-        <span className="font-display italic text-stone text-base block mb-1">Курирует</span>
+        <span className="font-display italic text-stone text-base block mb-1">Креатор</span>
         <h1 className="font-display text-3xl sm:text-4xl mb-3 [overflow-wrap:anywhere]">{creator.displayName}</h1>
         {creator.bio && (
           <p className="text-stone text-[15px] max-w-md mx-auto mb-2">{creator.bio}</p>
@@ -143,7 +143,7 @@ export default async function StorefrontPage({
         <p className="font-display italic text-stone text-sm mb-5">
           Доверяют {creator.followers.toLocaleString("ru-RU")}{" "}
           {pluralizeShoppers(creator.followers)}
-          <TrustInfo text="Столько покупателей подписались на этого куратора. Это реальные подписки, а не просмотры." />
+          <TrustInfo text="Столько покупателей подписались на этого креатора. Это реальные подписки, а не просмотры." />
         </p>
         {(creator.contactEmail || SOCIALS.some((n) => creator[n.key])) && (
           <div className="flex justify-center gap-4">

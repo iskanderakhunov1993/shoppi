@@ -107,8 +107,8 @@ export function BrandDashboard({
           <OnboardingProgress
             steps={[
               { label: "Укажите свои товары", done: hasArticles },
-              { label: "Получите первую ссылку от куратора", done: Boolean(links && links.length > 0) },
-              { label: "Опубликуйте предложение куратору", done: hasOpportunity },
+              { label: "Получите первую ссылку от креатора", done: Boolean(links && links.length > 0) },
+              { label: "Опубликуйте предложение креатору", done: hasOpportunity },
             ]}
           />
         }
@@ -188,12 +188,12 @@ export function BrandDashboard({
           ) : !hasArticles ? (
             <EmptyState
               title="Пока не указано ни одного товара."
-              description="Добавьте артикулы слева — и здесь появятся кураторы, которые уже ссылаются на ваши карточки, вместе с числом переходов по каждой."
+              description="Добавьте артикулы слева — и здесь появятся креаторы, которые уже ссылаются на ваши карточки, вместе с числом переходов по каждой."
             />
           ) : links.length === 0 ? (
             <EmptyState
               title="На эти товары пока никто не ссылается."
-              description={`Данные появятся, как только куратор добавит один из ваших артикулов к себе на витрину. Проверьте, что артикулы указаны верно — сейчас отслеживается ${(me.brandArticles ?? []).length}.`}
+              description={`Данные появятся, как только креатор добавит один из ваших артикулов к себе на витрину. Проверьте, что артикулы указаны верно — сейчас отслеживается ${(me.brandArticles ?? []).length}.`}
             />
           ) : (
             <ul className="flex flex-col">
