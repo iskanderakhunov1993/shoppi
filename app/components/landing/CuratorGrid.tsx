@@ -1,10 +1,5 @@
 import type { Creator } from "@/lib/store";
-
-const SEEDS: Record<string, string> = {
-  Белла: "shoppi-bella",
-  Максим: "shoppi-maxim",
-  Соня: "shoppi-sonya",
-};
+import { placeholderAvatar } from "@/lib/avatar";
 
 export function CuratorGrid({ creators }: { creators: Creator[] }) {
   return (
@@ -25,17 +20,25 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
         {creators.length === 0 ? (
           <p className="font-display italic text-stone">Пока нет опубликованных витрин.</p>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
+          <div
+            className={`grid gap-px bg-line ${
+              creators.length === 1
+                ? "max-w-xs mx-auto"
+                : creators.length === 2
+                  ? "sm:grid-cols-2 max-w-xl mx-auto"
+                  : "sm:grid-cols-2 md:grid-cols-3"
+            }`}
+          >
             {creators.map((creator) => (
               <a
                 key={creator.id}
                 href={`/${creator.slug}`}
                 className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
               >
-                <div className="aspect-[4/5] overflow-hidden">
+                <div className="aspect-[4/5] overflow-hidden bg-raise">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://picsum.photos/seed/${SEEDS[creator.displayName] ?? creator.slug}/500/620`}
+                    src={creator.avatarUrl || placeholderAvatar(creator.slug)}
                     alt={creator.displayName}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                   />
