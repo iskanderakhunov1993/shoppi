@@ -14,13 +14,13 @@ export async function GET(request: NextRequest) {
   }
 
   const item = parseMarketplaceItem(url);
-  if (item.marketplace !== "wildberries" || !item.articleId) {
-    // Not an error: Ozon and unrecognized links just aren't fetchable —
-    // the creator fills the form in by hand, as before.
+  if (item.marketplace === "other") {
+    // Not an error: an unrecognized link just isn't fetchable — the
+    // creator fills the form in by hand, as before.
     return NextResponse.json({ found: false });
   }
 
-  const info = await fetchProductInfo(item);
+  const info = await fetchProductInfo(item, url);
   if (!info) {
     return NextResponse.json({ found: false });
   }

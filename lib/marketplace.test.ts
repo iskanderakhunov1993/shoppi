@@ -23,6 +23,34 @@ describe("parseMarketplaceItem", () => {
     });
   });
 
+  it("pulls the trailing id out of a Yandex Market product URL", () => {
+    expect(parseMarketplaceItem("https://market.yandex.ru/product--kofevarka/1234567890")).toEqual({
+      marketplace: "yandexmarket",
+      articleId: "1234567890",
+    });
+  });
+
+  it("pulls the trailing id out of a Sportmaster product URL", () => {
+    expect(parseMarketplaceItem("https://www.sportmaster.ru/product/krossovki-nike-123456/")).toEqual({
+      marketplace: "sportmaster",
+      articleId: "123456",
+    });
+  });
+
+  it("pulls the trailing id out of a Stockmann product URL", () => {
+    expect(parseMarketplaceItem("https://www.stockmann.ru/product/sumka-778899")).toEqual({
+      marketplace: "stockmann",
+      articleId: "778899",
+    });
+  });
+
+  it("recognizes Poizon by brand name across mirror domains", () => {
+    expect(parseMarketplaceItem("https://www.poizon.com/item/998877")).toEqual({
+      marketplace: "poizon",
+      articleId: "998877",
+    });
+  });
+
   it("reports other marketplaces without an article", () => {
     expect(parseMarketplaceItem("https://www.lamoda.ru/p/palto-770211/")).toEqual({
       marketplace: "other",

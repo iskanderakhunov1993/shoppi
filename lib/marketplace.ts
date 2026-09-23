@@ -1,7 +1,22 @@
 export type MarketplaceItem = {
-  marketplace: "wildberries" | "ozon" | "other";
+  marketplace: "wildberries" | "ozon" | "yandexmarket" | "sportmaster" | "stockmann" | "poizon" | "other";
   articleId?: string;
 };
+
+/**
+ * Fallback id extraction for marketplaces whose URL structure isn't
+ * worth hand-parsing precisely: every one of them puts the product id
+ * as the last long run of digits somewhere in the path (and sometimes
+ * a matching one in the query string) — pull that.
+ */
+function trailingDigits(url: URL): string | undefined {
+  const fromPath = url.pathname.match(/(\d{5,})(?:\/|$)/g);
+  if (fromPath?.length) {
+    const last = fromPath[fromPath.length - 1];
+    return last.replace(/\D/g, "");
+  }
+  return undefined;
+}
 
 /**
  * Pulls the marketplace item id out of a product URL.
@@ -31,6 +46,25 @@ export function parseMarketplaceItem(rawUrl: string): MarketplaceItem {
     // /product/nazvanie-tovara-1234567890/ — the id is the trailing number
     const m = url.pathname.match(/\/product\/(?:[^/]*-)?(\d+)/);
     return { marketplace: "ozon", articleId: m?.[1] };
+  }
+
+  if (host.endsWith("market.yandex.ru")) {
+    return { marketplace: "yandexmarket", articleId: trailingDigits(url) };
+  }
+
+  if (host.endsWith("sportmaster.ru")) {
+    return { marketplace: "sportmaster", articleId: trailingDigits(url) };
+  }
+
+  if (host.endsWith("stockmann.ru")) {
+    return { marketplace: "stockmann", articleId: trailingDigits(url) };
+  }
+
+  if (host.includes("poizon")) {
+    // Poizon (aka Dewu/得物) is accessed in Russia through several mirror
+    // domains — poizon.com, poizon.ru, and reseller front-ends — so this
+    // matches on the brand name in the host rather than one fixed domain.
+    return { marketplace: "poizon", articleId: trailingDigits(url) };
   }
 
   return { marketplace: "other" };
@@ -154,15 +188,59 @@ async function findWbImageUrl(articleId: string): Promise<string | undefined> {
 }
 
 /**
- * Pulls real product data (title, price, photo) for a marketplace link.
- * Only Wildberries works (see fetchWbProductInfo) — Ozon blocks every
- * path tested, including through Microlink's own relay, with a
- * JS-challenge page ("Похоже, нет соединения") rather than a simple
- * status code, so there is no known way to automate it right now.
+ * Reads Open Graph / product meta tags off a page fetched through the
+ * r.jina.ai reader relay (same one that unblocks the WB card API — it
+ * renders the page and returns clean text/HTML, sidestepping the
+ * JS-challenge bot walls most of these storefronts put up for a plain
+ * server-side fetch). Works for any site that fills in og:title /
+ * og:image / a price meta tag server-side, which covers ordinary
+ * e-commerce templates even when the marketplace itself blocks direct
+ * scraping — Ozon's own JS-challenge page is the one known exception.
  */
-export async function fetchProductInfo(item: MarketplaceItem): Promise<FetchedProductInfo | null> {
+async function fetchGenericProductInfo(rawUrl: string): Promise<FetchedProductInfo | null> {
+  const res = await fetch(`https://r.jina.ai/${rawUrl}`, {
+    headers: { "X-Return-Format": "html" },
+  }).catch(() => null);
+  if (!res?.ok) return null;
+  const html = await res.text().catch(() => "");
+  if (!html) return null;
+
+  const meta = (prop: string) => {
+    const m = html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]+content=["']([^"']+)["']`, "i"))
+      ?? html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${prop}["']`, "i"));
+    return m?.[1];
+  };
+
+  const title = meta("og:title") ?? html.match(/<title>([^<]+)<\/title>/i)?.[1];
+  if (!title) return null;
+
+  const imageUrl = meta("og:image");
+  const priceRaw = meta("product:price:amount") ?? meta("og:price:amount");
+  const price = priceRaw ? Math.round(Number(priceRaw.replace(/[^\d.]/g, ""))) : undefined;
+
+  return { title: title.trim(), price: price || undefined, imageUrl };
+}
+
+/**
+ * Pulls real product data (title, price, photo) for a marketplace link.
+ * Wildberries uses its own card API (see fetchWbProductInfo); every other
+ * recognized marketplace falls back to reading Open Graph tags off the
+ * page through the relay. In practice this currently fails for all of
+ * them too — Ozon, Sportmaster, Yandex Market and Stockmann each serve
+ * a CAPTCHA/bot-check page even through r.jina.ai (confirmed by testing
+ * live URLs against each) — so today this only ever returns data for
+ * Wildberries. Left in place because it's a real attempt, not a stub:
+ * if any of these sites loosens its bot wall, or a future relay gets
+ * past it, auto-fill starts working for that marketplace with no other
+ * code change. Until then those links behave exactly as before —
+ * recognized and categorized, filled in by hand.
+ */
+export async function fetchProductInfo(item: MarketplaceItem, rawUrl?: string): Promise<FetchedProductInfo | null> {
   if (item.marketplace === "wildberries" && item.articleId) {
     return fetchWbProductInfo(item.articleId).catch(() => null);
+  }
+  if (item.marketplace !== "other" && rawUrl) {
+    return fetchGenericProductInfo(rawUrl).catch(() => null);
   }
   return null;
 }
