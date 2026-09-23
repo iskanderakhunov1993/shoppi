@@ -263,13 +263,12 @@ export function StorefrontGrid({
           >
             {copied ? "Ссылка скопирована" : "Поделиться"}
           </button>
-          {links.length === 0 ? (
-            <QuickAddProductButton variant="pill" />
-          ) : (
+          <QuickAddProductButton variant="pill" />
+          {links.length > 0 && (
             <button
               type="button"
               onClick={() => setEditor({})}
-              className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full bg-ink text-paper hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 text-[13px] px-3.5 py-1.5 rounded-full border border-line text-ink hover:border-ink transition-colors cursor-pointer whitespace-nowrap"
             >
               Добавить коллекцию +
             </button>

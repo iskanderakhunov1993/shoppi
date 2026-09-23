@@ -10,6 +10,7 @@ import { OpportunitiesFeed } from "./OpportunitiesFeed";
 import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
 import { AdFields } from "./AdFields";
 import { CircleFollowers } from "./CircleFollowers";
+import { BookmarkletButton } from "@/app/components/BookmarkletButton";
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type LinkRow = {
@@ -326,7 +327,7 @@ export function CreatorDashboard({
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-[11px] uppercase tracking-wider text-stone">Добавить товар</h3>
                 <a href="/bookmarklet" className="text-[11px] underline underline-offset-4 text-stone hover:text-ink transition-colors">
-                  Кнопка для WB ↗
+                  Кнопка для магазинов ↗
                 </a>
               </div>
               <form onSubmit={handleAdd} className="flex flex-col gap-3">
@@ -569,6 +570,25 @@ export function CreatorDashboard({
             )}
           </div>
         </div>
+      )}
+
+      {tab === "products" && (
+        <section className="border-t border-line px-8 py-10 max-w-[1400px] w-full mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+            <div className="flex-1 max-w-xl">
+              <h3 className="text-[11px] uppercase tracking-wider text-stone mb-2">Кнопка «Добавить в Shoppi»</h3>
+              <p className="text-stone text-[13px] leading-relaxed">
+                Перетащите кнопку на панель закладок. Потом откройте товар на Wildberries, Ozon, Lamoda,
+                Poizon или в другом магазине и нажмите закладку — форма выше заполнится названием, фото и
+                ценой со страницы.{" "}
+                <a href="/bookmarklet" className="underline underline-offset-4 hover:text-ink transition-colors">
+                  Подробнее
+                </a>
+              </p>
+            </div>
+            <BookmarkletButton />
+          </div>
+        </section>
       )}
 
       {tab === "circles" && (
