@@ -3,34 +3,64 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-// Reads the product open in the creator's own browser — already past
-// Wildberries' bot check as an ordinary visitor, so nothing here is
-// bypassing anything — and hands the scraped fields to our dashboard via
-// the URL. Kept as one unminified function body for readability; wrapped
-// in `javascript:` + stringified for the actual bookmarklet href.
+// Reads the product open in the creator's own browser — already past the
+// store's bot check as an ordinary visitor, so nothing here is bypassing
+// anything — and hands the scraped fields to our dashboard via the URL.
+// Wildberries has its own page quirks and gets a dedicated path; every
+// other store (Ozon, Яндекс.Маркет, Спортмастер, Stockmann, Poizon, …)
+// goes through the generic reader: schema.org Product JSON-LD first
+// (what these shops publish for Google Shopping), then Open Graph tags.
+// Kept as one unminified function body for readability; wrapped in
+// `javascript:` + stringified for the actual bookmarklet href.
 function bookmarkletBody(origin: string) {
   return `(function(){
     try {
-      if (!/(^|\\.)wildberries\\.ru$/.test(location.hostname)) {
-        alert("Откройте страницу товара на wildberries.ru и запустите букмарклет там.");
-        return;
-      }
-      var t = document.title;
-      var m = t.match(/^(.*)\\s\\d+\\s+купить за\\s+([\\d\\s]+)\\s*\\u20bd/);
-      var title = m ? m[1].trim() : "";
-      var price = m ? m[2].replace(/\\s/g, "") : "";
-      // WB serves gallery images from several CDN hosts (wbbasket.ru,
-      // geobasket.ru, ...) that rotate over time, so match on the article
-      // id in the path instead of a fixed host.
-      var idMatch = location.pathname.match(/\\/catalog\\/(\\d+)/);
-      var articleId = idMatch ? idMatch[1] : "";
-      var img = articleId
-        ? [].slice.call(document.querySelectorAll("img")).find(function (el) {
-            return el.src.indexOf("/" + articleId + "/images/big/1") !== -1;
-          })
-        : null;
-      var imageUrl = img ? img.src.replace(/^http:/, "https:") : "";
+      var title = "", price = "", imageUrl = "";
       var url = location.href.split("?")[0];
+      var meta = function (k) {
+        var el = document.querySelector('meta[property="' + k + '"],meta[name="' + k + '"],meta[itemprop="' + k + '"]');
+        return el ? (el.getAttribute("content") || "") : "";
+      };
+      var digits = function (v) { return String(v || "").replace(/[^\\d.,]/g, "").replace(",", ".").split(".")[0]; };
+
+      if (/(^|\\.)wildberries\\.ru$/.test(location.hostname)) {
+        var m = document.title.match(/^(.*)\\s\\d+\\s+купить за\\s+([\\d\\s]+)\\s*\\u20bd/);
+        title = m ? m[1].trim() : "";
+        price = m ? m[2].replace(/\\s/g, "") : "";
+        // WB rotates gallery CDN hosts, so match on the article id instead.
+        var idMatch = location.pathname.match(/\\/catalog\\/(\\d+)/);
+        var articleId = idMatch ? idMatch[1] : "";
+        var img = articleId
+          ? [].slice.call(document.querySelectorAll("img")).find(function (el) {
+              return el.src.indexOf("/" + articleId + "/images/big/1") !== -1;
+            })
+          : null;
+        imageUrl = img ? img.src : "";
+      } else {
+        var find = function (node) {
+          if (!node || typeof node !== "object") return null;
+          if (Array.isArray(node)) { for (var i = 0; i < node.length; i++) { var r = find(node[i]); if (r) return r; } return null; }
+          var t = node["@type"];
+          if (t === "Product" || (Array.isArray(t) && t.indexOf("Product") !== -1)) return node;
+          return find(node["@graph"]);
+        };
+        var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+        for (var s = 0; s < scripts.length; s++) {
+          try {
+            var p = find(JSON.parse(scripts[s].textContent));
+            if (!p) continue;
+            title = title || p.name || "";
+            var im = Array.isArray(p.image) ? p.image[0] : p.image;
+            imageUrl = imageUrl || (im && (im.url || im)) || "";
+            var off = Array.isArray(p.offers) ? p.offers[0] : p.offers;
+            if (off) price = price || digits(off.price || off.lowPrice || (off.priceSpecification && off.priceSpecification.price));
+          } catch (e) {}
+        }
+        title = title || meta("og:title") || document.title;
+        imageUrl = imageUrl || meta("og:image");
+        price = price || digits(meta("product:price:amount") || meta("og:price:amount") || meta("price"));
+      }
+      imageUrl = String(imageUrl || "").replace(/^\\/\\//, "https://").replace(/^http:/, "https:");
       if (!title) {
         alert("Не нашли название товара на странице — попробуйте перезагрузить её и подождать пару секунд.");
         return;
@@ -64,12 +94,16 @@ export default function BookmarkletPage() {
       <div className="max-w-[640px] mx-auto flex flex-col gap-8">
         <div>
           <span className="text-[11px] uppercase tracking-widest text-stone">Shoppi</span>
-          <h1 className="font-display text-3xl md:text-4xl mt-2 mb-3">Добавить товар с Wildberries в один клик</h1>
+          <h1 className="font-display text-3xl md:text-4xl mt-2 mb-3">Добавить товар из любого магазина в один клик</h1>
           <p className="text-stone text-sm leading-relaxed">
-            Wildberries блокирует автоматические запросы к своим страницам, поэтому подтянуть
-            название, фото и цену с сервера напрямую по вставленной ссылке нельзя. Но если открыть
+            Магазины блокируют автоматические запросы к своим страницам, поэтому подтянуть
+            название, фото и цену с сервера по вставленной ссылке получается не всегда. Но если открыть
             товар в собственном браузере — как обычный покупатель — и нажать эту кнопку, она
             прочитает данные прямо со страницы и откроет форму добавления товара уже заполненной.
+          </p>
+          <p className="text-stone text-[12.5px] mt-3">
+            Работает на Wildberries, Ozon, Lamoda, Poizon, Яндекс Маркете, Спортмастере, Stockmann и
+            большинстве других интернет-магазинов.
           </p>
         </div>
 
@@ -96,14 +130,13 @@ export default function BookmarkletPage() {
           <h2 className="font-display text-xl">Как этим пользоваться</h2>
           <ol className="text-stone text-sm leading-relaxed flex flex-col gap-2 list-decimal pl-5">
             <li>Перетащите кнопку выше в закладки браузера (один раз).</li>
-            <li>Откройте на wildberries.ru страницу товара, который хотите добавить.</li>
+            <li>Откройте в магазине страницу товара, который хотите добавить.</li>
             <li>Нажмите на кнопку в закладках — откроется новая вкладка с кабинетом Shoppi.</li>
             <li>Название, фото и цена уже будут в форме — проверьте и нажмите «Добавить».</li>
           </ol>
           <p className="text-stone text-sm leading-relaxed">
-            Для Ozon и других сайтов пока так не получится — они блокируют такие подсказки жёстче
-            (капча). Для них по-прежнему нужно вставить ссылку и заполнить название, фото и цену
-            вручную.
+            Если какое-то поле не подтянулось — магазин его не отдаёт на странице. Допишите его
+            вручную перед сохранением.
           </p>
         </section>
 
