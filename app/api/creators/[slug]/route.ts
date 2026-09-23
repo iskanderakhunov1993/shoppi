@@ -43,6 +43,7 @@ export async function GET(
       saves: saves.get(link.id) ?? 0,
       sameProductCreators: stat?.creatorCount,
       sameProductAvatars: stat?.sampleAvatars,
+      sameProductNames: stat?.sampleNames,
     };
   });
 

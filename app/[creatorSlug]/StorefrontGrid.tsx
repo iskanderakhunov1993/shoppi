@@ -25,6 +25,7 @@ type StorefrontLink = {
   clicksMonth: number;
   sameProductCreators?: number;
   sameProductAvatars?: string[];
+  sameProductNames?: string[];
   saves: number;
   isAd?: boolean;
   adInfo?: string;
@@ -142,7 +143,8 @@ export function StorefrontGrid({
 
   return (
     <div>
-      <div className="flex items-center gap-5 px-8 pt-6 pb-4 overflow-x-auto border-b border-line">
+      <div className="relative border-b border-line">
+      <div className="flex items-center gap-5 px-8 pt-6 pb-4 overflow-x-auto">
         {searchOpen ? (
           <input
             autoFocus
@@ -157,7 +159,7 @@ export function StorefrontGrid({
             type="button"
             onClick={() => setSearchOpen(true)}
             aria-label="Поиск по витрине"
-            className="flex-none text-stone hover:text-ink transition-colors cursor-pointer"
+            className="flex-none w-8 h-8 flex items-center justify-center text-stone hover:text-ink transition-colors cursor-pointer -ml-1"
           >
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
@@ -233,6 +235,7 @@ export function StorefrontGrid({
             Для вас
           </button>
         )}
+        {categories.length > 0 && <span className="text-line select-none flex-none">·</span>}
         {categories.map((c) => (
           <button
             key={c}
@@ -244,6 +247,11 @@ export function StorefrontGrid({
             {CATEGORY_LABEL[c] ?? c}
           </button>
         ))}
+      </div>
+      {/* Right-edge fade hints that the tab row scrolls further — the row
+          has no visible scrollbar, so without this a 7+ tab list can look
+          like it simply ends at the viewport edge. */}
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-paper to-transparent" />
       </div>
 
       {isOwner && (
@@ -325,7 +333,10 @@ export function StorefrontGrid({
       {tab === "social" && (
         <div className="flex flex-col gap-3 px-8 py-8 border-b border-line max-w-md">
           {socials.length === 0 ? (
-            <EmptyState title="Соцсети пока не добавлены." />
+            <EmptyState
+              title={isOwner ? "Вы пока не добавили ни одной соцсети." : "Соцсети пока не добавлены."}
+              cta={isOwner ? { label: "Добавить в профиле", href: "/dashboard?tab=profile" } : undefined}
+            />
           ) : (
             socials.map((s) => (
               <a
@@ -422,7 +433,7 @@ export function StorefrontGrid({
           {shown.map((link, i) => (
             <div
               key={link.id}
-              className={`flex flex-col gap-3 p-6 border-b border-line ${
+              className={`flex flex-col gap-3 p-6 border-b border-line transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_-14px_rgba(0,0,0,0.35)] ${
                 (i + 1) % 3 !== 0 ? "lg:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
             >
@@ -466,7 +477,12 @@ export function StorefrontGrid({
                   </div>
                 )}
                 {!!link.sameProductCreators && link.sameProductCreators > 1 && (
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div
+                    className="flex items-center gap-2 mt-0.5"
+                    title={
+                      link.sameProductNames?.length ? `Также выбрали: ${link.sameProductNames.join(", ")}` : undefined
+                    }
+                  >
                     <div className="flex -space-x-2">
                       {(link.sameProductAvatars ?? []).slice(0, 3).map((src, i) => (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -474,6 +490,7 @@ export function StorefrontGrid({
                           key={i}
                           src={src}
                           alt=""
+                          title={link.sameProductNames?.[i]}
                           className="w-5 h-5 rounded-full object-cover border-2 border-card bg-raise"
                         />
                       ))}

@@ -635,7 +635,11 @@ export async function listLinksByArticles(articles: string[], opts: { limit?: nu
   return rows.map(toLink);
 }
 
-export type SameProductStat = { creatorCount: number; sampleAvatars: string[] };
+export type SameProductStat = {
+  creatorCount: number;
+  sampleAvatars: string[];
+  sampleNames: string[];
+};
 
 /**
  * For each (marketplace, articleId) pair, how many *distinct* creators on
@@ -668,13 +672,15 @@ export async function countCreatorsByArticle(
     if (creatorIds.size <= 1) continue;
     const sample = [...creatorIds].slice(0, 3);
     sample.forEach((id) => creatorIdsNeeded.add(id));
-    result.set(key, { creatorCount: creatorIds.size, sampleAvatars: sample });
+    result.set(key, { creatorCount: creatorIds.size, sampleAvatars: sample, sampleNames: sample });
   }
 
   const creators = await Promise.all([...creatorIdsNeeded].map((id) => getCreatorById(id)));
-  const avatarById = new Map(creators.filter((c): c is Creator => Boolean(c)).map((c) => [c.id, c.avatarUrl ?? ""]));
+  const byId = new Map(creators.filter((c): c is Creator => Boolean(c)).map((c) => [c.id, c]));
   for (const stat of result.values()) {
-    stat.sampleAvatars = stat.sampleAvatars.map((id) => avatarById.get(id) ?? "").filter(Boolean);
+    const ids = stat.sampleAvatars;
+    stat.sampleNames = ids.map((id) => byId.get(id)?.displayName ?? "").filter(Boolean);
+    stat.sampleAvatars = ids.map((id) => byId.get(id)?.avatarUrl ?? "").filter(Boolean);
   }
 
   return result;
