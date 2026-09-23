@@ -36,11 +36,11 @@ function AccountMenu() {
         className="w-9 h-9 flex items-center justify-center rounded-full border border-line text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="8" cy="5.2" r="2.6" stroke="currentColor" strokeWidth="1.3" />
+          <circle cx="8" cy="5.2" r="2.6" stroke="currentColor" strokeWidth="1.5" />
           <path
             d="M2.6 13.5c.9-2.6 2.9-4 5.4-4s4.5 1.4 5.4 4"
             stroke="currentColor"
-            strokeWidth="1.3"
+            strokeWidth="1.5"
             strokeLinecap="round"
           />
         </svg>

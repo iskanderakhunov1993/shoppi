@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
+// Fraunces (the previous display face) has no Cyrillic glyphs at all, so
+// every Russian heading on the site — nearly all of them — was silently
+// falling back to the browser's default serif the whole time. Playfair
+// Display keeps the same contrasty editorial character but actually
+// covers Cyrillic.
+const displayFont = Playfair_Display({
   variable: "--font-display",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   style: ["normal", "italic"],
-  weight: ["400", "500"],
+  weight: ["400", "600", "700"],
 });
 
 const inter = Inter({
@@ -41,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ru"
-      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

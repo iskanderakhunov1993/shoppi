@@ -9,7 +9,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
       <path
         d="M8 13.5s-5.5-3.4-5.5-7.1A2.9 2.9 0 0 1 8 4.6a2.9 2.9 0 0 1 5.5 1.8c0 3.7-5.5 7.1-5.5 7.1z"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.5"
         strokeLinejoin="round"
       />
     </svg>

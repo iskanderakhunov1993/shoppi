@@ -162,8 +162,8 @@ export function StorefrontGrid({
             className="flex-none w-8 h-8 flex items-center justify-center text-stone hover:text-ink transition-colors cursor-pointer -ml-1"
           >
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
-              <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
         )}

@@ -14,11 +14,11 @@ function applyTheme(theme: Theme) {
 function SunIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4L3.3 3.3"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>
@@ -31,7 +31,7 @@ function MoonIcon() {
       <path
         d="M14 9.7A6 6 0 1 1 6.3 2a4.7 4.7 0 0 0 7.7 7.7Z"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.5"
         strokeLinejoin="round"
       />
     </svg>

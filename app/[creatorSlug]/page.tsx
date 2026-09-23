@@ -78,7 +78,7 @@ function PencilIcon() {
       <path
         d="M11.3 2.3a1.4 1.4 0 0 1 2 2L5.4 12.2l-2.8.7.7-2.8L11.3 2.3z"
         stroke="currentColor"
-        strokeWidth="1.2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

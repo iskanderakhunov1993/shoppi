@@ -32,14 +32,14 @@ export function ShareButtonIcon({ url }: { url: string }) {
           <path
             d="M8 10V2.5M8 2.5L5.2 5.3M8 2.5l2.8 2.8"
             stroke="currentColor"
-            strokeWidth="1.3"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d="M3.5 8.5v3.3c0 .66.54 1.2 1.2 1.2h6.6c.66 0 1.2-.54 1.2-1.2V8.5"
             stroke="currentColor"
-            strokeWidth="1.3"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

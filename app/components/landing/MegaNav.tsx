@@ -306,7 +306,7 @@ export function MegaNav({
                     aria-hidden="true"
                     className={`transition-transform ${open === menu.key ? "rotate-180" : ""}`}
                   >
-                    <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                    <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.5" fill="none" />
                   </svg>
                 </button>
               ))}
@@ -380,8 +380,8 @@ export function MegaNav({
               } ${mutedColor} hover:${textColor} transition-colors cursor-pointer`}
             >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
-                <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M11.5 11.5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
           )}

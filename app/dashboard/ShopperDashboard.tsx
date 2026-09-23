@@ -176,8 +176,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                     </svg>
                   ) : (
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <rect x="5.5" y="5.5" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
-                      <path d="M3 10.5V3.5a1 1 0 0 1 1-1H10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      <rect x="5.5" y="5.5" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M3 10.5V3.5a1 1 0 0 1 1-1H10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                   )}
                 </button>
