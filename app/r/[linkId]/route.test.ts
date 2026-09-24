@@ -13,7 +13,7 @@ describe("resolveRedirectTarget", () => {
     const link = await addLink({
       creatorId: creator.id,
       title: "Item",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/product",
     });
 

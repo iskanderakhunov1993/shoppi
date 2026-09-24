@@ -35,14 +35,14 @@ async function main() {
     [
       {
         title: "Компрессионные гетры для бега",
-        category: "mens",
+        category: "sport",
         url: "https://www.wildberries.ru/catalog/205871234/detail.aspx",
         image: "https://picsum.photos/seed/shoppi-artem-getry/600/450",
         price: 1890,
       },
       {
         title: "Массажный ролл для восстановления",
-        category: "mens",
+        category: "sport",
         url: "https://www.ozon.ru/product/rolik-massazh-3021984/",
         image: "https://picsum.photos/seed/shoppi-artem-roll/600/450",
         price: 2490,
@@ -57,14 +57,14 @@ async function main() {
     [
       {
         title: "Ретинол-сыворотка 0.3%",
-        category: "cosmetics",
+        category: "face_care",
         url: "https://www.wildberries.ru/catalog/211456789/detail.aspx",
         image: "https://picsum.photos/seed/shoppi-liza-retinol/600/450",
         price: 1790,
       },
       {
         title: "Солнцезащитный крем SPF 50 без белого следа",
-        category: "cosmetics",
+        category: "face_care",
         url: "https://www.ozon.ru/product/spf-krem-4192837/",
         image: "https://picsum.photos/seed/shoppi-liza-spf/600/450",
         price: 990,

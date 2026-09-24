@@ -33,7 +33,7 @@ export function BrandOpportunities() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [compensation, setCompensation] = useState("");
-  const [category, setCategory] = useState<Category>("cosmetics");
+  const [category, setCategory] = useState<Category>("face_care");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);

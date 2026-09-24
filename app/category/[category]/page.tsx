@@ -1,39 +1,30 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { AdLabel } from "@/app/components/AdLabel";
 import { seedDemoAccounts } from "@/lib/seed";
-import { listLinksByCategory, getCreatorById, type Link as ShopLink } from "@/lib/store";
+import { listLinksByCategory, listCategoryCovers, getCreatorById, type Link as ShopLink } from "@/lib/store";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { EmptyState } from "@/app/components/EmptyState";
-import { CATEGORY_LABEL, isCategory, type Category } from "@/lib/categories";
+import { CATEGORY_LABEL, isCategory, normalizeCategory } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
-
-const CATEGORY_SEED: Record<Category, string> = {
-  cosmetics: "shoppi-cat-cosmetics",
-  mens: "shoppi-cat-mens",
-  clothing: "shoppi-cat-clothing",
-  tools: "shoppi-cat-tools",
-  shoes: "shoppi-cat-shoes",
-  accessories: "shoppi-cat-accessories",
-  home: "shoppi-cat-home",
-  kids: "shoppi-cat-kids",
-  electronics: "shoppi-cat-electronics",
-  sport: "shoppi-cat-sport",
-  beauty_health: "shoppi-cat-beauty-health",
-  books_stationery: "shoppi-cat-books-stationery",
-};
 
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ category: string }>;
 }) {
-  const { category } = await params;
-  if (!isCategory(category)) notFound();
+  const { category: raw } = await params;
+  if (!isCategory(raw)) {
+    const renamed = normalizeCategory(raw);
+    if (renamed) permanentRedirect(`/category/${renamed}`);
+    notFound();
+  }
+  const category = raw;
 
   await seedDemoAccounts();
   const links: ShopLink[] = await listLinksByCategory(category);
+  const cover = (await listCategoryCovers()).find((c) => c.category === category)?.imageUrl;
   const creatorsById = new Map(
     await Promise.all(
       [...new Set(links.map((l) => l.creatorId))].map(
@@ -47,12 +38,12 @@ export default async function CategoryPage({
       <LandingNav overlay />
 
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`https://picsum.photos/seed/${CATEGORY_SEED[category]}/1600/700`}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-ink" />
+        )}
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-black/20" />
         <div className="relative h-full flex flex-col justify-end px-6 md:px-10 pb-10">
           <div className="max-w-[1200px] mx-auto w-full">

@@ -1,6 +1,19 @@
 import { CATEGORIES, CATEGORY_LABEL } from "@/lib/categories";
+import { listCategoryCovers } from "@/lib/store";
+import { pluralizeProducts } from "@/lib/plural";
 
-export function ShopByCategory() {
+export async function ShopByCategory() {
+  const covers = await listCategoryCovers();
+  const byCategory = new Map(covers.map((c) => [c.category, c]));
+  // Catalogue order, not popularity order, so tiles don't reshuffle as
+  // click counts move; empty categories are left out entirely.
+  const shown = CATEGORIES.flatMap((slug) => {
+    const cover = byCategory.get(slug);
+    return cover ? [cover] : [];
+  });
+
+  if (shown.length === 0) return null;
+
   return (
     <section className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
       <div className="max-w-[1200px] mx-auto">
@@ -14,26 +27,26 @@ export function ShopByCategory() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-line">
-          {CATEGORIES.map((slug) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {shown.map(({ category, count, imageUrl }) => (
             <a
-              key={slug}
-              href={`/category/${slug}`}
-              className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
+              key={category}
+              href={`/category/${category}`}
+              className="group flex flex-col hover:opacity-90 transition-opacity"
             >
-              <div className="aspect-[4/3] overflow-hidden">
+              <div className="aspect-[4/5] overflow-hidden bg-raise">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://picsum.photos/seed/shoppi-tile-${slug}/500/400`}
+                  src={imageUrl}
                   alt=""
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
-              <div className="px-4 py-5 text-center">
-                <span className="font-display italic text-xs text-stone block mb-0.5">
-                  Смотреть
+              <div className="pt-3">
+                <span className="font-display text-lg leading-snug block">{CATEGORY_LABEL[category]}</span>
+                <span className="text-[12px] text-stone">
+                  {count} {pluralizeProducts(count)}
                 </span>
-                <span className="font-display text-lg">{CATEGORY_LABEL[slug]}</span>
               </div>
             </a>
           ))}

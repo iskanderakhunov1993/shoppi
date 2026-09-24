@@ -18,7 +18,7 @@ const ACCOUNTS = [
     instagram: "nika.test.picks",
     tiktok: "nikatestpicks",
     products: [
-      { title: "Тестовая сыворотка", category: "cosmetics" as const, url: "https://www.wildberries.ru/catalog/900000001/detail.aspx", price: 1200 },
+      { title: "Тестовая сыворотка", category: "face_care" as const, url: "https://www.wildberries.ru/catalog/900000001/detail.aspx", price: 1200 },
     ],
   },
   {
@@ -48,7 +48,7 @@ const ACCOUNTS = [
     instagram: "pavel.test.wear",
     tiktok: undefined,
     products: [
-      { title: "Тестовый ремень", category: "mens" as const, url: "https://www.wildberries.ru/catalog/900000004/detail.aspx", price: 1900 },
+      { title: "Тестовый ремень", category: "accessories" as const, url: "https://www.wildberries.ru/catalog/900000004/detail.aspx", price: 1900 },
     ],
   },
   {
@@ -58,7 +58,7 @@ const ACCOUNTS = [
     instagram: "katya.test.makeup",
     tiktok: "katyatestmakeup",
     products: [
-      { title: "Тестовая тушь", category: "cosmetics" as const, url: "https://www.wildberries.ru/catalog/900000005/detail.aspx", price: 890 },
+      { title: "Тестовая тушь", category: "face_care" as const, url: "https://www.wildberries.ru/catalog/900000005/detail.aspx", price: 890 },
     ],
   },
 ];

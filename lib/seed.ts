@@ -81,14 +81,14 @@ async function runSeed(): Promise<void> {
     [
       {
         title: "Сыворотка с витамином C",
-        category: "cosmetics",
+        category: "face_care",
         url: "https://www.wildberries.ru/catalog/172247725/detail.aspx",
         image: "https://picsum.photos/seed/shoppi-serum/600/450",
         price: 2490,
       },
       {
         title: "Крем для рук, без отдушки",
-        category: "cosmetics",
+        category: "body_care",
         url: "https://www.letu.ru/product/krem-dlya-ruk-101",
         image: "https://picsum.photos/seed/shoppi-cream/600/450",
         price: 690,

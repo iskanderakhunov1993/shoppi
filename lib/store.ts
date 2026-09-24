@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { sql, nextSeq } from "./db.ts";
-import type { Category } from "./categories.ts";
+import { normalizeCategory, type Category } from "./categories.ts";
 
 export type Role = "shopper" | "creator" | "brand";
 
@@ -129,7 +129,9 @@ function toCreator(r: Row): Creator {
     youtubeHandle: opt(r.youtube_handle),
     contactEmail: opt(r.contact_email),
     onboarded: Boolean(r.onboarded),
-    categories: r.categories ? (JSON.parse(str(r.categories)) as Category[]) : undefined,
+    categories: r.categories
+      ? [...new Set((JSON.parse(str(r.categories)) as string[]).map(normalizeCategory).filter((c): c is Category => !!c))]
+      : undefined,
     hidePopular: Boolean(r.hide_popular),
   };
 }
@@ -141,7 +143,7 @@ function toLink(r: Row): Link {
     title: str(r.title),
     imageUrl: opt(r.image_url),
     price: num(r.price),
-    category: str(r.category) as Link["category"],
+    category: normalizeCategory(str(r.category)) ?? (str(r.category) as Link["category"]),
     brand: opt(r.brand),
     subtype: opt(r.subtype),
     targetUrl: str(r.target_url),
@@ -696,6 +698,39 @@ export async function listLinksByCategory(
     SELECT * FROM links WHERE category = ${category} ORDER BY seq DESC LIMIT ${limit} OFFSET ${offset}
   `;
   return rows.map(toLink);
+}
+
+export type CategoryCover = { category: Category; count: number; imageUrl: string };
+
+/**
+ * Every category that has at least one product with a photo, with its
+ * product count and the photo of its most-clicked product (newest on a
+ * tie) — real creator-picked imagery for category tiles instead of stock
+ * art, and empty categories simply don't appear.
+ */
+export async function listCategoryCovers(): Promise<CategoryCover[]> {
+  const rows = await sql`
+    WITH clicks_per AS (
+      SELECT link_id, COUNT(*) FILTER (WHERE is_bot = false) AS n FROM clicks GROUP BY link_id
+    ),
+    ranked AS (
+      SELECT l.category, l.image_url,
+             ROW_NUMBER() OVER (PARTITION BY l.category ORDER BY COALESCE(c.n, 0) DESC, l.seq DESC) AS rn,
+             COUNT(*) OVER (PARTITION BY l.category) AS total
+      FROM links l LEFT JOIN clicks_per c ON c.link_id = l.id
+      WHERE l.image_url IS NOT NULL AND l.image_url <> ''
+    )
+    SELECT category, image_url, total FROM ranked WHERE rn = 1
+  `;
+  const byCategory = new Map<Category, CategoryCover>();
+  for (const r of rows) {
+    const category = normalizeCategory(str(r.category));
+    if (!category) continue;
+    const existing = byCategory.get(category);
+    const count = Number(r.total) + (existing?.count ?? 0);
+    byCategory.set(category, { category, count, imageUrl: existing?.imageUrl ?? str(r.image_url) });
+  }
+  return [...byCategory.values()];
 }
 
 export async function countLinksByCategory(category: Link["category"]): Promise<number> {

@@ -52,7 +52,7 @@ export function CreatorDashboard({
   const [links, setLinks] = useState<LinkRow[] | null>(null);
   const [title, setTitle] = useState("");
   const [targetUrl, setTargetUrl] = useState("");
-  const [category, setCategory] = useState<Category>("cosmetics");
+  const [category, setCategory] = useState<Category>("face_care");
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [promoCode, setPromoCode] = useState("");
@@ -65,7 +65,7 @@ export function CreatorDashboard({
   const [lookupNote, setLookupNote] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [editCategory, setEditCategory] = useState<Category>("cosmetics");
+  const [editCategory, setEditCategory] = useState<Category>("face_care");
   const [editPrice, setEditPrice] = useState("");
   const [editImage, setEditImage] = useState("");
   const [editPromoCode, setEditPromoCode] = useState("");

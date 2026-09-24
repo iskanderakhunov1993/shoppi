@@ -85,13 +85,13 @@ describe("links and clicks", () => {
     const first = await addLink({
       creatorId: creator.id,
       title: "First",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/1",
     });
     const second = await addLink({
       creatorId: creator.id,
       title: "Second",
-      category: "mens",
+      category: "shoes",
       targetUrl: "https://example.com/2",
     });
 
@@ -112,7 +112,7 @@ describe("links and clicks", () => {
     const link = await addLink({
       creatorId: creator.id,
       title: "Item",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/item",
     });
 
@@ -162,13 +162,13 @@ describe("listLinksByDomain", () => {
     const match = await addLink({
       creatorId: creator.id,
       title: "Serum",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://www.wildberries.ru/catalog/1",
     });
     await addLink({
       creatorId: creator.id,
       title: "Other brand",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://ozon.ru/catalog/2",
     });
 
@@ -188,7 +188,7 @@ describe("favorites", () => {
     const link = await addLink({
       creatorId: creator.id,
       title: "Serum",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/serum",
     });
 
@@ -234,7 +234,7 @@ describe("searchLinks", () => {
     const link = await addLink({
       creatorId: creator.id,
       title: "Сыворотка для лица",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/serum",
     });
 
@@ -246,7 +246,7 @@ describe("searchLinks", () => {
 
   it("returns nothing for a title that is not there", async () => {
     const { creator } = await createCreator("anna@example.com");
-    await addLink({ creatorId: creator.id, title: "Крем", category: "cosmetics", targetUrl: "https://example.com/1" });
+    await addLink({ creatorId: creator.id, title: "Крем", category: "face_care", targetUrl: "https://example.com/1" });
     expect(await searchLinks("шампунь")).toEqual([]);
   });
 });
@@ -281,8 +281,8 @@ describe("follows (circles)", () => {
     const b = (await createCreator("b@example.com")).creator;
     const { user: shopper } = await createUser("shopper@example.com", "hashed", "shopper");
 
-    const first = await addLink({ creatorId: a.id, title: "A1", category: "cosmetics", targetUrl: "https://example.com/a1" });
-    const second = await addLink({ creatorId: b.id, title: "B1", category: "mens", targetUrl: "https://example.com/b1" });
+    const first = await addLink({ creatorId: a.id, title: "A1", category: "face_care", targetUrl: "https://example.com/a1" });
+    const second = await addLink({ creatorId: b.id, title: "B1", category: "shoes", targetUrl: "https://example.com/b1" });
 
     await followCreator(shopper.id, a.id);
     await followCreator(shopper.id, b.id);
@@ -295,7 +295,7 @@ describe("follows (circles)", () => {
     const stranger = (await createCreator("stranger@example.com")).creator;
     const { user: shopper } = await createUser("shopper@example.com", "hashed", "shopper");
 
-    await addLink({ creatorId: stranger.id, title: "Not yours", category: "cosmetics", targetUrl: "https://example.com/x" });
+    await addLink({ creatorId: stranger.id, title: "Not yours", category: "face_care", targetUrl: "https://example.com/x" });
     await followCreator(shopper.id, followed.id);
 
     expect(await circleFeed(shopper.id)).toEqual([]);
@@ -308,7 +308,7 @@ describe("promo codes", () => {
     const link = await addLink({
       creatorId: creator.id,
       title: "Serum",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://example.com/serum",
       promoCode: "ANNA10",
     });
@@ -329,7 +329,7 @@ describe("affiliate templates (CPA network)", () => {
     await addLink({
       creatorId: creator.id,
       title: "Serum",
-      category: "cosmetics",
+      category: "face_care",
       targetUrl: "https://www.wildberries.ru/catalog/172247725/detail.aspx",
       articleId: "172247725",
     });
@@ -353,7 +353,7 @@ describe("opportunities", () => {
       title: "Обзор нового крема",
       description: "Ищем креатора для честного обзора.",
       compensation: "Продукт + 3000₽",
-      category: "cosmetics",
+      category: "face_care",
     });
     expect(opportunity.status).toBe("open");
     expect((await listOpenOpportunities()).map((o) => o.id)).toContain(opportunity.id);

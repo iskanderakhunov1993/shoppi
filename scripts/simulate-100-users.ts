@@ -34,10 +34,10 @@ const CREATOR_FIRST = ["Полина", "Алина", "Ксения", "Марин
 const BRAND_NAMES = ["Nordwear", "Purelab", "Uraltools", "Mono", "Bereg"];
 const LAST = ["Иванова", "Смирнова", "Кузнецова", "Попова", "Соколова", "Волкова", "Морозова", "Новикова"];
 
-const CATEGORIES: Category[] = ["cosmetics", "mens", "clothing", "tools"];
+const CATEGORIES: Category[] = ["face_care", "accessories", "clothing", "tools"];
 const CATEGORY_TITLES: Partial<Record<Category, string[]>> = {
-  cosmetics: ["Сыворотка с ниацинамидом", "Крем для рук", "Санскрин SPF 50"],
-  mens: ["Термокружка", "Кожаный ремень", "Механические часы"],
+  face_care: ["Сыворотка с ниацинамидом", "Крем для рук", "Санскрин SPF 50"],
+  accessories: ["Термокружка", "Кожаный ремень", "Механические часы"],
   clothing: ["Пальто из шерсти", "Джинсы прямого кроя", "Худи без принта"],
   tools: ["Аккумуляторный шуруповёрт", "Набор отвёрток", "Электролобзик"],
 };
