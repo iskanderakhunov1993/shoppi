@@ -64,7 +64,7 @@ export default async function SearchPage({
                   <h2 className="text-[11px] uppercase tracking-wider text-stone mb-5">
                     Креаторы · {creators.length}
                   </h2>
-                  <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-px bg-line">
+                  <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
                     {creators.map((c) => (
                       <a
                         key={c.id}

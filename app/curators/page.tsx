@@ -83,7 +83,7 @@ export default async function CuratorsDirectoryPage({
               По этому запросу креаторов не нашлось.
             </p>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
               {creators.map((creator) => (
                 <div key={creator.id} className="group bg-paper flex flex-col">
                   <a href={`/${creator.slug}`} className="block hover:opacity-90 transition-opacity">

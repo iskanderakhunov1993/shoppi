@@ -71,7 +71,7 @@ export default async function CategoryPage({
           {links.length === 0 ? (
             <EmptyState title="В этой категории пока нет опубликованных товаров." />
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-px bg-line">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
               {links.map((link) => {
                 const creator = creatorsById.get(link.creatorId);
                 return (

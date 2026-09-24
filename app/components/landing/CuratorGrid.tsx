@@ -21,7 +21,7 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
           <p className="font-display italic text-stone">Пока нет опубликованных витрин.</p>
         ) : (
           <div
-            className={`grid gap-px bg-line ${
+            className={`grid gap-x-6 gap-y-10 ${
               creators.length === 1
                 ? "max-w-xs mx-auto"
                 : creators.length === 2

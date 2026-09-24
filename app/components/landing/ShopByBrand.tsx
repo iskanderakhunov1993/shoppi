@@ -21,7 +21,7 @@ export function ShopByBrand({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-line">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {domains.map((d) => (
             <div
               key={d.domain}
