@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { seedDemoAccounts } from "@/lib/seed";
 import { countCreators, listCreators, getSessionUserId, getUserById } from "@/lib/store";
-import { placeholderAvatar } from "@/lib/avatar";
+import { CreatorMosaic } from "@/app/components/CreatorMosaic";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
@@ -83,36 +83,19 @@ export default async function CuratorsDirectoryPage({
               По этому запросу креаторов не нашлось.
             </p>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
-              {creators.map((creator) => (
-                <div key={creator.id} className="group bg-paper flex flex-col">
-                  <a href={`/${creator.slug}`} className="block hover:opacity-90 transition-opacity">
-                    <div className="aspect-square overflow-hidden bg-raise">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={creator.avatarUrl || placeholderAvatar(creator.slug)}
-                        alt={creator.displayName}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-4 pb-0">
-                      <div className="font-display text-lg mb-1">{creator.displayName}</div>
-                      {creator.bio && (
-                        <p className="font-display italic text-[13px] text-stone leading-snug">
-                          {creator.bio}
-                        </p>
-                      )}
-                    </div>
-                  </a>
-                  {isShopperViewer && (
-                    <div className="p-4 pt-3 flex items-center gap-2">
-                      <FollowButton creatorId={creator.id} compact />
-                      <AddToCircleButton creatorId={creator.id} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <CreatorMosaic
+              creators={creators}
+              actions={
+                isShopperViewer
+                  ? (creator) => (
+                      <>
+                        <FollowButton creatorId={creator.id} compact />
+                        <AddToCircleButton creatorId={creator.id} />
+                      </>
+                    )
+                  : undefined
+              }
+            />
           )}
 
           {totalPages > 1 && (

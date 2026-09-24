@@ -1,5 +1,5 @@
 import type { Creator } from "@/lib/store";
-import { placeholderAvatar } from "@/lib/avatar";
+import { CreatorMosaic } from "@/app/components/CreatorMosaic";
 
 export function CuratorGrid({ creators }: { creators: Creator[] }) {
   return (
@@ -20,40 +20,7 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
         {creators.length === 0 ? (
           <p className="font-display italic text-stone">Пока нет опубликованных витрин.</p>
         ) : (
-          <div
-            className={`grid gap-x-6 gap-y-10 ${
-              creators.length === 1
-                ? "max-w-xs mx-auto"
-                : creators.length === 2
-                  ? "sm:grid-cols-2 max-w-xl mx-auto"
-                  : "sm:grid-cols-2 md:grid-cols-3"
-            }`}
-          >
-            {creators.map((creator) => (
-              <a
-                key={creator.id}
-                href={`/${creator.slug}`}
-                className="group bg-paper flex flex-col hover:opacity-90 transition-opacity"
-              >
-                <div className="aspect-[4/5] overflow-hidden bg-raise">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={creator.avatarUrl || placeholderAvatar(creator.slug)}
-                    alt={creator.displayName}
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-5">
-                  <div className="font-display text-lg mb-1">{creator.displayName}</div>
-                  {creator.bio && (
-                    <p className="font-display italic text-[13.5px] text-stone leading-snug">
-                      {creator.bio}
-                    </p>
-                  )}
-                </div>
-              </a>
-            ))}
-          </div>
+          <CreatorMosaic creators={creators} />
         )}
       </div>
     </section>
