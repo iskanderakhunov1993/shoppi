@@ -55,9 +55,40 @@ function bookmarkletBody(origin: string) {
             if (off) price = price || digits(off.price || off.lowPrice || (off.priceSpecification && off.priceSpecification.price));
           } catch (e) {}
         }
-        title = title || meta("og:title") || document.title;
-        imageUrl = imageUrl || meta("og:image");
-        price = price || digits(meta("product:price:amount") || meta("og:price:amount") || meta("price"));
+        // No product markup (Lamoda and other SPA stores): read what the
+        // shopper actually sees. og: tags come last — on these sites they're
+        // often site-wide defaults (a category name, the store logo).
+        var h1 = document.querySelector("h1");
+        var h1Text = h1 ? h1.innerText.replace(/\\s+/g, " ").trim() : "";
+        var bestImg = "", bestArea = 0;
+        [].slice.call(document.images).forEach(function (el) {
+          var src = el.currentSrc || el.src || "";
+          if (!src || /logo|icon|sprite|avatar|\\.svg/i.test(src)) return;
+          if (el.naturalWidth < 200 || el.naturalHeight < 200) return;
+          var r = el.getBoundingClientRect();
+          var area = r.width * r.height;
+          if (area > bestArea) { bestArea = area; bestImg = src; }
+        });
+        var domPrice = "";
+        var ip = document.querySelector('[itemprop="price"]');
+        if (ip) domPrice = digits(ip.getAttribute("content") || ip.textContent);
+        if (!domPrice) {
+          var cands = document.querySelectorAll('[class*="price" i], [data-testid*="price" i]');
+          for (var c = 0; c < cands.length; c++) {
+            var el = cands[c];
+            var OLD = "s, del, [class*='old' i], [class*='was' i], [class*='through' i], [class*='crossed' i]";
+            if (el.closest(OLD)) continue;
+            var copy = el.cloneNode(true);
+            [].slice.call(copy.querySelectorAll(OLD)).forEach(function (o) { o.remove(); });
+            var pm = (copy.textContent || "").match(/(\\d[\\d\\s\\u00a0]{0,9})\\s*(₽|руб)/);
+            if (pm) { domPrice = pm[1].replace(/[\\s\\u00a0]/g, ""); break; }
+          }
+        }
+        var ogImage = meta("og:image");
+        if (/logo|icon/i.test(ogImage)) ogImage = "";
+        title = title || h1Text || meta("og:title") || document.title;
+        imageUrl = imageUrl || bestImg || ogImage;
+        price = price || domPrice || digits(meta("product:price:amount") || meta("og:price:amount") || meta("price"));
       }
       imageUrl = String(imageUrl || "").replace(/^\\/\\//, "https://").replace(/^http:/, "https:");
       if (!title) {
