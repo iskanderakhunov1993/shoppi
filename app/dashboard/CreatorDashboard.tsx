@@ -11,7 +11,7 @@ import { CreatorOnboardingWizard } from "./CreatorOnboardingWizard";
 import { AdFields } from "./AdFields";
 import { CircleFollowers } from "./CircleFollowers";
 import { BookmarkletButton } from "@/app/components/BookmarkletButton";
-import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_LABEL, guessCategory, type Category } from "@/lib/categories";
 
 type LinkRow = {
   id: string;
@@ -100,7 +100,11 @@ export function CreatorDashboard({
       const prefUrl = params.get("targetUrl");
       const prefImage = params.get("imageUrl");
       const prefPrice = params.get("price");
-      if (prefTitle) setTitle(prefTitle);
+      if (prefTitle) {
+        setTitle(prefTitle);
+        const guessed = guessCategory(prefTitle);
+        if (guessed) setCategory(guessed);
+      }
       if (prefUrl) setTargetUrl(prefUrl);
       if (prefImage) setImageUrl(prefImage);
       if (prefPrice) setPrice(prefPrice);
@@ -137,7 +141,11 @@ export function CreatorDashboard({
       return;
     }
 
-    if (data.title && !title.trim()) setTitle(data.title);
+    if (data.title && !title.trim()) {
+      setTitle(data.title);
+      const guessed = guessCategory(data.title);
+      if (guessed) setCategory(guessed);
+    }
     if (data.price && !price.trim()) setPrice(String(data.price));
     if (data.imageUrl && !imageUrl.trim()) setImageUrl(data.imageUrl);
     setLookupNote("Подтянули название, фото и цену с Wildberries — можно поправить перед сохранением.");

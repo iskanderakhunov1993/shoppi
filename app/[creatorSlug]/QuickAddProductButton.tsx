@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_LABEL, guessCategory, type Category } from "@/lib/categories";
 
 /**
  * Lets a creator add a product without leaving their own storefront —
@@ -30,7 +30,11 @@ export function QuickAddProductButton({ variant = "icon" }: { variant?: "icon" |
     const res = await fetch(`/api/marketplace/lookup?url=${encodeURIComponent(url)}`);
     const data = await res.json().catch(() => null);
     setLookingUp(false);
-    if (data?.found && data.title && !title.trim()) setTitle(data.title);
+    if (data?.found && data.title && !title.trim()) {
+      setTitle(data.title);
+      const guessed = guessCategory(data.title);
+      if (guessed) setCategory(guessed);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
