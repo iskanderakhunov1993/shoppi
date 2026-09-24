@@ -7,6 +7,7 @@ import { EmptyState } from "@/app/components/EmptyState";
 import { OnboardingModal } from "./OnboardingModal";
 import { CircleOnboarding } from "./CircleOnboarding";
 import { MyCircles } from "./MyCircles";
+import { InterestsEditor } from "./InterestsEditor";
 import { placeholderAvatar } from "@/lib/avatar";
 import { CATEGORY_LABEL, type Category } from "@/lib/categories";
 
@@ -38,8 +39,9 @@ const TAB_HINT: Record<Tab, string> = {
   circles: "Группируйте креаторов из «Мои креаторы» по темам — например, «Уход» или «На дачу».",
 };
 
-export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string } }) {
+export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string; interests?: Category[] } }) {
   const [tab, setTabState] = useState<Tab>("overview");
+  const [interests, setInterests] = useState<Category[]>(me.interests ?? []);
 
   // Keeps the URL shareable/bookmarkable per tab (e.g. a link straight
   // to "Круги"), and restores the tab on load instead of always
@@ -280,6 +282,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             </button>
           </div>
 
+          <InterestsEditor interests={interests} onChange={setInterests} />
+
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] uppercase tracking-wider text-stone">
@@ -507,6 +511,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       {showOnboarding && (
         <CircleOnboarding
+          initialInterests={interests}
           onClose={() => setShowOnboarding(false)}
           onDone={async () => {
             setShowOnboarding(false);

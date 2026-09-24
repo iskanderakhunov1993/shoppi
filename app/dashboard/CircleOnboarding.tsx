@@ -16,12 +16,14 @@ type RecommendedCreator = {
 export function CircleOnboarding({
   onClose,
   onDone,
+  initialInterests = [],
 }: {
   onClose: () => void;
   onDone: () => void;
+  initialInterests?: Category[];
 }) {
   const [step, setStep] = useState<"categories" | "creators">("categories");
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(initialInterests);
   const [creators, setCreators] = useState<RecommendedCreator[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -32,6 +34,13 @@ export function CircleOnboarding({
 
   async function goToCreators() {
     setStep("creators");
+    // Kept as the shopper's interests — they drive the personal "Для вас"
+    // ordering later, not just this one-off recommendation.
+    fetch("/api/me", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ interests: categories }),
+    });
     const res = await fetch(`/api/creators/recommended?categories=${categories.join(",")}`);
     const data = await res.json();
     setCreators(data.creators ?? []);
@@ -82,13 +91,14 @@ export function CircleOnboarding({
             <p className="text-stone text-sm leading-relaxed -mt-4">
               Выберите категории — покажем реальных креаторов, которые уже добавляют в них товары.
             </p>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
+                  aria-pressed={categories.includes(c)}
                   onClick={() => toggleCategory(c)}
-                  className={`text-left px-4 py-3 border transition-colors cursor-pointer ${
+                  className={`text-[13px] px-3.5 py-2 rounded-full border transition-colors cursor-pointer ${
                     categories.includes(c)
                       ? "border-ink bg-ink text-paper"
                       : "border-line hover:border-ink"

@@ -29,6 +29,9 @@ export type User = {
   displayName?: string;
   avatarUrl?: string;
   slug?: string;
+  // Shopper's own "что мне интересно" picks — drives the personal "Для вас"
+  // ordering and creator recommendations. Unset until they choose.
+  interests?: Category[];
 };
 
 export type Creator = {
@@ -112,7 +115,12 @@ function toUser(r: Row): User {
     displayName: opt(r.display_name),
     avatarUrl: opt(r.avatar_url),
     slug: opt(r.slug),
+    interests: r.interests ? parseCategories(str(r.interests)) : undefined,
   };
+}
+
+function parseCategories(json: string): Category[] {
+  return [...new Set((JSON.parse(json) as string[]).map(normalizeCategory).filter((c): c is Category => !!c))];
 }
 
 function toCreator(r: Row): Creator {
@@ -129,9 +137,7 @@ function toCreator(r: Row): Creator {
     youtubeHandle: opt(r.youtube_handle),
     contactEmail: opt(r.contact_email),
     onboarded: Boolean(r.onboarded),
-    categories: r.categories
-      ? [...new Set((JSON.parse(str(r.categories)) as string[]).map(normalizeCategory).filter((c): c is Category => !!c))]
-      : undefined,
+    categories: r.categories ? parseCategories(str(r.categories)) : undefined,
     hidePopular: Boolean(r.hide_popular),
   };
 }
@@ -208,6 +214,11 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 export async function getUserById(id: string): Promise<User | undefined> {
   const rows = await sql`SELECT * FROM users WHERE id = ${id}`;
   return rows[0] ? toUser(rows[0]) : undefined;
+}
+
+export async function setUserInterests(userId: string, interests: Category[]): Promise<void> {
+  const value = interests.length ? JSON.stringify([...new Set(interests)]) : null;
+  await sql`UPDATE users SET interests = ${value} WHERE id = ${userId}`;
 }
 
 export async function verifyUser(token: string): Promise<User | null> {

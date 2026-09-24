@@ -186,6 +186,7 @@ export default async function StorefrontPage({
         storefrontUrl={storefrontUrl}
         hidePopular={creator.hidePopular}
         isOwner={isOwner}
+        interests={viewerUser?.interests}
         socials={[
           ...(creator.contactEmail
             ? [{ key: "email", label: "Email", handle: creator.contactEmail, href: `mailto:${creator.contactEmail}` }]

@@ -5,6 +5,7 @@ import {
   getCreatorByUserId,
   setAffiliateTemplate,
   setBrandArticles,
+  setUserInterests,
   updateCreator,
   updateUserProfile,
 } from "@/lib/store";
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
     displayName: user.displayName ?? "Покупатель",
     avatarUrl: user.avatarUrl ?? "",
     slug,
+    interests: user.interests ?? [],
   });
 }
 
@@ -161,6 +163,8 @@ export async function PUT(request: NextRequest) {
     if (body?.displayName !== undefined && !String(body.displayName).trim()) {
       return NextResponse.json({ error: "Имя не может быть пустым" }, { status: 400 });
     }
+    const interests = Array.isArray(body?.interests) ? body.interests.filter(isCategory) : undefined;
+    if (interests) await setUserInterests(user.id, interests);
     const updated = await updateUserProfile(user.id, {
       displayName: body?.displayName?.trim(),
       avatarUrl: body?.avatarUrl,
@@ -169,6 +173,7 @@ export async function PUT(request: NextRequest) {
       displayName: updated.displayName,
       avatarUrl: updated.avatarUrl ?? "",
       slug: await ensureUserSlug(user.id),
+      interests: interests ?? user.interests ?? [],
     });
   }
 

@@ -34,6 +34,10 @@ type StorefrontLink = {
 type Collection = { id: string; name: string; linkIds: string[] };
 type Social = { key: string; label: string; handle: string; href: string };
 
+// Stable default: a fresh [] per render would re-run the "Для вас" memo
+// and reshuffle it on every re-render.
+const NO_INTERESTS: Category[] = [];
+
 type Tab = "latest" | "popular" | "popular_month" | "popular_week" | "collections" | "social" | "for_you" | string;
 
 export function StorefrontGrid({
@@ -42,6 +46,7 @@ export function StorefrontGrid({
   socials = [],
   storefrontUrl = "",
   hidePopular = false,
+  interests = NO_INTERESTS,
   isOwner = false,
 }: {
   links: StorefrontLink[];
@@ -49,6 +54,7 @@ export function StorefrontGrid({
   socials?: Social[];
   storefrontUrl?: string;
   hidePopular?: boolean;
+  interests?: Category[];
   isOwner?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("latest");
@@ -75,10 +81,19 @@ export function StorefrontGrid({
     if (tab === "popular") return [...links].sort((a, b) => b.clicks - a.clicks);
     if (tab === "popular_month") return [...links].sort((a, b) => b.clicksMonth - a.clicksMonth);
     if (tab === "popular_week") return [...links].sort((a, b) => b.clicksWeek - a.clicksWeek);
-    if (tab === "for_you") return [...links].sort(() => Math.random() - 0.5);
+    if (tab === "for_you") {
+      // Personal when the shopper has picked interests: their categories
+      // first, most-clicked first within each group. Without interests
+      // there's nothing to personalize on, so it stays a shuffled mix.
+      if (interests.length === 0) return [...links].sort(() => Math.random() - 0.5);
+      const wanted = new Set(interests);
+      return [...links].sort(
+        (a, b) => Number(wanted.has(b.category)) - Number(wanted.has(a.category)) || b.clicks - a.clicks
+      );
+    }
     if (tab === "collections" || tab === "social") return [];
     return links.filter((l) => l.category === tab);
-  }, [links, tab, activeCollection]);
+  }, [links, tab, activeCollection, interests]);
 
   // Secondary facets (тип/бренд) — only built from products in the
   // current tab that actually have the field set, so an empty facet
