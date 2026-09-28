@@ -35,7 +35,7 @@ export function RoleTeasers() {
             Смотрите, кто вас продвигает.
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 list-disc list-inside marker:text-line">
-            <li>Привяжите домен — увидите все ссылки на него</li>
+            <li>Привяжите домен и увидите все ссылки на него</li>
             <li>Клики по каждому товару, без ручных таблиц</li>
             <li>Никаких заявок и модерации на старте</li>
           </ul>

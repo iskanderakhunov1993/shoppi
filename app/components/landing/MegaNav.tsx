@@ -51,7 +51,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Все категории",
           href: "/categories",
-          description: "От косметики до электроники — товары креаторов по темам.",
+          description: "От косметики до электроники: товары креаторов по темам.",
         },
       ],
     },
@@ -73,7 +73,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Пример витрины",
           href: example,
-          description: "Живая страница креатора — ровно то, что получите вы.",
+          description: "Живая страница креатора, ровно то, что получите вы.",
         },
         {
           label: "Пример медиакита",
@@ -83,7 +83,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         {
           label: "Стать креатором",
           href: "/signup",
-          description: "Регистрация открыта всем — без заявки и модерации.",
+          description: "Регистрация открыта всем, без заявки и модерации.",
         },
       ],
     },
