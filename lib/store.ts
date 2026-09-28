@@ -416,6 +416,17 @@ export async function listCreators(
   return rows.map(toCreator);
 }
 
+/** Creators with at least one product, most products first. */
+export async function listCreatorsWithProducts(limit = 8): Promise<Creator[]> {
+  const rows = await sql`
+    SELECT c.* FROM creators c
+    JOIN (SELECT creator_id, COUNT(*) AS n FROM links GROUP BY creator_id) l ON l.creator_id = c.id
+    ORDER BY l.n DESC, c.created_at DESC
+    LIMIT ${limit}
+  `;
+  return rows.map(toCreator);
+}
+
 export async function countCreators(query?: string): Promise<number> {
   if (query?.trim()) {
     const q = `%${query.trim().toLowerCase()}%`;

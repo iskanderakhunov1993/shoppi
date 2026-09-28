@@ -6,7 +6,6 @@
 export const BRANDS_ENABLED = false;
 
 // One-click demo logins skip the password check entirely, so they exist
-// only outside production. In prod the demo accounts stay as read-only
-// showcases (their storefronts are linked from the landing page) but
-// nobody can sign in as them.
+// only outside production — and so do the demo accounts themselves (see
+// seedDemoAccounts): production shows only real creators.
 export const DEMO_LOGIN_ENABLED = process.env.NODE_ENV !== "production";

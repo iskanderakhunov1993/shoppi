@@ -10,7 +10,7 @@ import {
   countNewFollowedLinks,
 } from "@/lib/store";
 import { placeholderAvatar } from "@/lib/avatar";
-import { getDemoCreatorSlug } from "@/lib/seed";
+import { getShowcaseCreatorSlug } from "@/lib/seed";
 import { MegaNav } from "./MegaNav";
 
 /**
@@ -61,7 +61,7 @@ export async function LandingNav({ overlay = false }: { overlay?: boolean }) {
   return (
     <MegaNav
       signedIn={signedIn}
-      demoSlug={await getDemoCreatorSlug()}
+      demoSlug={await getShowcaseCreatorSlug()}
       overlay={overlay}
       onboarding={onboarding}
       avatarUrl={avatarUrl}

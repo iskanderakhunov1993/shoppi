@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDemoCreatorSlug } from "@/lib/seed";
+import { getShowcaseCreatorSlug } from "@/lib/seed";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Column = { title: string; links: { label: string; href: string }[] };
@@ -10,7 +10,7 @@ type Column = { title: string; links: { label: string; href: string }[] };
  * intentional rather than as the page simply running out of content.
  */
 export async function LandingFooter() {
-  const slug = await getDemoCreatorSlug();
+  const slug = await getShowcaseCreatorSlug();
   const example = slug ? `/${slug}` : "/curators";
   const exampleStats = slug ? `/${slug}/stats` : "/curators";
 

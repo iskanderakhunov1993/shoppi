@@ -8,12 +8,14 @@ import {
   markUserVerified,
   setBrandArticles,
   updateCreator,
+  listCreatorsWithProducts,
   type Creator,
   type Role,
 } from "./store.ts";
 import { parseMarketplaceItem } from "./marketplace.ts";
 import { placeholderAvatar } from "./avatar.ts";
 import type { Category } from "./categories.ts";
+import { DEMO_LOGIN_ENABLED } from "./featureFlags.ts";
 
 // Seeds a handful of already-verified accounts so the login page can offer
 // one-click demo logins and the landing page has real storefronts to link
@@ -115,17 +117,22 @@ async function runSeed(): Promise<void> {
   }
 }
 
-export async function getDemoCreatorSlug(): Promise<string | undefined> {
-  const user = await getUserByEmail(DEMO_ACCOUNTS.creator);
-  return user ? (await getCreatorByUserId(user.id))?.slug : undefined;
+/** Slug for the "Пример витрины / медиакита" links: the fullest real storefront. */
+export async function getShowcaseCreatorSlug(): Promise<string | undefined> {
+  return (await listCreatorsWithProducts(1))[0]?.slug;
 }
 
 // Public pages call this on every request. The seed is idempotent but
 // costs several sequential DB round trips, so run it once per server
 // instance and let later requests reuse the result. A failure clears
 // the cache so the next request retries.
+//
+// Never in production: the demo accounts exist for local quick-login, and
+// seeding them on the live site put a fake creator with stock photos in
+// front of real shoppers.
 let seeded: Promise<void> | null = null;
 export function seedDemoAccounts(): Promise<void> {
+  if (!DEMO_LOGIN_ENABLED) return Promise.resolve();
   seeded ??= runSeed().catch((err) => {
     seeded = null;
     throw err;
@@ -134,10 +141,7 @@ export function seedDemoAccounts(): Promise<void> {
 }
 
 export async function listLandingCreators(): Promise<Creator[]> {
-  const user = await getUserByEmail(DEMO_ACCOUNTS.creator);
-  if (!user) return [];
-  const creator = await getCreatorByUserId(user.id);
-  return creator ? [creator] : [];
+  return listCreatorsWithProducts(8);
 }
 
 export { DEMO_PASSWORD };
