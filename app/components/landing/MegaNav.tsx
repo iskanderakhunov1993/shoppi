@@ -393,7 +393,7 @@ export function MegaNav({
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Меню"
             aria-expanded={mobileOpen}
-            className={`md:hidden flex flex-col gap-[5px] p-1 cursor-pointer ${textColor}`}
+            className={`md:hidden flex flex-col items-center justify-center gap-[5px] w-11 h-11 -mr-2.5 cursor-pointer ${textColor}`}
           >
             <span className="block w-5 h-px bg-current" />
             <span className="block w-5 h-px bg-current" />
