@@ -20,10 +20,7 @@ export function HowItWorks() {
   return (
     <section id="how" className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
       <div className="max-w-[1200px] mx-auto">
-        <span className="text-[11px] uppercase tracking-widest text-stone">
-          Как это устроено
-        </span>
-        <h2 className="font-display text-2xl md:text-3xl mt-3 mb-12 max-w-lg">
+        <h2 className="font-display text-2xl md:text-3xl mb-12 max-w-lg">
           Три шага от находки креатора до вашей покупки.
         </h2>
         <div className="grid md:grid-cols-3 gap-10 md:gap-0">
