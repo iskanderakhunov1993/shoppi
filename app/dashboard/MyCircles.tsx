@@ -125,7 +125,7 @@ export function MyCircles({
         <p className="text-stone text-sm">Загрузка…</p>
       ) : circles.length === 0 ? (
         <p className="font-display italic text-stone">
-          Пока нет ни одного круга — создайте первый, например по категории или поводу.
+          Пока нет ни одного круга. Создайте первый, например по категории или поводу.
         </p>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
@@ -217,7 +217,7 @@ export function MyCircles({
                         </h4>
                         {detail.feed.length === 0 ? (
                           <p className="text-stone text-[13px]">
-                            Пока пусто — добавьте креатора с товарами на витрине.
+                            Пока пусто. Добавьте креатора с товарами на витрине.
                           </p>
                         ) : (
                           <ul className="flex flex-col">

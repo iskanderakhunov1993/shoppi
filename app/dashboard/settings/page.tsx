@@ -136,7 +136,7 @@ export default function SettingsPage() {
             />
           </Field>
           <p className="text-stone text-[12px] -mt-2">
-            Смену email пока не поддерживаем — обратитесь в поддержку, если это нужно.
+            Смену email пока не поддерживаем. Обратитесь в поддержку, если это нужно.
           </p>
 
           {nameError && <p className="text-error text-sm">{nameError}</p>}

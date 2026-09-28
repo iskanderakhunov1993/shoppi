@@ -89,7 +89,7 @@ export function CircleOnboarding({
         {step === "categories" && (
           <>
             <p className="text-stone text-sm leading-relaxed -mt-4">
-              Выберите категории — покажем реальных креаторов, которые уже добавляют в них товары.
+              Выберите категории: покажем реальных креаторов, которые уже добавляют в них товары.
             </p>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => (
@@ -122,13 +122,13 @@ export function CircleOnboarding({
         {step === "creators" && (
           <>
             <p className="text-stone text-sm leading-relaxed -mt-4">
-              Добавьте кого-то из них в круг — их находки соберутся у вас в одной ленте. Можно изменить позже.
+              Добавьте кого-то из них в круг, и их находки соберутся у вас в одной ленте. Можно изменить позже.
             </p>
             {creators === null ? (
               <p className="text-stone text-sm">Загрузка…</p>
             ) : creators.length === 0 ? (
               <p className="text-stone text-sm">
-                Пока нет креаторов в этих категориях — загляните позже или посмотрите{" "}
+                Пока нет креаторов в этих категориях. Загляните позже или посмотрите{" "}
                 <a href="/curators" className="underline">
                   весь список
                 </a>

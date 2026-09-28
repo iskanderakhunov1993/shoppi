@@ -118,7 +118,7 @@ export function BrandDashboard({
         <div className="border-b md:border-b-0 md:border-r border-line px-8 py-8 flex flex-col gap-4">
           <h3 className="text-[11px] uppercase tracking-wider text-stone">Мои товары</h3>
           <p className="text-stone text-[13px] leading-relaxed">
-            Артикулы или ссылки на ваши карточки — по одной в строке. На маркетплейсе домен
+            Артикулы или ссылки на ваши карточки, по одной в строке. На маркетплейсе домен
             общий для всех продавцов, поэтому товары определяются по артикулу.
           </p>
           <form onSubmit={saveArticles} className="flex flex-col gap-3">
@@ -140,7 +140,7 @@ export function BrandDashboard({
               />
               <p className="text-stone text-[12px] leading-relaxed">
                 Если у вас есть партнёрская ссылка из CPA-сети (Admitad, ePN и т.п.), вставьте её
-                шаблон с плейсхолдером <code>{"{url}"}</code> вместо адреса товара — переходы по
+                шаблон с плейсхолдером <code>{"{url}"}</code> вместо адреса товара: переходы по
                 вашим товарам пойдут через неё вместо прямой ссылки на маркетплейс.
               </p>
             </div>
@@ -188,12 +188,12 @@ export function BrandDashboard({
           ) : !hasArticles ? (
             <EmptyState
               title="Пока не указано ни одного товара."
-              description="Добавьте артикулы слева — и здесь появятся креаторы, которые уже ссылаются на ваши карточки, вместе с числом переходов по каждой."
+              description="Добавьте артикулы слева, и здесь появятся креаторы, которые уже ссылаются на ваши карточки, вместе с числом переходов по каждой."
             />
           ) : links.length === 0 ? (
             <EmptyState
               title="На эти товары пока никто не ссылается."
-              description={`Данные появятся, как только креатор добавит один из ваших артикулов к себе на витрину. Проверьте, что артикулы указаны верно — сейчас отслеживается ${(me.brandArticles ?? []).length}.`}
+              description={`Данные появятся, как только креатор добавит один из ваших артикулов к себе на витрину. Проверьте, что артикулы указаны верно: сейчас отслеживается ${(me.brandArticles ?? []).length}.`}
             />
           ) : (
             <ul className="flex flex-col">

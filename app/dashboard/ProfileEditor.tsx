@@ -129,7 +129,7 @@ export function ProfileEditor({
             className={`${inputClass} border border-line px-3 py-2.5`}
           />
           <p className="text-stone text-[11.5px] leading-relaxed">
-            Необязательно. Будет видна всем на вашей витрине — сюда пишут бренды.
+            Необязательно. Будет видна всем на вашей витрине: сюда пишут бренды.
           </p>
         </div>
       </section>
@@ -143,7 +143,7 @@ export function ProfileEditor({
             onChange={(e) => setHidePopular(e.target.checked)}
             className="mt-0.5 shrink-0"
           />
-          Скрыть вкладку «Популярное» на витрине — не показывать покупателям, какие товары
+          Скрыть вкладку «Популярное» на витрине: не показывать покупателям, какие товары
           кликают чаще.
         </label>
       </section>

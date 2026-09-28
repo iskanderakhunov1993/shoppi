@@ -101,7 +101,7 @@ export function BrandOpportunities() {
           Предложить сотрудничество креатору
         </h3>
         <p className="text-stone text-[13px] leading-relaxed">
-          Опубликуйте предложение — креаторы увидят его в своём кабинете и смогут откликнуться.
+          Опубликуйте предложение, и креаторы увидят его в своём кабинете и смогут откликнуться.
         </p>
         <form onSubmit={handleCreate} className="flex flex-col gap-3">
           <input

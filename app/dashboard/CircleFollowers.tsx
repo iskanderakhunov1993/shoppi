@@ -24,7 +24,7 @@ export function CircleFollowers() {
       <div>
         <h3 className="text-[11px] uppercase tracking-wider text-stone mb-1">Круги</h3>
         <p className="text-stone text-[13px] leading-relaxed">
-          Покупатели, которые добавили вас в свой личный круг — более тесная связь, чем просто
+          Покупатели, которые добавили вас в свой личный круг: более тесная связь, чем просто
           подписка. Они видят ваши товары в своей общей ленте среди других избранных кураторов.
         </p>
       </div>

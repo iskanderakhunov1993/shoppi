@@ -110,7 +110,7 @@ export function CreatorOnboardingWizard({
               <h1 className="font-display text-2xl mb-2">Привет, {me.displayName}!</h1>
               <p className="text-stone text-sm leading-relaxed">
                 Ведите витрину с товарами, которые правда советуете, и видите честную
-                статистику переходов — без чужого алгоритма между вами и аудиторией.
+                статистику переходов, без чужого алгоритма между вами и аудиторией.
               </p>
             </div>
             <button onClick={() => setStep(1)} className={`${buttonClass} w-fit`}>
@@ -158,7 +158,7 @@ export function CreatorOnboardingWizard({
             <div>
               <h1 className="font-display text-2xl mb-1">О чём ваша витрина?</h1>
               <p className="text-stone text-sm leading-relaxed">
-                Выберите категории — покупатели сразу поймут, чего от вас ждать. Можно изменить позже.
+                Выберите категории: покупатели сразу поймут, чего от вас ждать. Можно изменить позже.
               </p>
             </div>
 

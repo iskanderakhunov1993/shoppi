@@ -50,7 +50,7 @@ export function OpportunitiesFeed() {
       {opportunities === null ? (
         <p className="text-stone text-sm">Загрузка…</p>
       ) : opportunities.length === 0 ? (
-        <EmptyState title="Пока нет открытых предложений — загляните позже." />
+        <EmptyState title="Пока нет открытых предложений. Загляните позже." />
       ) : (
         <ul className="flex flex-col gap-6 max-w-xl">
           {opportunities.map((o) => (

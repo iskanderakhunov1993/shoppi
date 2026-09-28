@@ -108,7 +108,7 @@ export function CreatorDashboard({
       if (prefUrl) setTargetUrl(prefUrl);
       if (prefImage) setImageUrl(prefImage);
       if (prefPrice) setPrice(prefPrice);
-      setLookupNote("Данные подтянуты со страницы товара букмарклетом — проверьте перед сохранением.");
+      setLookupNote("Данные подтянуты со страницы товара букмарклетом, проверьте перед сохранением.");
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
@@ -137,7 +137,7 @@ export function CreatorDashboard({
     setLookingUp(false);
 
     if (!data?.found) {
-      setLookupNote("Не смогли подтянуть данные по этой ссылке — заполните вручную.");
+      setLookupNote("Не смогли подтянуть данные по этой ссылке, заполните вручную.");
       return;
     }
 
@@ -148,7 +148,7 @@ export function CreatorDashboard({
     }
     if (data.price && !price.trim()) setPrice(String(data.price));
     if (data.imageUrl && !imageUrl.trim()) setImageUrl(data.imageUrl);
-    setLookupNote("Подтянули название, фото и цену с Wildberries — можно поправить перед сохранением.");
+    setLookupNote("Подтянули название, фото и цену с Wildberries, можно поправить перед сохранением.");
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -397,7 +397,7 @@ export function CreatorDashboard({
                   </div>
                 </div>
                 <p className="text-[11.5px] text-stone -mt-1.5">
-                  Необязательно — но именно по бренду и типу шоппер сможет фильтровать вашу витрину.
+                  Необязательно, но именно по бренду и типу шоппер сможет фильтровать вашу витрину.
                 </p>
                 <details className="group -mt-1">
                   <summary className="text-[11px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer select-none list-none flex items-center gap-1.5">
@@ -451,7 +451,7 @@ export function CreatorDashboard({
             </div>
 
             {links.length === 0 ? (
-              <EmptyState title="Ваша витрина пока пуста — добавьте первый товар в форме выше." />
+              <EmptyState title="Ваша витрина пока пуста. Добавьте первый товар в форме выше." />
             ) : (
               <ul className="flex flex-col">
                 {links.map((link) => (
@@ -587,7 +587,7 @@ export function CreatorDashboard({
               <h3 className="text-[11px] uppercase tracking-wider text-stone mb-2">Кнопка «Добавить в Shoppi»</h3>
               <p className="text-stone text-[13px] leading-relaxed">
                 Перетащите кнопку на панель закладок. Потом откройте товар на Wildberries, Ozon, Lamoda,
-                Poizon или в другом магазине и нажмите закладку — форма выше заполнится названием, фото и
+                Poizon или в другом магазине и нажмите закладку: форма выше заполнится названием, фото и
                 ценой со страницы.{" "}
                 <a href="/bookmarklet" className="underline underline-offset-4 hover:text-ink transition-colors">
                   Подробнее
@@ -611,10 +611,10 @@ export function CreatorDashboard({
             <h3 className="text-[11px] uppercase tracking-wider text-stone">Как вы зарабатываете</h3>
             <p className="text-stone text-[13px] leading-relaxed">
               Три независимых способа, можно использовать любой или все сразу: добавьте{" "}
-              <b className="text-ink font-medium">промокод</b> к товару на вкладке «Товары» — он
+              <b className="text-ink font-medium">промокод</b> к товару на вкладке «Товары», он
               появится у вас на витрине рядом с ценой; если бренд подключил{" "}
               <b className="text-ink font-medium">партнёрскую сеть</b>, переходы по его товарам
-              будут учитываться автоматически, без каких-либо действий с вашей стороны; а ниже —{" "}
+              будут учитываться автоматически, без каких-либо действий с вашей стороны, а ниже:{" "}
               <b className="text-ink font-medium">прямые предложения</b> от брендов, на которые
               можно откликнуться.
             </p>
