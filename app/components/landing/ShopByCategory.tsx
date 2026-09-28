@@ -38,7 +38,9 @@ export async function ShopByCategory() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
-                  alt=""
+                  alt={`Товар из категории «${CATEGORY_LABEL[category]}»`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>

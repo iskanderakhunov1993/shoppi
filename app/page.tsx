@@ -13,6 +13,7 @@ import { ShopByBrand } from "@/app/components/landing/ShopByBrand";
 import { RoleTeasers } from "@/app/components/landing/RoleTeasers";
 import { Faq } from "@/app/components/landing/Faq";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
+import { Reveal } from "@/app/components/Reveal";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 // Reads mutable in-memory store state (seeded demo creators) on every
@@ -43,12 +44,12 @@ export default async function Home() {
           overlay treatment. */}
       <LandingNav />
       <Hero />
-      <HowItWorks />
-      <CuratorGrid creators={creators} />
-      <ShopByCategory />
-      {BRANDS_ENABLED && <ShopByBrand domains={domains} />}
-      <RoleTeasers />
-      <Faq />
+      <Reveal><HowItWorks /></Reveal>
+      <Reveal><CuratorGrid creators={creators} /></Reveal>
+      <Reveal><ShopByCategory /></Reveal>
+      {BRANDS_ENABLED && <Reveal><ShopByBrand domains={domains} /></Reveal>}
+      <Reveal><RoleTeasers /></Reveal>
+      <Reveal><Faq /></Reveal>
       <LandingFooter />
     </main>
   );

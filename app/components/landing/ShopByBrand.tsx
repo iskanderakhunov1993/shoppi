@@ -31,6 +31,8 @@ export function ShopByBrand({
               <img
                 src={`https://picsum.photos/seed/shoppi-brand-${d.domain}/500/500`}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
