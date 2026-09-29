@@ -68,7 +68,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
   useEffect(() => setOrigin(window.location.origin), []);
 
-  // Opened from the "X/3 выполнено" badge in the global nav, which
+  // Opened from the "X/2 выполнено" badge in the global nav, which
   // links here with this query param instead of duplicating the modal.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("onboarding")) {
@@ -101,13 +101,14 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
   // Auto-surface the checklist on every visit for anyone who hasn't
   // finished it yet, including after logging back in — closing it
   // (×) only dismisses the current view, not future ones, so it
-  // keeps nudging until all three steps are actually done.
+  // keeps nudging until both steps are actually done. Also closes it
+  // on its own the moment the last step completes, so it never lingers
+  // showing a fully checked-off list.
   useEffect(() => {
-    if (favorites === null || circle === null || circleCount === null) return;
-    const allDone = favorites.length > 0 && circle.creators.length > 0 && circleCount > 0;
-    if (allDone) return;
-    setShowOnboardingModal(true);
-  }, [favorites, circle, circleCount]);
+    if (favorites === null || circle === null) return;
+    const allDone = favorites.length > 0 && circle.creators.length > 0;
+    setShowOnboardingModal(!allDone);
+  }, [favorites, circle]);
 
   function dismissOnboardingModal() {
     setShowOnboardingModal(false);
@@ -125,8 +126,10 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
   const hasFavorite = Boolean(favorites && favorites.length > 0);
   const hasFollow = Boolean(circle && circle.creators.length > 0);
-  const hasCircle = Boolean(circleCount !== null && circleCount > 0);
-  const onboardingDone = hasFavorite && hasFollow && hasCircle;
+  // Circles group multiple creators by theme — meaningless with just
+  // one followed creator, so it stays a discoverable feature rather
+  // than a gate on finishing onboarding.
+  const onboardingDone = hasFavorite && hasFollow;
 
   return (
     <main className="flex-1 flex flex-col">
@@ -141,7 +144,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 onClick={() => setShowOnboardingModal(true)}
                 className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors cursor-pointer"
               >
-                Начало работы · {[hasFavorite, hasFollow, hasCircle].filter(Boolean).length}/3
+                Начало работы · {[hasFavorite, hasFollow].filter(Boolean).length}/2
               </button>
             )}
             <Link
@@ -402,7 +405,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               </div>
               <p className="font-display italic text-base text-stone">Пока нет креаторов</p>
               <p className="text-stone text-sm leading-relaxed">
-                Соберите первый круг креаторов, чьему вкусу доверяете, и их находки соберутся в одну
+                Подпишитесь на первых креаторов, чьему вкусу доверяете, и их находки соберутся в одну
                 ленту, вместо того чтобы проверять каждую витрину по отдельности.
               </p>
               <button
@@ -410,7 +413,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 onClick={() => setShowOnboarding(true)}
                 className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity cursor-pointer"
               >
-                Собрать первый круг
+                Найти креаторов
               </button>
             </div>
           ) : (
@@ -544,19 +547,6 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             },
             {
               n: 2,
-              title: "Соберите свой круг",
-              description: "Назовите круг и добавьте туда креаторов, например «Уход» или «На дачу».",
-              done: hasCircle,
-              cta: {
-                label: "Создать круг",
-                onClick: () => {
-                  setShowOnboardingModal(false);
-                  setTab("circles");
-                },
-              },
-            },
-            {
-              n: 3,
               title: "Сохраните товар в избранное",
               description: "На любой витрине креатора нажмите «Сохранить»: товар появится в «Сохранённом».",
               done: hasFavorite,

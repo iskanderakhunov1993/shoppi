@@ -75,7 +75,7 @@ export function CircleOnboarding({
       <div className="bg-card border border-line w-full max-w-lg max-h-[85vh] overflow-y-auto p-8 flex flex-col gap-6">
         <div className="flex items-start justify-between">
           <h2 className="font-display text-2xl">
-            {step === "categories" ? "Что вам интересно?" : "Кого добавим в круг?"}
+            {step === "categories" ? "Что вам интересно?" : "Кого добавим в креаторы?"}
           </h2>
           <button
             onClick={onClose}
@@ -122,7 +122,7 @@ export function CircleOnboarding({
         {step === "creators" && (
           <>
             <p className="text-stone text-sm leading-relaxed -mt-4">
-              Добавьте кого-то из них в круг, и их находки соберутся у вас в одной ленте. Можно изменить позже.
+              Добавьте кого-то из них, и их находки соберутся у вас в ленте. Можно изменить позже.
             </p>
             {creators === null ? (
               <p className="text-stone text-sm">Загрузка…</p>
