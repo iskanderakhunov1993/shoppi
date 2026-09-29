@@ -98,19 +98,18 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
     loadCircleCount();
   }, [loadFavorites, loadCircle, loadCircleCount]);
 
-  // Auto-surface the checklist once per browser for anyone who hasn't
-  // finished it yet — same idea as a first-run modal, but it won't
-  // nag again once dismissed even if steps stay incomplete.
+  // Auto-surface the checklist on every visit for anyone who hasn't
+  // finished it yet, including after logging back in — closing it
+  // (×) only dismisses the current view, not future ones, so it
+  // keeps nudging until all three steps are actually done.
   useEffect(() => {
     if (favorites === null || circle === null || circleCount === null) return;
     const allDone = favorites.length > 0 && circle.creators.length > 0 && circleCount > 0;
     if (allDone) return;
-    if (localStorage.getItem("shoppi-onboarding-dismissed")) return;
     setShowOnboardingModal(true);
   }, [favorites, circle, circleCount]);
 
   function dismissOnboardingModal() {
-    localStorage.setItem("shoppi-onboarding-dismissed", "1");
     setShowOnboardingModal(false);
   }
 
