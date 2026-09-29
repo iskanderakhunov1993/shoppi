@@ -33,7 +33,7 @@ type Tab = "overview" | "saved" | "circle" | "circles";
 const VALID_TABS: Tab[] = ["overview", "saved", "circle", "circles"];
 
 const TAB_HINT: Record<Tab, string> = {
-  overview: "Как связаны разделы ниже, и что где искать.",
+  overview: "Ваши подписки, круги и сохранённые товары в одном месте.",
   saved: "Товары, сохранённые с любой витрины. Эта же подборка доступна по ссылке «Мой вишлист» вверху.",
   circle: "Те, на кого вы подписаны напрямую: их находки собираются в ленте ниже.",
   circles: "Группируйте креаторов из «Мои креаторы» по темам, например «Уход» или «На дачу».",
@@ -229,30 +229,6 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       {tab === "overview" && (
         <div className="px-8 py-8 flex flex-col gap-10">
-          <ol className="flex flex-col sm:flex-row gap-5 sm:gap-3 max-w-3xl">
-            <li className="flex-1 flex gap-3">
-              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">1</span>
-              <p className="text-[13px] text-stone leading-snug">
-                <span className="text-ink font-medium">Подпишитесь</span> на креаторов, чьему вкусу
-                доверяете: вкладка «Мои креаторы».
-              </p>
-            </li>
-            <li className="flex-1 flex gap-3">
-              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">2</span>
-              <p className="text-[13px] text-stone leading-snug">
-                <span className="text-ink font-medium">Группируйте</span> их по темам в «Круги»,
-                своя лента находок под каждый круг.
-              </p>
-            </li>
-            <li className="flex-1 flex gap-3">
-              <span className="flex-none w-6 h-6 rounded-full border border-line text-[11px] flex items-center justify-center text-stone">3</span>
-              <p className="text-[13px] text-stone leading-snug">
-                <span className="text-ink font-medium">Сохраняйте</span> конкретные товары в
-                «Сохранённое», с любой витрины, не только от своих креаторов.
-              </p>
-            </li>
-          </ol>
-
           <div className="grid sm:grid-cols-3 gap-px bg-line border border-line">
             <button
               type="button"
