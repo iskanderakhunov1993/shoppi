@@ -73,7 +73,7 @@ export function CollectionEditor({
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl">{collection ? "Изменить коллекцию" : "Новая коллекция"}</h2>
-          <button type="button" onClick={onClose} aria-label="Закрыть" className="text-stone hover:text-ink text-xl leading-none cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Закрыть" className="w-11 h-11 -mr-2.5 flex-none flex items-center justify-center text-stone hover:text-ink text-xl leading-none cursor-pointer">
             ×
           </button>
         </div>

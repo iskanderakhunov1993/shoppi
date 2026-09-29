@@ -80,7 +80,7 @@ export function CircleOnboarding({
           <button
             onClick={onClose}
             aria-label="Закрыть"
-            className="text-stone hover:text-ink transition-colors text-xl leading-none cursor-pointer"
+            className="w-11 h-11 -mt-2.5 -mr-2.5 flex-none flex items-center justify-center text-stone hover:text-ink transition-colors text-xl leading-none cursor-pointer"
           >
             ×
           </button>

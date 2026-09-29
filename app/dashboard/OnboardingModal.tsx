@@ -24,7 +24,7 @@ export function OnboardingModal({
         <button
           onClick={onClose}
           aria-label="Закрыть"
-          className="absolute top-5 right-5 text-stone hover:text-ink transition-colors text-xl leading-none cursor-pointer"
+          className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center text-stone hover:text-ink transition-colors text-xl leading-none cursor-pointer"
         >
           ×
         </button>
