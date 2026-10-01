@@ -7,7 +7,6 @@ import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { FollowButton } from "@/app/components/FollowButton";
-import { AddToCircleButton } from "@/app/[creatorSlug]/AddToCircleButton";
 
 export const dynamic = "force-dynamic";
 
@@ -86,14 +85,7 @@ export default async function CuratorsDirectoryPage({
             <CreatorMosaic
               creators={creators}
               actions={
-                isShopperViewer
-                  ? (creator) => (
-                      <>
-                        <FollowButton creatorId={creator.id} compact />
-                        <AddToCircleButton creatorId={creator.id} />
-                      </>
-                    )
-                  : undefined
+                isShopperViewer ? (creator) => <FollowButton creatorId={creator.id} compact /> : undefined
               }
             />
           )}

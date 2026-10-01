@@ -66,7 +66,7 @@ export function CreatorMosaic({
               </div>
             </a>
             {actions && (
-              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-paper/90 rounded-full p-1">
+              <div className="absolute top-2 left-2 flex items-center gap-1.5">
                 {actions(creator)}
               </div>
             )}

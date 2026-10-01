@@ -69,7 +69,9 @@ export function FollowButton({
         compact ? "px-3 py-1.5" : "px-5 py-2.5 w-full sm:w-auto"
       } ${
         following
-          ? "border border-ink text-ink hover:bg-ink hover:text-paper"
+          ? compact
+            ? "bg-paper text-ink hover:bg-ink hover:text-paper"
+            : "border border-ink text-ink hover:bg-ink hover:text-paper"
           : "bg-ink text-paper hover:opacity-80"
       }`}
     >
