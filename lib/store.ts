@@ -1048,6 +1048,45 @@ export async function listFollowedLinks(
   }));
 }
 
+/** Same as listFollowedLinks, scoped to one category — powers the
+ * "Мои креаторы" tab on a category page the same way it works on
+ * /finds. */
+export async function listFollowedLinksByCategory(
+  userId: string,
+  category: Link["category"],
+  opts: { limit?: number; offset?: number } = {}
+): Promise<RecentLink[]> {
+  const limit = Math.min(opts.limit ?? 48, 100);
+  const offset = opts.offset ?? 0;
+  const rows = await sql`
+    SELECT l.*, c.display_name AS creator_display_name, c.slug AS creator_slug, c.avatar_url AS creator_avatar_url
+    FROM links l
+    JOIN creators c ON c.id = l.creator_id
+    JOIN follows f ON f.creator_id = l.creator_id
+    WHERE f.user_id = ${userId} AND l.category = ${category}
+    ORDER BY l.seq DESC LIMIT ${limit} OFFSET ${offset}
+  `;
+  return rows.map((r) => ({
+    ...toLink(r),
+    creatorName: str(r.creator_display_name),
+    creatorSlug: str(r.creator_slug),
+    creatorAvatarUrl: r.creator_avatar_url === null ? undefined : str(r.creator_avatar_url),
+  }));
+}
+
+export async function countFollowedLinksByCategory(
+  userId: string,
+  category: Link["category"]
+): Promise<number> {
+  const rows = await sql`
+    SELECT COUNT(*) AS c
+    FROM links l
+    JOIN follows f ON f.creator_id = l.creator_id
+    WHERE f.user_id = ${userId} AND l.category = ${category}
+  `;
+  return Number(rows[0].c);
+}
+
 /**
  * The platform-wide "Latest Finds" feed: every product from every
  * creator, newest first — plain chronological order, no ranking or
