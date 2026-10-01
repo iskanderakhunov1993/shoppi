@@ -85,7 +85,7 @@ export default async function WishlistPage({
                   />
                 </div>
               )}
-              <span className="text-[10px] uppercase tracking-wide text-stone">
+              <span className="text-[11px] uppercase tracking-wide text-stone">
                 {CATEGORY_LABEL[link.category] ?? link.category}
                 {link.creatorSlug && <> · от {link.creatorName}</>}
               </span>

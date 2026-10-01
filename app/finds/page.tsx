@@ -96,7 +96,7 @@ export default async function FindsPage({
                   <img src={link.imageUrl} alt={link.title} className="w-full h-full object-cover" />
                 )}
               </div>
-              <span className="text-[10px] uppercase tracking-wide text-stone">
+              <span className="text-[11px] uppercase tracking-wide text-stone">
                 {CATEGORY_LABEL[link.category] ?? link.category}
               </span>
               <div className="text-sm font-medium leading-snug">{link.title}</div>

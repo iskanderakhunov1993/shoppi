@@ -112,7 +112,7 @@ export default async function CollectionPage({ params }: { params: Promise<Param
                 </div>
               </div>
               <a href={`/r/${link.id}`} className="flex flex-col gap-1 hover:opacity-85 transition-opacity">
-                <span className="text-[10px] uppercase tracking-wide text-stone">
+                <span className="text-[11px] uppercase tracking-wide text-stone">
                   {CATEGORY_LABEL[link.category] ?? link.category}
                   {link.brand && ` · ${link.brand}`}
                 </span>

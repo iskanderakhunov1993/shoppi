@@ -63,9 +63,9 @@ export async function LandingFooter() {
         <div className={`grid grid-cols-2 ${BRANDS_ENABLED ? "md:grid-cols-4" : "md:grid-cols-3"} gap-x-8 gap-y-12`}>
           {columns.map((column) => (
             <div key={column.title}>
-              <h4 className="text-[12px] font-semibold uppercase tracking-[0.12em] mb-6">
+              <h2 className="text-[12px] font-semibold uppercase tracking-[0.12em] mb-6">
                 {column.title}
-              </h4>
+              </h2>
               <ul className="flex flex-col gap-3">
                 {column.links.map((link) => (
                   <li key={link.label}>

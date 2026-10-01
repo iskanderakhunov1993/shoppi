@@ -474,7 +474,7 @@ export function StorefrontGrid({
                 </div>
               </div>
               <a href={link.wrappedUrl} className="flex flex-col gap-1 hover:opacity-85 transition-opacity">
-                <span className="text-[10px] uppercase tracking-wide text-stone">
+                <span className="text-[11px] uppercase tracking-wide text-stone">
                   {CATEGORY_LABEL[link.category] ?? link.category}
                   {link.subtype && ` · ${link.subtype}`}
                 </span>
