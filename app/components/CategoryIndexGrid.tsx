@@ -1,10 +1,21 @@
-import { CATEGORIES, CATEGORY_LABEL } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { listCategoryCovers } from "@/lib/store";
 
 // First tile in the grid gets the tall ShopMy-style "feature" slot
 // (row-span-2); grid-flow-dense packs the rest around it. Only kicks in
 // once there's enough tiles to actually pack around a hole.
 const FEATURE_SLOT = 0;
+
+// Curated covers for categories that don't have a live product cover
+// yet — used only as a fallback; once a real product exists in the
+// category its actual cover wins. A nicer stand-in than the
+// typographic plate, but still not pretending to be live content.
+const STATIC_COVERS: Partial<Record<Category, string>> = {
+  shoes: "/category-covers/shoes.webp",
+  perfume: "/category-covers/perfume.webp",
+  makeup: "/category-covers/makeup.webp",
+  bags: "/category-covers/bags.webp",
+};
 
 /**
  * The full /categories index, not the landing teaser (ShopByCategory) —
@@ -17,7 +28,7 @@ export async function CategoryIndexGrid() {
   const byCategory = new Map(covers.map((c) => [c.category, c]));
   const shown = CATEGORIES.map((category) => ({
     category,
-    imageUrl: byCategory.get(category)?.imageUrl,
+    imageUrl: byCategory.get(category)?.imageUrl ?? STATIC_COVERS[category],
   }));
 
   const useFeatured = shown.length >= 5;
