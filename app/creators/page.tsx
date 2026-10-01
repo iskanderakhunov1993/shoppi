@@ -29,10 +29,10 @@ export default function CreatorsPage() {
         titleSuffix="витрина."
         subhead="Публикуйте то, что реально выбрали сами, без чужого алгоритма между вами и вашей аудиторией."
         ctaLabel="Стать креатором"
-        ctaHref="/signup"
+        ctaHref="/signup?role=creator"
         imageSeed="shoppi-creators"
       />
-      <ValueList eyebrow="Что вы получаете" title="Инструменты креатора" items={ITEMS} />
+      <ValueList title="Инструменты креатора" items={ITEMS} />
       <section className="px-6 md:px-10 py-14 text-center">
         <p className="text-stone text-sm max-w-md mx-auto mb-2">
           Регистрация открыта всем, без заявки и модерации.

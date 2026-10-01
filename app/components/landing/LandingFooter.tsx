@@ -21,7 +21,7 @@ export async function LandingFooter() {
         { label: "Обзор", href: "/creators" },
         { label: "Пример витрины", href: example },
         { label: "Пример медиакита", href: exampleStats },
-        { label: "Стать креатором", href: "/signup" },
+        { label: "Стать креатором", href: "/signup?role=creator" },
         { label: "Войти в кабинет", href: "/login" },
       ],
     },
@@ -31,7 +31,7 @@ export async function LandingFooter() {
             title: "Брендам",
             links: [
               { label: "Обзор", href: "/brands" },
-              { label: "Подключить домен", href: "/signup" },
+              { label: "Подключить домен", href: "/signup?role=brand" },
               { label: "Войти в аналитику", href: "/login" },
             ],
           },

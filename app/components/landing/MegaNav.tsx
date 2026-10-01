@@ -82,7 +82,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         },
         {
           label: "Стать креатором",
-          href: "/signup",
+          href: "/signup?role=creator",
           description: "Регистрация открыта всем, без заявки и модерации.",
         },
       ],
@@ -99,7 +99,7 @@ function buildMenus(demoSlug?: string): Menu[] {
         },
         {
           label: "Подключить домен",
-          href: "/signup",
+          href: "/signup?role=brand",
           description: "Укажите свои артикулы и увидите первые данные сразу.",
         },
         {
@@ -202,13 +202,16 @@ export function MegaNav({
 
   // The bar rides over the hero photo at the top of the page, then takes
   // on a solid background once it starts covering ordinary content.
+  // IntersectionObserver on a 1px sentinel, not a scroll listener — the
+  // sentinel scrolls out of view past the same 24px threshold the old
+  // scrollY check used.
+  const scrollSentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 24);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const el = scrollSentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -237,12 +240,14 @@ export function MegaNav({
   const mutedColor = transparent ? "text-white/75" : "text-stone";
 
   return (
-    <nav
-      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-200 ${
-        transparent ? "bg-transparent" : "bg-paper/95 backdrop-blur-md border-b border-line"
-      }`}
-      onMouseLeave={scheduleClose}
-    >
+    <>
+      <div ref={scrollSentinelRef} aria-hidden className="absolute top-6 h-px w-px pointer-events-none" />
+      <nav
+        className={`fixed top-0 inset-x-0 z-50 transition-colors duration-200 ${
+          transparent ? "bg-transparent" : "bg-paper/95 backdrop-blur-md border-b border-line"
+        }`}
+        onMouseLeave={scheduleClose}
+      >
       <div className="px-4 sm:px-6 md:px-10">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3 py-5">
         <Link href="/" className={`font-display text-lg ${textColor}`}>
@@ -484,6 +489,7 @@ export function MegaNav({
           )}
         </div>
       )}
-    </nav>
+      </nav>
+    </>
   );
 }

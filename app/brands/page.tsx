@@ -37,10 +37,10 @@ export default async function BrandsPage() {
         titleSuffix="как люди, которые его любят."
         subhead="Смотрите, кто из креаторов уже ссылается на ваш домен, и сколько кликов это приносит."
         ctaLabel="Подключить домен"
-        ctaHref="/signup"
+        ctaHref="/signup?role=brand"
         imageSeed="shoppi-brands"
       />
-      <ValueList eyebrow="Что вы получаете" title="Аналитика без усилий" items={ITEMS} />
+      <ValueList title="Аналитика без усилий" items={ITEMS} />
       <ShopByBrand domains={domains} />
       <LandingFooter />
     </main>

@@ -23,7 +23,7 @@ export function RoleTeasers() {
           </ul>
         </div>
         <Link
-          href="/signup"
+          href="/signup?role=creator"
           className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-80 transition-opacity w-fit mt-auto md:mt-0 md:flex-none"
         >
           Стать креатором
@@ -40,7 +40,7 @@ export function RoleTeasers() {
             <li>Никаких заявок и модерации на старте</li>
           </ul>
           <Link
-            href="/signup"
+            href="/signup?role=brand"
             className="text-[13px] font-semibold uppercase tracking-wide text-ink border border-ink px-6 py-3.5 hover:bg-ink hover:text-paper transition-colors w-fit mt-auto"
           >
             Подключить бренд

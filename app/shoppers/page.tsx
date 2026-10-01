@@ -39,7 +39,7 @@ export default async function ShoppersPage() {
         ctaHref="#curators"
         imageSeed="shoppi-shoppers"
       />
-      <ValueList eyebrow="Что вы получаете" title="Покупки без алгоритма" items={ITEMS} />
+      <ValueList title="Покупки без алгоритма" items={ITEMS} />
       <CuratorGrid creators={creators} />
       <LandingFooter />
     </main>
