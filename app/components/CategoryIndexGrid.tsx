@@ -17,7 +17,7 @@ export async function CategoryIndexGrid() {
   const byCategory = new Map(covers.map((c) => [c.category, c]));
   const shown = CATEGORIES.map((category) => ({
     category,
-    imageUrl: byCategory.get(category)?.imageUrl ?? `https://picsum.photos/seed/shoppi-cat-${category}/600/600`,
+    imageUrl: byCategory.get(category)?.imageUrl,
   }));
 
   const useFeatured = shown.length >= 5;
@@ -26,6 +26,7 @@ export async function CategoryIndexGrid() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid-flow-dense auto-rows-[220px] md:auto-rows-[260px] gap-px bg-line border border-line">
       {shown.map(({ category, imageUrl }, i) => {
         const featured = useFeatured && i === FEATURE_SLOT;
+        const label = CATEGORY_LABEL[category];
         return (
           <a
             key={category}
@@ -34,20 +35,41 @@ export async function CategoryIndexGrid() {
               featured ? "row-span-2" : ""
             }`}
           >
-            <div className="flex-1 bg-raise p-8 flex items-center justify-center overflow-hidden min-h-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt={`Товар из категории «${CATEGORY_LABEL[category]}»`}
-                loading="lazy"
-                decoding="async"
-                className="max-w-full max-h-full object-contain group-hover:scale-[1.04] transition-transform duration-300"
-              />
+            <div className="flex-1 bg-raise overflow-hidden min-h-0 relative">
+              {imageUrl ? (
+                <div className="w-full h-full p-8 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt={`Товар из категории «${label}»`}
+                    loading="lazy"
+                    decoding="async"
+                    className="max-w-full max-h-full object-contain group-hover:scale-[1.04] transition-transform duration-300"
+                  />
+                </div>
+              ) : (
+                // No live product yet for this category — a quiet
+                // typographic mark instead of a stock photo pretending
+                // to be one. The initial sits in the same display face
+                // as the category name below it, just large and faint,
+                // like an embossed plate rather than a placeholder.
+                <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                  <span
+                    className={`font-display italic text-line leading-none group-hover:text-stone transition-colors ${
+                      featured ? "text-[11rem] md:text-[13rem]" : "text-[6rem] md:text-[7rem]"
+                    }`}
+                  >
+                    {label[0]}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="px-5 py-4 flex-none">
-              <span className="font-display italic text-[13px] text-stone block mb-0.5">Смотреть</span>
+              <span className="font-display italic text-[13px] text-stone block mb-0.5">
+                {imageUrl ? "Смотреть" : "Скоро"}
+              </span>
               <span className={`font-display leading-snug ${featured ? "text-2xl md:text-3xl" : "text-xl"}`}>
-                {CATEGORY_LABEL[category]}
+                {label}
               </span>
             </div>
           </a>
