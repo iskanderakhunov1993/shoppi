@@ -123,7 +123,14 @@ export function CreatorOnboardingWizard({
           <form onSubmit={saveProfile} className="flex flex-col gap-6">
             <h1 className="font-display text-2xl text-center">Расскажите о себе</h1>
 
-            <AvatarUpload avatarUrl={avatarUrl} seed={me.slug ?? me.displayName} onChange={setAvatarUrl} />
+            <div className="flex flex-col items-center gap-2 -mt-2">
+              <AvatarUpload avatarUrl={avatarUrl} seed={me.slug ?? me.displayName} onChange={setAvatarUrl} />
+              {!avatarUrl && (
+                <p className="text-stone text-[12px] text-center max-w-[220px]">
+                  С настоящим фото покупатели доверяют витрине больше
+                </p>
+              )}
+            </div>
 
             <div className="flex flex-col gap-3">
               <input
