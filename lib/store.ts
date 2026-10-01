@@ -956,15 +956,27 @@ export async function countFavoritesForLinks(linkIds: string[]): Promise<Map<str
 
 /* ---------------------------------------------------------------- follows */
 
+// Following a creator and belonging to a circle used to be two separate
+// actions (follow, then manually build a named circle later) — the same
+// mix-up ShopMy avoids by having curator selection create the circle in
+// one step. Every follow now keeps the shopper's default circle in sync,
+// so "Мои креаторы" and "Круги" never drift apart without a second step.
 export async function followCreator(userId: string, creatorId: string): Promise<void> {
   await sql`
     INSERT INTO follows (user_id, creator_id, created_at) VALUES (${userId}, ${creatorId}, ${new Date().toISOString()})
     ON CONFLICT DO NOTHING
   `;
+  const circle = await ensureDefaultCircle(userId);
+  await addCircleMember(circle.id, creatorId);
 }
 
 export async function unfollowCreator(userId: string, creatorId: string): Promise<void> {
   await sql`DELETE FROM follows WHERE user_id = ${userId} AND creator_id = ${creatorId}`;
+  await sql`
+    DELETE FROM circle_members
+    WHERE creator_id = ${creatorId}
+      AND circle_id IN (SELECT id FROM circles WHERE user_id = ${userId})
+  `;
 }
 
 export async function isFollowing(userId: string, creatorId: string): Promise<boolean> {
@@ -1107,6 +1119,15 @@ export async function createCircle(userId: string, name: string): Promise<Circle
 export async function listCirclesByUser(userId: string): Promise<Circle[]> {
   const rows = await sql`SELECT * FROM circles WHERE user_id = ${userId} ORDER BY created_at ASC`;
   return rows.map(toCircle);
+}
+
+// The shopper's first circle doubles as the implicit "all follows" bucket
+// that followCreator keeps in sync — created lazily on first follow so
+// nobody has to build a circle by hand before it exists.
+export async function ensureDefaultCircle(userId: string): Promise<Circle> {
+  const existing = await listCirclesByUser(userId);
+  if (existing[0]) return existing[0];
+  return createCircle(userId, "Общий круг");
 }
 
 export async function getCircle(id: string): Promise<Circle | undefined> {
