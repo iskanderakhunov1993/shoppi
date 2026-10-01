@@ -7,6 +7,7 @@ import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { EmptyState } from "@/app/components/EmptyState";
+import { ShopperOnboardingNudge } from "@/app/components/ShopperOnboardingNudge";
 import { CATEGORY_LABEL } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function FindsPage({
 
   return (
     <main className="flex-1 flex flex-col">
+      {isShopperViewer && <ShopperOnboardingNudge initialInterests={viewerUser?.interests ?? []} />}
       <LandingNav />
 
       <section className="px-6 md:px-10 pt-32 pb-10 border-b border-line">

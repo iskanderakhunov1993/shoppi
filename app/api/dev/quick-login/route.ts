@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByEmail, type Role } from "@/lib/store";
+import { getUserByEmail, getCreatorByUserId, type Role } from "@/lib/store";
 import { createSession, SESSION_COOKIE } from "@/lib/auth";
 import { seedDemoAccounts, DEMO_ACCOUNTS } from "@/lib/seed";
 import { DEMO_LOGIN_ENABLED } from "@/lib/featureFlags";
+import { homePathFor } from "@/lib/landing";
 
 const ROLES: Role[] = ["shopper", "creator", "brand"];
 
@@ -28,7 +29,8 @@ export async function POST(request: NextRequest) {
   }
 
   const token = await createSession(user.id);
-  const response = NextResponse.json({ email: user.email, role: user.role });
+  const creator = user.role === "creator" ? await getCreatorByUserId(user.id) : undefined;
+  const response = NextResponse.json({ email: user.email, role: user.role, next: homePathFor(user, creator) });
   response.cookies.set(SESSION_COOKIE, token, { httpOnly: true, sameSite: "lax", path: "/" });
   return response;
 }

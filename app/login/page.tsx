@@ -56,13 +56,14 @@ export default function LoginPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
+    const data = await res.json().catch(() => null);
     setQuickLoginRole(null);
 
     if (!res.ok) {
       setError("Не удалось войти в демо-аккаунт");
       return;
     }
-    router.push("/dashboard");
+    router.push(data?.next ?? "/dashboard");
   }
 
   return (
