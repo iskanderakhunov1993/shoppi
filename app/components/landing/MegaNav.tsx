@@ -148,6 +148,7 @@ function quickLinksFor(role: Role | undefined, creatorSlug?: string): { label: s
   return [
     { label: "Креаторы", href: "/curators" },
     { label: "Находки", href: "/finds" },
+    { label: "Категории", href: "/categories" },
     { label: "Круги", href: "/dashboard?tab=circles" },
     { label: "Сохранённое", href: "/dashboard?tab=saved" },
   ];
