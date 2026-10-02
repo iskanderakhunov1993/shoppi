@@ -17,22 +17,57 @@ type FeedLink = {
 };
 type CircleDetail = CircleSummary & { feed: FeedLink[] };
 
+const SUGGESTIONS = ["Уход", "Макияж", "На дачу", "Подарки"];
+const PLURAL = new Intl.PluralRules("ru");
+const creatorsWord = (n: number) => {
+  const f = PLURAL.select(n);
+  return f === "one" ? "креатор" : f === "few" ? "креатора" : "креаторов";
+};
+
 export function MyCircles({
   availableCreators,
   onChange,
+  onOpenCreators,
 }: {
   availableCreators: Member[];
   onChange?: () => void;
+  onOpenCreators?: () => void;
 }) {
   const [circles, setCircles] = useState<CircleSummary[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CircleDetail | null>(null);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [detailFailed, setDetailFailed] = useState(false);
+
+  // Runs a request; shows a message instead of failing silently.
+  async function run(req: () => Promise<Response>, fail: string): Promise<boolean> {
+    setError(null);
+    try {
+      const res = await req();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? fail);
+        return false;
+      }
+      return true;
+    } catch {
+      setError("Нет соединения. Попробуйте ещё раз.");
+      return false;
+    }
+  }
 
   const loadCircles = useCallback(async () => {
-    const res = await fetch("/api/circles");
-    setCircles(res.ok ? (await res.json()).circles : []);
+    try {
+      const res = await fetch("/api/circles");
+      if (!res.ok) throw new Error();
+      setCircles((await res.json()).circles);
+    } catch {
+      setCircles([]);
+      setError("Не удалось загрузить круги. Обновите страницу.");
+    }
   }, []);
 
   useEffect(() => {
@@ -40,21 +75,37 @@ export function MyCircles({
   }, [loadCircles]);
 
   const loadDetail = useCallback(async (id: string) => {
-    const res = await fetch(`/api/circles/${id}`);
-    setDetail(res.ok ? await res.json() : null);
+    setDetailFailed(false);
+    try {
+      const res = await fetch(`/api/circles/${id}`);
+      if (!res.ok) throw new Error();
+      setDetail(await res.json());
+    } catch {
+      setDetail(null);
+      setDetailFailed(true);
+    }
   }, []);
 
   async function createCircle(e: React.FormEvent) {
     e.preventDefault();
-    if (!newName.trim()) return;
+    const name = newName.trim();
+    if (!name) return;
+    if (circles?.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+      setError("Круг с таким названием уже есть.");
+      return;
+    }
     setCreating(true);
-    const res = await fetch("/api/circles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName.trim() }),
-    });
+    const ok = await run(
+      () =>
+        fetch("/api/circles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        }),
+      "Не удалось создать круг"
+    );
     setCreating(false);
-    if (res.ok) {
+    if (ok) {
       setNewName("");
       await loadCircles();
       onChange?.();
@@ -62,9 +113,9 @@ export function MyCircles({
   }
 
   async function deleteCircle(id: string) {
-    const confirmed = window.confirm("Удалить этот круг? Креаторов и находки в нём это не затронет.");
-    if (!confirmed) return;
-    await fetch(`/api/circles/${id}`, { method: "DELETE" });
+    setConfirmDeleteId(null);
+    const ok = await run(() => fetch(`/api/circles/${id}`, { method: "DELETE" }), "Не удалось удалить круг");
+    if (!ok) return;
     if (openId === id) {
       setOpenId(null);
       setDetail(null);
@@ -84,21 +135,19 @@ export function MyCircles({
     await loadDetail(id);
   }
 
-  async function addMember(circleId: string, creatorId: string) {
-    if (!creatorId) return;
-    await fetch(`/api/circles/${circleId}/members`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ creatorId }),
-    });
-    await loadDetail(circleId);
-    await loadCircles();
-  }
-
-  async function removeMember(circleId: string, creatorId: string) {
-    await fetch(`/api/circles/${circleId}/members?creatorId=${encodeURIComponent(creatorId)}`, {
-      method: "DELETE",
-    });
+  async function toggleMember(circleId: string, creatorId: string, isMember: boolean) {
+    const ok = await run(
+      () =>
+        isMember
+          ? fetch(`/api/circles/${circleId}/members?creatorId=${encodeURIComponent(creatorId)}`, { method: "DELETE" })
+          : fetch(`/api/circles/${circleId}/members`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ creatorId }),
+            }),
+      "Не удалось изменить состав круга"
+    );
+    if (!ok) return;
     await loadDetail(circleId);
     await loadCircles();
   }
@@ -108,25 +157,64 @@ export function MyCircles({
       <form onSubmit={createCircle} className="flex gap-2 max-w-md">
         <input
           value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          placeholder="Название круга, например «Уход за кожей»"
+          onChange={(e) => {
+            setNewName(e.target.value);
+            setError(null);
+          }}
+          aria-label="Название круга"
+          maxLength={40}
+          placeholder="Название круга"
           className="flex-1 min-w-0 border border-line px-3 py-2.5 text-[13.5px] bg-transparent outline-none focus:border-ink transition-colors"
         />
         <button
           type="submit"
           disabled={creating || !newName.trim()}
-          className="text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-4 py-2.5 hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer"
+          className="text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink border border-ink px-4 py-2.5 hover:opacity-80 transition-opacity disabled:bg-transparent disabled:text-stone disabled:border-line disabled:hover:opacity-100 disabled:cursor-not-allowed cursor-pointer"
         >
-          Создать
+          {creating ? "Создаю…" : "Создать"}
         </button>
       </form>
 
-      {circles === null ? (
-        <p className="text-stone text-sm">Загрузка…</p>
-      ) : circles.length === 0 ? (
-        <p className="font-display italic text-stone">
-          Пока нет ни одного круга. Создайте первый, например по категории или поводу.
+      <p role="alert" className="text-error text-sm -mt-5 empty:hidden">{error}</p>
+
+      {availableCreators.length < 2 && (
+        <p className="text-stone text-[13px] -mt-4 max-w-md">
+          Круги пригодятся, когда вы подпишетесь на нескольких креаторов.{" "}
+          <a href="/curators" className="underline underline-offset-4 hover:text-ink transition-colors">
+            Найти креаторов
+          </a>
         </p>
+      )}
+
+      {circles === null ? (
+        <p role="status" className="text-stone text-sm">Загрузка…</p>
+      ) : circles.length === 0 ? (
+        <div className="flex flex-col gap-4 max-w-md">
+          <p className="font-display italic text-stone text-lg">
+            Круг собирает нескольких креаторов в одну ленту по теме.
+          </p>
+          <div className="flex flex-wrap gap-2" aria-label="Подсказки названий">
+            {SUGGESTIONS.map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => setNewName(name)}
+                className="text-[13px] px-3.5 py-2 border border-line hover:border-ink transition-colors cursor-pointer"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+          {onOpenCreators && availableCreators.length > 0 && (
+            <button
+              type="button"
+              onClick={onOpenCreators}
+              className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer w-fit"
+            >
+              Мои креаторы →
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
           {circles.map((circle) => (
@@ -134,6 +222,7 @@ export function MyCircles({
               <button
                 type="button"
                 onClick={() => toggleOpen(circle.id)}
+                aria-expanded={openId === circle.id}
                 className="w-full text-left cursor-pointer group"
               >
                 <div className="grid grid-cols-2 gap-px bg-line aspect-[2/1]">
@@ -151,64 +240,81 @@ export function MyCircles({
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                   <span className="text-[13.5px] font-medium truncate group-hover:underline">{circle.name}</span>
                   <span className="text-[11.5px] text-stone flex-none">
-                    {circle.members.length} {circle.members.length === 1 ? "креатор" : "креаторов"}
+                    {circle.members.length} {creatorsWord(circle.members.length)}
                   </span>
                 </div>
               </button>
-              <div className="px-4 pb-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => deleteCircle(circle.id)}
-                  className="text-[11px] uppercase tracking-wide text-stone hover:text-error transition-colors cursor-pointer flex-none"
-                >
-                  Удалить
-                </button>
+              <div className="px-4 pb-2 flex justify-end items-center gap-3 min-h-9">
+                {confirmDeleteId === circle.id ? (
+                  <>
+                    <span className="text-[12px] text-stone">Удалить круг? Креаторы останутся.</span>
+                    <button
+                      type="button"
+                      onClick={() => deleteCircle(circle.id)}
+                      className="text-[11px] uppercase tracking-wide text-error px-2 py-2 cursor-pointer"
+                    >
+                      Да
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-[11px] uppercase tracking-wide text-stone hover:text-ink px-2 py-2 cursor-pointer"
+                    >
+                      Нет
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteId(circle.id)}
+                    className="text-[11px] uppercase tracking-wide text-stone hover:text-error transition-colors cursor-pointer px-2 py-2"
+                  >
+                    Удалить
+                  </button>
+                )}
               </div>
 
               {openId === circle.id && (
                 <div className="border-t border-line px-4 py-4 flex flex-col gap-5">
                   {detail === null ? (
-                    <p className="text-stone text-sm">Загрузка…</p>
+                    <p role="status" className="text-stone text-sm">
+                      {detailFailed ? "Не удалось загрузить круг." : "Загрузка…"}
+                    </p>
                   ) : (
                     <>
-                      <div className="flex flex-wrap gap-2">
-                        {detail.members.map((m) => (
-                          <div
-                            key={m.id}
-                            className="flex items-center gap-2 border border-line pl-1.5 pr-2.5 py-1.5"
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={m.avatarUrl || placeholderAvatar(m.slug)}
-                              alt=""
-                              className="w-6 h-6 rounded-full object-cover bg-raise"
-                            />
-                            <a href={`/${m.slug}`} className="text-[12.5px] hover:underline">
-                              {m.displayName}
-                            </a>
-                            <button
-                              onClick={() => removeMember(circle.id, m.id)}
-                              aria-label={`Убрать ${m.displayName} из круга`}
-                              className="text-stone hover:text-error transition-colors cursor-pointer text-[13px] leading-none"
-                            >
-                              ×
-                            </button>
+                      <div>
+                        <h4 className="text-[11px] uppercase tracking-wider text-stone mb-3">
+                          Состав круга
+                        </h4>
+                        {availableCreators.length === 0 ? (
+                          <p className="text-stone text-[13px]">Сначала подпишитесь на креаторов.</p>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {availableCreators.map((c) => {
+                              const isMember = detail.members.some((m) => m.id === c.id);
+                              return (
+                                <button
+                                  key={c.id}
+                                  type="button"
+                                  aria-pressed={isMember}
+                                  onClick={() => toggleMember(circle.id, c.id, isMember)}
+                                  className={`flex items-center gap-2 border pl-1.5 pr-3 py-1.5 text-[12.5px] transition-colors cursor-pointer ${
+                                    isMember ? "border-ink" : "border-line text-stone hover:border-ink hover:text-ink"
+                                  }`}
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={c.avatarUrl || placeholderAvatar(c.slug)}
+                                    alt=""
+                                    className="w-6 h-6 rounded-full object-cover bg-raise"
+                                  />
+                                  {isMember ? "✓ " : ""}
+                                  {c.displayName}
+                                </button>
+                              );
+                            })}
                           </div>
-                        ))}
-                        <select
-                          value=""
-                          onChange={(e) => addMember(circle.id, e.target.value)}
-                          className="text-[12.5px] border border-dashed border-line px-2 py-1.5 bg-transparent text-stone cursor-pointer"
-                        >
-                          <option value="">+ Добавить креатора</option>
-                          {availableCreators
-                            .filter((c) => !detail.members.some((m) => m.id === c.id))
-                            .map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.displayName}
-                              </option>
-                            ))}
-                        </select>
+                        )}
                       </div>
 
                       <div>
@@ -243,11 +349,11 @@ export function MyCircles({
                                     )}
                                   </span>
                                 </div>
-                                {link.price && (
+                                {link.price ? (
                                   <span className="text-sm text-stone">
                                     {link.price.toLocaleString("ru-RU")} ₽
                                   </span>
-                                )}
+                                ) : null}
                               </li>
                             ))}
                           </ul>

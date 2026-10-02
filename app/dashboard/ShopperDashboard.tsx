@@ -462,7 +462,11 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       {tab === "circles" && (
         <div className="px-8 py-8">
-          <MyCircles availableCreators={circle?.creators ?? []} onChange={loadCircleCount} />
+          <MyCircles
+            availableCreators={circle?.creators ?? []}
+            onChange={loadCircleCount}
+            onOpenCreators={() => setTab("circle")}
+          />
         </div>
       )}
 
