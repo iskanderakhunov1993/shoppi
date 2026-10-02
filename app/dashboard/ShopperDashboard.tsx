@@ -422,8 +422,14 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                     {circle.feed.map((link) => (
                       <li
                         key={link.id}
-                        className="grid grid-cols-[1fr_auto] items-center gap-4 py-3.5 border-b border-line last:border-b-0"
+                        className="grid grid-cols-[56px_1fr_auto] items-center gap-4 py-3.5 border-b border-line last:border-b-0"
                       >
+                        <div className="w-14 h-14 bg-raise overflow-hidden">
+                          {link.imageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={link.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
+                          )}
+                        </div>
                         <div>
                           <a href={link.wrappedUrl} className="text-[13.5px] font-medium hover:underline">
                             {link.title}
@@ -441,11 +447,9 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                             )}
                           </span>
                         </div>
-                        {link.price && (
-                          <span className="text-sm text-stone">
-                            {link.price.toLocaleString("ru-RU")} ₽
-                          </span>
-                        )}
+                        <span className="text-sm text-stone">
+                          {link.price ? `${link.price.toLocaleString("ru-RU")} ₽` : "цена не указана"}
+                        </span>
                       </li>
                     ))}
                   </ul>
