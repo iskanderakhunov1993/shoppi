@@ -27,6 +27,8 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
   tools: "/category-covers/tools.webp",
   pets: "/category-covers/pets.webp",
   health: "/category-covers/health.webp",
+  kids: "/category-covers/kids.webp",
+  sport: "/category-covers/sport.webp",
 };
 
 /**
