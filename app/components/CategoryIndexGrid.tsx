@@ -27,6 +27,7 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
   shoes: "/category-covers/shoes.webp",
   perfume: "/category-covers/perfume.webp",
   face_care: "/category-covers/face_care.webp",
+  makeup: "/category-covers/makeup.webp",
   bags: "/category-covers/bags.webp",
   accessories: "/category-covers/accessories.webp",
   electronics: "/category-covers/electronics.webp",
