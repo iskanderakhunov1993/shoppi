@@ -1,6 +1,10 @@
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { listCategoryCovers } from "@/lib/store";
 
+// Categories whose curated cover wins even when a live product has a photo
+// (the live cover there is an advertising poster, not a clean product shot).
+const PREFER_STATIC: Category[] = ["face_care"];
+
 // Categories kept out of the index for now (still valid everywhere else).
 const HIDDEN: Category[] = ["home_decor"];
 
@@ -22,7 +26,7 @@ const BENTO: Record<number, { span: string; size: "tall" | "big" }> = {
 const STATIC_COVERS: Partial<Record<Category, string>> = {
   shoes: "/category-covers/shoes.webp",
   perfume: "/category-covers/perfume.webp",
-  makeup: "/category-covers/makeup.webp",
+  face_care: "/category-covers/face_care.webp",
   bags: "/category-covers/bags.webp",
   accessories: "/category-covers/accessories.webp",
   electronics: "/category-covers/electronics.webp",
@@ -46,7 +50,9 @@ export async function CategoryIndexGrid() {
   const byCategory = new Map(covers.map((c) => [c.category, c]));
   const shown = CATEGORIES.filter((c) => !HIDDEN.includes(c)).map((category) => ({
     category,
-    imageUrl: byCategory.get(category)?.imageUrl ?? STATIC_COVERS[category],
+    imageUrl: PREFER_STATIC.includes(category)
+      ? STATIC_COVERS[category] ?? byCategory.get(category)?.imageUrl
+      : byCategory.get(category)?.imageUrl ?? STATIC_COVERS[category],
   }));
 
   const useBento = shown.length === 18;
