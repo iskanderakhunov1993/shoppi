@@ -20,6 +20,9 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
   books_stationery: "/category-covers/books_stationery.webp",
   clothing: "/category-covers/clothing.webp",
   kitchen: "/category-covers/kitchen.webp",
+  tools: "/category-covers/tools.webp",
+  pets: "/category-covers/pets.webp",
+  health: "/category-covers/health.webp",
 };
 
 /**
