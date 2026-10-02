@@ -1,6 +1,6 @@
 import { LandingNav } from "@/app/components/landing/LandingNav";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
-import { CategoryIndexGrid, type CategoryGridVariant } from "@/app/components/CategoryIndexGrid";
+import { CategoryIndexGrid } from "@/app/components/CategoryIndexGrid";
 
 export const metadata = { title: "Все категории — Shoppi" };
 
@@ -8,13 +8,7 @@ export const metadata = { title: "Все категории — Shoppi" };
 // prerendered at build time.
 export const dynamic = "force-dynamic";
 
-export default async function CategoriesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ v?: string }>;
-}) {
-  const { v } = await searchParams;
-  const variant: CategoryGridVariant = v === "2" ? 2 : v === "3" ? 3 : 1;
+export default function CategoriesPage() {
   return (
     <main className="flex-1 flex flex-col">
       <LandingNav />
@@ -29,7 +23,7 @@ export default async function CategoriesPage({
       </section>
       <div className="px-6 md:px-10 pb-16 md:pb-24 flex-1">
         <div className="max-w-[1200px] mx-auto">
-          <CategoryIndexGrid variant={variant} />
+          <CategoryIndexGrid />
         </div>
       </div>
       <LandingFooter />
