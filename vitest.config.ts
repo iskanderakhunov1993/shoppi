@@ -20,5 +20,10 @@ export default defineConfig({
     // fresh in-memory SQLite per process, so two test files truncating
     // tables at the same time would stomp on each other's fixtures.
     fileParallelism: false,
+    // Every query is a round trip to the remote database; the 5s/10s
+    // defaults flaked on slow connections and cascaded into
+    // "Email already registered" in neighbouring tests.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
   },
 })
