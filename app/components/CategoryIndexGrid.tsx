@@ -1,12 +1,9 @@
-import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { CATEGORY_LABEL, VISIBLE_CATEGORIES, type Category } from "@/lib/categories";
 import { listCategoryCovers } from "@/lib/store";
 
 // Categories whose curated cover wins even when a live product has a photo
 // (the live cover there is an advertising poster, not a clean product shot).
 const PREFER_STATIC: Category[] = ["face_care", "hair_care", "household", "accessories"];
-
-// Categories kept out of the index for now (still valid everywhere else).
-const HIDDEN: Category[] = ["home_decor"];
 
 // Bento rhythm like ShopMy: tall tiles plus one big 2x2 in the middle.
 // With 19 visible categories on 4 columns: 19 + 1 + 3 + 1 = 24 cells
@@ -50,7 +47,7 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
 export async function CategoryIndexGrid() {
   const covers = await listCategoryCovers();
   const byCategory = new Map(covers.map((c) => [c.category, c]));
-  const shown = CATEGORIES.filter((c) => !HIDDEN.includes(c)).map((category) => ({
+  const shown = VISIBLE_CATEGORIES.map((category) => ({
     category,
     imageUrl: PREFER_STATIC.includes(category)
       ? STATIC_COVERS[category] ?? byCategory.get(category)?.imageUrl

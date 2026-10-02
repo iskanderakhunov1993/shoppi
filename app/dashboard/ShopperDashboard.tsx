@@ -27,7 +27,7 @@ type FollowedCreator = {
   avatarUrl?: string;
 };
 
-type FeedLink = FavoriteLink & { wrappedUrl: string; clicks: number; creatorName?: string; creatorSlug?: string };
+type FeedLink = FavoriteLink & { wrappedUrl: string; clicks: number; creatorName?: string; creatorSlug?: string; imageUrl?: string };
 
 type Tab = "overview" | "saved" | "circle" | "circles";
 const VALID_TABS: Tab[] = ["overview", "saved", "circle", "circles"];
@@ -229,39 +229,6 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
       {tab === "overview" && (
         <div className="px-8 py-8 flex flex-col gap-10">
-          <div className="grid sm:grid-cols-3 gap-px bg-line border border-line">
-            <button
-              type="button"
-              onClick={() => setTab("circle")}
-              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
-            >
-              <span className="block font-display text-3xl">{circle ? circle.creators.length : "–"}</span>
-              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">
-                Мои креаторы →
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("circles")}
-              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
-            >
-              <span className="block font-display text-3xl">{circleCount ?? "–"}</span>
-              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">Круги →</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("saved")}
-              className="bg-paper p-5 text-left hover:bg-raise transition-colors cursor-pointer"
-            >
-              <span className="block font-display text-3xl">{favorites ? favorites.length : "–"}</span>
-              <span className="block text-[11px] uppercase tracking-wider text-stone mt-1">
-                Сохранённое →
-              </span>
-            </button>
-          </div>
-
-          <InterestsEditor interests={interests} onChange={setInterests} />
-
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] uppercase tracking-wider text-stone">
@@ -289,11 +256,17 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               </p>
             ) : (
               <ul className="flex flex-col">
-                {circle.feed.slice(0, 4).map((link) => (
+                {circle.feed.slice(0, 8).map((link) => (
                   <li
                     key={link.id}
-                    className="grid grid-cols-[1fr_auto] items-center gap-4 py-3.5 border-b border-line last:border-b-0"
+                    className="grid grid-cols-[56px_1fr_auto] items-center gap-4 py-3.5 border-b border-line last:border-b-0"
                   >
+                    <div className="w-14 h-14 bg-raise overflow-hidden">
+                      {link.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={link.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      )}
+                    </div>
                     <div>
                       <a href={link.wrappedUrl} className="text-[13.5px] font-medium hover:underline">
                         {link.title}
@@ -311,14 +284,16 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                         )}
                       </span>
                     </div>
-                    {link.price && (
-                      <span className="text-sm text-stone">{link.price.toLocaleString("ru-RU")} ₽</span>
-                    )}
+                    <span className="text-sm text-stone">
+                      {link.price ? `${link.price.toLocaleString("ru-RU")} ₽` : "цена не указана"}
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
+
+          <InterestsEditor interests={interests} onChange={setInterests} />
         </div>
       )}
 

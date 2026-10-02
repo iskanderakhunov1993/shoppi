@@ -106,3 +106,7 @@ export function guessCategory(title: string): Category | undefined {
   }
   return undefined;
 }
+
+/** Categories kept out of pickers and indexes for now (still valid everywhere else). */
+export const HIDDEN_CATEGORIES: Category[] = ["home_decor"];
+export const VISIBLE_CATEGORIES = CATEGORIES.filter((c) => !HIDDEN_CATEGORIES.includes(c));
