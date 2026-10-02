@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Field, inputClass, buttonClass } from "@/app/components/Field";
+import { Field, boxedInputClass, buttonClass, secondaryButtonClass } from "@/app/components/Field";
 
 const ROLE_LABEL: Record<string, string> = {
   shopper: "Покупатель",
@@ -25,6 +25,9 @@ export default function SettingsPage() {
   const [savingName, setSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [savedName, setSavedName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -35,12 +38,13 @@ export default function SettingsPage() {
   const loadMe = useCallback(async () => {
     const res = await fetch("/api/me");
     if (res.status === 401) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
     const data = await res.json();
     setMe(data);
     setDisplayName(data.displayName ?? "");
+    setSavedName(data.displayName ?? "");
   }, [router]);
 
   useEffect(() => {
@@ -52,18 +56,28 @@ export default function SettingsPage() {
     setNameError(null);
     setSavingName(true);
 
-    const res = await fetch("/api/me", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName }),
-    });
-    const data = await res.json();
+    let res: Response;
+    let data: { error?: string } = {};
+    try {
+      res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName: displayName.trim() }),
+      });
+      data = await res.json().catch(() => ({}));
+    } catch {
+      setSavingName(false);
+      setNameError("Нет соединения. Попробуйте ещё раз.");
+      return;
+    }
     setSavingName(false);
 
     if (!res.ok) {
       setNameError(data.error ?? "Не удалось сохранить");
       return;
     }
+    setDisplayName(displayName.trim());
+    setSavedName(displayName.trim());
     setNameSaved(true);
     setTimeout(() => setNameSaved(false), 2500);
   }
@@ -73,12 +87,20 @@ export default function SettingsPage() {
     setPasswordError(null);
     setSavingPassword(true);
 
-    const res = await fetch("/api/me/password", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-    const data = await res.json();
+    let res: Response;
+    let data: { error?: string } = {};
+    try {
+      res = await fetch("/api/me/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      data = await res.json().catch(() => ({}));
+    } catch {
+      setSavingPassword(false);
+      setPasswordError("Нет соединения. Попробуйте ещё раз.");
+      return;
+    }
     setSavingPassword(false);
 
     if (!res.ok) {
@@ -88,6 +110,7 @@ export default function SettingsPage() {
     setCurrentPassword("");
     setNewPassword("");
     setPasswordSaved(true);
+    setPasswordOpen(false);
     setTimeout(() => setPasswordSaved(false), 2500);
   }
 
@@ -99,81 +122,156 @@ export default function SettingsPage() {
     );
   }
 
+  const isShopper = me.role === "shopper";
+  const nameDirty = displayName.trim() !== savedName && displayName.trim().length > 0;
+
   return (
     <main className="flex-1 flex flex-col">
       <div className="flex items-center justify-between px-8 py-6 border-b border-line">
         <div>
-          <div className="text-[11px] uppercase tracking-wider text-stone">Настройки</div>
-          <h1 className="font-display text-xl">{ROLE_LABEL[me.role]}</h1>
+          <div className="text-[11px] uppercase tracking-wider text-stone">{ROLE_LABEL[me.role]}</div>
+          <h1 className="font-display text-xl">Настройки</h1>
         </div>
         <Link
           href="/dashboard"
-          className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
+          className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors"
         >
-          Назад в кабинет
+          ← В кабинет
         </Link>
       </div>
 
-      <div className="px-8 py-10 max-w-md flex flex-col gap-12">
-        <form onSubmit={saveName} className="flex flex-col gap-4">
-          <h2 className="font-display text-lg">Профиль</h2>
+      <div className="px-8 py-10 max-w-3xl w-full mx-auto md:mx-0 md:ml-8 lg:ml-16 grid md:grid-cols-[160px_1fr] gap-x-12 gap-y-8">
+        <nav aria-label="Разделы настроек" className="hidden md:block">
+          <ul className="sticky top-8 flex flex-col gap-3 text-[13px]">
+            <li><a href="#profile" className="text-ink">Профиль</a></li>
+            <li><a href="#password" className="text-stone hover:text-ink transition-colors">Пароль</a></li>
+          </ul>
+        </nav>
 
-          <Field label="Имя на витрине">
-            <input
-              className={`${inputClass} border border-line px-3 py-2.5`}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              required
-            />
-          </Field>
+        <div className="flex flex-col gap-12 max-w-md">
+          <form id="profile" onSubmit={saveName} className="flex flex-col gap-4 scroll-mt-8">
+            <h2 className="font-display text-2xl">Профиль</h2>
 
-          <Field label="Email">
-            <input
-              className={`${inputClass} border border-line px-3 py-2.5 opacity-60`}
-              value={me.email}
-              disabled
-              readOnly
-            />
-          </Field>
-          <p className="text-stone text-[12px] -mt-2">
-            Смену email пока не поддерживаем. Обратитесь в поддержку, если это нужно.
-          </p>
+            <Field label={isShopper ? "Имя" : "Имя на витрине"} htmlFor="displayName">
+              <input
+                id="displayName"
+                name="displayName"
+                autoComplete="name"
+                maxLength={60}
+                className={boxedInputClass}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+              />
+            </Field>
 
-          {nameError && <p className="text-error text-sm">{nameError}</p>}
-          <button type="submit" disabled={savingName} className={`${buttonClass} w-fit`}>
-            {savingName ? "Сохраняем…" : nameSaved ? "Сохранено" : "Сохранить имя"}
-          </button>
-        </form>
+            <Field label="Email" htmlFor="email">
+              <input
+                id="email"
+                name="email"
+                aria-describedby="email-hint"
+                className={boxedInputClass}
+                value={me.email}
+                disabled
+                readOnly
+              />
+            </Field>
+            <p id="email-hint" className="text-stone text-[12px] -mt-2">
+              Email изменить нельзя. Если нужно, напишите в поддержку.
+            </p>
 
-        <form onSubmit={savePassword} className="flex flex-col gap-4 pt-8 border-t border-line">
-          <h2 className="font-display text-lg">Пароль</h2>
+            <p role="alert" className="text-error text-sm empty:hidden">{nameError}</p>
+            <div className="flex items-center gap-4">
+              <button type="submit" disabled={savingName || !nameDirty} className={`${secondaryButtonClass} w-fit`}>
+                {savingName ? "Сохраняем…" : "Сохранить"}
+              </button>
+              <span role="status" aria-live="polite" className="text-[13px] text-stone">
+                {nameSaved ? "✓ Сохранено" : ""}
+              </span>
+            </div>
+          </form>
 
-          <Field label="Текущий пароль">
-            <input
-              type="password"
-              className={`${inputClass} border border-line px-3 py-2.5`}
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-            />
-          </Field>
+          <section id="password" className="flex flex-col gap-4 pt-8 border-t border-line scroll-mt-8">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="font-display text-2xl">Пароль</h2>
+              {!passwordOpen && (
+                <button
+                  type="button"
+                  onClick={() => setPasswordOpen(true)}
+                  aria-expanded={false}
+                  aria-controls="password-form"
+                  className="text-[12px] uppercase tracking-wide text-stone border-b border-line hover:text-ink hover:border-ink transition-colors cursor-pointer"
+                >
+                  Сменить
+                </button>
+              )}
+            </div>
+            <span role="status" aria-live="polite" className="text-[13px] text-stone empty:hidden">
+              {passwordSaved ? "✓ Пароль изменён" : ""}
+            </span>
 
-          <Field label="Новый пароль">
-            <input
-              type="password"
-              className={`${inputClass} border border-line px-3 py-2.5`}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              minLength={8}
-              required
-            />
-          </Field>
+            {passwordOpen && (
+              <form id="password-form" onSubmit={savePassword} className="flex flex-col gap-4">
+                <Field label="Текущий пароль" htmlFor="currentPassword">
+                  <input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    className={boxedInputClass}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </Field>
 
-          {passwordError && <p className="text-error text-sm">{passwordError}</p>}
-          <button type="submit" disabled={savingPassword} className={`${buttonClass} w-fit`}>
-            {savingPassword ? "Сохраняем…" : passwordSaved ? "Сохранено" : "Сменить пароль"}
-          </button>
-        </form>
+                <Field label="Новый пароль" htmlFor="newPassword">
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    aria-describedby="password-hint"
+                    className={boxedInputClass}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    minLength={8}
+                    required
+                  />
+                </Field>
+                <p id="password-hint" className="text-stone text-[12px] -mt-2">Не менее 8 символов.</p>
+
+                <label className="flex items-center gap-2 text-[13px] text-stone cursor-pointer w-fit">
+                  <input
+                    type="checkbox"
+                    checked={showPassword}
+                    onChange={(e) => setShowPassword(e.target.checked)}
+                  />
+                  Показать пароли
+                </label>
+
+                <p role="alert" className="text-error text-sm empty:hidden">{passwordError}</p>
+                <div className="flex items-center gap-4">
+                  <button type="submit" disabled={savingPassword} className={`${buttonClass} w-fit`}>
+                    {savingPassword ? "Сохраняем…" : "Сменить пароль"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPasswordOpen(false);
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setPasswordError(null);
+                    }}
+                    className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer"
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        </div>
       </div>
     </main>
   );
