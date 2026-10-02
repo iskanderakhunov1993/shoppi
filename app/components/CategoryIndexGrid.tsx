@@ -9,13 +9,12 @@ const PREFER_STATIC: Category[] = ["face_care", "hair_care", "household", "acces
 const HIDDEN: Category[] = ["home_decor"];
 
 // Bento rhythm like ShopMy: tall tiles plus one big 2x2 in the middle.
-// With 18 visible categories on 4 columns: 18 + 1 + 3 + 1 + 1 = 24 cells
+// With 19 visible categories on 4 columns: 19 + 1 + 3 + 1 = 24 cells
 // (6 full rows), so grid-flow-dense leaves no holes. Re-balance these
 // if the visible count changes.
 const BENTO: Record<number, { span: string; size: "tall" | "big" }> = {
   0: { span: "row-span-2", size: "tall" },
   7: { span: "col-span-2 row-span-2", size: "big" },
-  11: { span: "row-span-2", size: "tall" },
   14: { span: "row-span-2", size: "tall" },
 };
 
@@ -58,7 +57,7 @@ export async function CategoryIndexGrid() {
       : byCategory.get(category)?.imageUrl ?? STATIC_COVERS[category],
   }));
 
-  const useBento = shown.length === 18;
+  const useBento = shown.length === 19;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid-flow-dense auto-rows-[200px] md:auto-rows-[250px] gap-1.5">
