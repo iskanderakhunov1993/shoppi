@@ -1,12 +1,17 @@
 import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 import { listCategoryCovers } from "@/lib/store";
 
-// Bento rhythm like ShopMy: a tall tile first, one big 2x2 in the middle,
-// another tall one near the end. With 19 categories on 4 columns that is
-// exactly 24 cells (6 full rows), so grid-flow-dense leaves no holes.
+// Categories kept out of the index for now (still valid everywhere else).
+const HIDDEN: Category[] = ["home_decor"];
+
+// Bento rhythm like ShopMy: tall tiles plus one big 2x2 in the middle.
+// With 18 visible categories on 4 columns: 18 + 1 + 3 + 1 + 1 = 24 cells
+// (6 full rows), so grid-flow-dense leaves no holes. Re-balance these
+// if the visible count changes.
 const BENTO: Record<number, { span: string; size: "tall" | "big" }> = {
   0: { span: "row-span-2", size: "tall" },
   7: { span: "col-span-2 row-span-2", size: "big" },
+  11: { span: "row-span-2", size: "tall" },
   14: { span: "row-span-2", size: "tall" },
 };
 
@@ -27,6 +32,7 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
   tools: "/category-covers/tools.webp",
   pets: "/category-covers/pets.webp",
   health: "/category-covers/health.webp",
+  body_care: "/category-covers/body_care.webp",
   kids: "/category-covers/kids.webp",
   sport: "/category-covers/sport.webp",
 };
@@ -38,12 +44,12 @@ const STATIC_COVERS: Partial<Record<Category, string>> = {
 export async function CategoryIndexGrid() {
   const covers = await listCategoryCovers();
   const byCategory = new Map(covers.map((c) => [c.category, c]));
-  const shown = CATEGORIES.map((category) => ({
+  const shown = CATEGORIES.filter((c) => !HIDDEN.includes(c)).map((category) => ({
     category,
     imageUrl: byCategory.get(category)?.imageUrl ?? STATIC_COVERS[category],
   }));
 
-  const useBento = shown.length === 19;
+  const useBento = shown.length === 18;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid-flow-dense auto-rows-[200px] md:auto-rows-[250px] gap-1.5">
