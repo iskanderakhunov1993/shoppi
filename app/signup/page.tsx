@@ -214,12 +214,14 @@ function SignupForm() {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={8}
+              autoComplete="new-password"
               className={inputClass}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
+          <p className="text-stone text-[12px] -mt-2">Не менее 8 символов.</p>
           {role === "brand" && (
             <Field label="Домен бренда">
               <input

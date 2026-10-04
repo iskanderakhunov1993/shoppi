@@ -61,13 +61,13 @@ function ResetPasswordForm() {
     <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-6">
       <div>
         <h1 className="font-display text-2xl mb-1">Новый пароль</h1>
-        <p className="text-stone text-sm">Минимум 6 символов.</p>
+        <p className="text-stone text-sm">Минимум 8 символов.</p>
       </div>
       <Field label="Новый пароль">
         <input
           type="password"
           required
-          minLength={6}
+          minLength={8}
           className={inputClass}
           value={password}
           onChange={(e) => setPassword(e.target.value)}

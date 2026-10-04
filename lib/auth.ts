@@ -44,3 +44,6 @@ export function visitorFingerprint(ip: string, userAgent: string): string {
   const salt = process.env.CLICK_SALT ?? "shoppi-dev-salt";
   return createHash("sha256").update(`${salt}:${ip}:${userAgent}`).digest("hex").slice(0, 32);
 }
+
+/** One password rule for signup, reset and change. */
+export const MIN_PASSWORD_LENGTH = 8;

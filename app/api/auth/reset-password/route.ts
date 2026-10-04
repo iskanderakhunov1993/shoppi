@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth";
 import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
 import { clientIpFrom } from "@/lib/bot-detection";
 import { getUserByResetToken, updateUserPasswordHash, clearResetToken, markUserVerified } from "@/lib/store";
@@ -9,9 +10,9 @@ export async function POST(request: NextRequest) {
   const token = body?.token as string | undefined;
   const password = body?.password as string | undefined;
 
-  if (!token || !password || password.length < 6) {
+  if (!token || !password || password.length < MIN_PASSWORD_LENGTH) {
     return NextResponse.json(
-      { error: "token и password (мин. 6 символов) обязательны" },
+      { error: "Пароль должен быть не короче 8 символов" },
       { status: 400 }
     );
   }

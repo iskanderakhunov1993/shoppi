@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth";
 import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
 import { clientIpFrom } from "@/lib/bot-detection";
 import { createUser, getUserByEmail, markUserVerified, type Role } from "@/lib/store";
@@ -14,9 +15,9 @@ export async function POST(request: NextRequest) {
   const role = body?.role as string | undefined;
   const brandDomain = body?.brandDomain as string | undefined;
 
-  if (!email || !password || password.length < 6) {
+  if (!email || !password || password.length < MIN_PASSWORD_LENGTH) {
     return NextResponse.json(
-      { error: "Введите email и пароль (не короче 6 символов)" },
+      { error: "Введите email и пароль (не короче 8 символов)" },
       { status: 400 }
     );
   }

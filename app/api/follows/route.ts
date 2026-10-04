@@ -43,7 +43,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
-  if (!user || user.role !== "shopper") {
+  if (!user) {
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
+  }
+  if (user.role !== "shopper") {
     return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 
@@ -66,7 +69,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const user = await requireUser(request);
-  if (!user || user.role !== "shopper") {
+  if (!user) {
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
+  }
+  if (user.role !== "shopper") {
     return NextResponse.json({ error: "Доступно только покупателям" }, { status: 403 });
   }
 

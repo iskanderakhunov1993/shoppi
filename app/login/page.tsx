@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { safeNextPath } from "@/lib/pendingAction";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
 import { BRANDS_ENABLED, DEMO_LOGIN_ENABLED } from "@/lib/featureFlags";
 
@@ -18,6 +19,11 @@ const DEMO_ROLES = (Object.keys(DEMO_LABEL) as Role[]).filter(
   (role) => BRANDS_ENABLED || role !== "brand"
 );
 
+// Set by buttons that need an account ("Сохранить", "Подписаться").
+function returnPath(): string | null {
+  return safeNextPath(new URLSearchParams(window.location.search).get("next"));
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,12 +37,20 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
+    let res: Response;
+    let data: { error?: string; next?: string } = {};
+    try {
+      res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      data = await res.json().catch(() => ({}));
+    } catch {
+      setSubmitting(false);
+      setError("Нет соединения. Попробуйте ещё раз.");
+      return;
+    }
     setSubmitting(false);
 
     if (!res.ok) {
@@ -44,7 +58,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(data.next ?? "/dashboard");
+    router.push(returnPath() ?? data.next ?? "/dashboard");
   }
 
   async function handleQuickLogin(role: Role) {
@@ -63,7 +77,7 @@ export default function LoginPage() {
       setError("Не удалось войти в демо-аккаунт");
       return;
     }
-    router.push(data?.next ?? "/dashboard");
+    router.push(returnPath() ?? data?.next ?? "/dashboard");
   }
 
   return (

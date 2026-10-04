@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { AdLabel } from "@/app/components/AdLabel";
 import { notFound } from "next/navigation";
@@ -66,9 +67,9 @@ export default async function WishlistPage({
         {wishlist.isOwner && !wishlist.isPublic && (
           <p className="text-stone text-[13px] mt-4">
             Вишлист виден только вам. Открыть доступ по ссылке можно в{" "}
-            <a href="/dashboard/settings" className="underline underline-offset-4 hover:text-ink">
+            <Link href="/dashboard/settings" className="underline underline-offset-4 hover:text-ink">
               настройках
-            </a>
+            </Link>
             .
           </p>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { loginUrlFor, takePendingAction } from "@/lib/pendingAction";
 
 export function FollowButton({
   creatorId,
@@ -17,6 +18,7 @@ export function FollowButton({
   const [followers, setFollowers] = useState(initialFollowers);
   const [pending, setPending] = useState(false);
   const [known, setKnown] = useState(false);
+  const [shopperOnly, setShopperOnly] = useState(false);
 
   // Mirrors FavoriteButton's pattern: check the real state once mounted,
   // so the button never claims "Добавить" on someone already followed.
@@ -26,7 +28,24 @@ export function FollowButton({
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (cancelled || !data) return;
-        setFollowing(data.creators.some((c: { id: string }) => c.id === creatorId));
+        const isFollowing = data.creators.some((c: { id: string }) => c.id === creatorId);
+        setFollowing(isFollowing);
+        // Back from login after clicking "Подписаться" while signed out.
+        // Consume it either way, so it can't fire later.
+        if (takePendingAction("follow", creatorId) && !isFollowing) {
+          fetch("/api/follows", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ creatorId }),
+          })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              if (cancelled || !d) return;
+              setFollowing(true);
+              setFollowers(d.followers);
+            })
+            .catch(() => {});
+        }
       })
       .finally(() => !cancelled && setKnown(true));
     return () => {
@@ -48,8 +67,13 @@ export function FollowButton({
 
     setPending(false);
 
-    if (res.status === 401 || res.status === 403) {
-      router.push("/login");
+    if (res.status === 401) {
+      router.push(loginUrlFor("follow", creatorId));
+      return;
+    }
+    if (res.status === 403) {
+      setShopperOnly(true);
+      setTimeout(() => setShopperOnly(false), 2500);
       return;
     }
     if (res.ok) {
@@ -75,7 +99,7 @@ export function FollowButton({
           : "bg-ink text-paper hover:opacity-80"
       }`}
     >
-      {following ? (compact ? "Подписан" : "В ваших креаторах") : compact ? "Подписаться" : "Добавить в моих креаторов"}
+      {shopperOnly ? "Только для покупателей" : following ? (compact ? "Подписан" : "В ваших креаторах") : compact ? "Подписаться" : "Добавить в моих креаторов"}
       {!compact && followers > 0 && <span className="opacity-70 ml-2 normal-case">· {followers}</span>}
     </button>
   );

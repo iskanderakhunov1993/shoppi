@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { DashboardHeader } from "./DashboardHeader";
 import { EmptyState } from "@/app/components/EmptyState";
@@ -76,21 +76,40 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
     }
   }, []);
 
-  const loadFavorites = useCallback(async () => {
-    const res = await fetch("/api/favorites");
-    setFavorites(res.ok ? (await res.json()).favorites : []);
+  // A failed load used to fall back to empty data and read as "Пока пусто".
+  const [loadFailed, setLoadFailed] = useState(false);
+  const getJson = useCallback(async (url: string) => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error();
+      return await res.json();
+    } catch {
+      setLoadFailed(true);
+      return null;
+    }
   }, []);
+
+  const loadFavorites = useCallback(async () => {
+    const data = await getJson("/api/favorites");
+    setFavorites(data?.favorites ?? []);
+  }, [getJson]);
 
   const loadCircle = useCallback(async () => {
-    const res = await fetch("/api/follows");
-    setCircle(res.ok ? await res.json() : { creators: [], feed: [] });
-  }, []);
+    const data = await getJson("/api/follows");
+    setCircle(data ?? { creators: [], feed: [] });
+  }, [getJson]);
 
   const loadCircleCount = useCallback(async () => {
-    const res = await fetch("/api/circles");
-    const data = res.ok ? await res.json() : { circles: [] };
-    setCircleCount((data.circles ?? []).length);
-  }, []);
+    const data = await getJson("/api/circles");
+    setCircleCount((data?.circles ?? []).length);
+  }, [getJson]);
+
+  function retryLoad() {
+    setLoadFailed(false);
+    loadFavorites();
+    loadCircle();
+    loadCircleCount();
+  }
 
   useEffect(() => {
     loadFavorites();
@@ -119,10 +138,48 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
     await loadFavorites();
   }
 
-  async function unfollow(creatorId: string) {
-    await fetch(`/api/follows?creatorId=${encodeURIComponent(creatorId)}`, { method: "DELETE" });
-    await loadCircle();
+  // Unfollow is held back for a few seconds so it can be undone: the
+  // creator disappears right away, the DELETE goes out when the toast
+  // expires (or immediately if the page is being left).
+  const [pendingUnfollow, setPendingUnfollow] = useState<FollowedCreator | null>(null);
+  const unfollowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const commitUnfollow = useCallback(
+    async (creatorId: string) => {
+      try {
+        await fetch(`/api/follows?creatorId=${encodeURIComponent(creatorId)}`, { method: "DELETE", keepalive: true });
+      } finally {
+        await loadCircle();
+      }
+    },
+    [loadCircle]
+  );
+
+  function unfollow(creator: FollowedCreator) {
+    if (pendingUnfollow && unfollowTimer.current) {
+      clearTimeout(unfollowTimer.current);
+      commitUnfollow(pendingUnfollow.id);
+    }
+    setPendingUnfollow(creator);
+    unfollowTimer.current = setTimeout(() => {
+      setPendingUnfollow(null);
+      commitUnfollow(creator.id);
+    }, 5000);
   }
+
+  function undoUnfollow() {
+    if (unfollowTimer.current) clearTimeout(unfollowTimer.current);
+    setPendingUnfollow(null);
+  }
+
+  useEffect(() => {
+    if (!pendingUnfollow) return;
+    const flush = () => {
+      fetch(`/api/follows?creatorId=${encodeURIComponent(pendingUnfollow.id)}`, { method: "DELETE", keepalive: true });
+    };
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, [pendingUnfollow]);
 
   const hasFavorite = Boolean(favorites && favorites.length > 0);
   const hasFollow = Boolean(circle && circle.creators.length > 0);
@@ -234,6 +291,35 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
         </button>
       </div>
       <p className="px-8 pt-3 text-[12.5px] text-stone">{TAB_HINT[tab]}</p>
+
+      {loadFailed && (
+        <div role="alert" className="mx-8 mt-4 border border-line px-4 py-3 flex items-center justify-between gap-4 text-[13px]">
+          <span>Не удалось загрузить часть данных.</span>
+          <button
+            type="button"
+            onClick={retryLoad}
+            className="text-[12px] uppercase tracking-wide underline underline-offset-4 cursor-pointer"
+          >
+            Повторить
+          </button>
+        </div>
+      )}
+
+      {pendingUnfollow && (
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-ink text-paper px-5 py-3 flex items-center gap-5 text-[13px] shadow-lg"
+        >
+          <span>{pendingUnfollow.displayName} больше не в ваших креаторах</span>
+          <button
+            type="button"
+            onClick={undoUnfollow}
+            className="text-[12px] uppercase tracking-wide underline underline-offset-4 cursor-pointer"
+          >
+            Отменить
+          </button>
+        </div>
+      )}
 
       {tab === "overview" && (
         <div className="px-8 py-8 flex flex-col gap-10">
@@ -391,7 +477,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {circle.creators.map((c) => (
+                  {circle.creators.filter((c) => c.id !== pendingUnfollow?.id).map((c) => (
                     <div
                       key={c.id}
                       className="flex items-center gap-2.5 border border-line pl-2 pr-3 py-2"
@@ -406,9 +492,10 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                         {c.displayName}
                       </a>
                       <button
-                        onClick={() => unfollow(c.id)}
+                        type="button"
+                        onClick={() => unfollow(c)}
                         aria-label={`Убрать ${c.displayName} из креаторов`}
-                        className="text-stone hover:text-error transition-colors cursor-pointer text-[15px] leading-none"
+                        className="w-8 h-8 -my-1.5 -mr-2 flex items-center justify-center text-stone hover:text-error transition-colors cursor-pointer text-[17px] leading-none"
                       >
                         ×
                       </button>

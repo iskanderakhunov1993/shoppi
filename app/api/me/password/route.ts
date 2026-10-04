@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth";
 import { requireUser } from "@/lib/require-user";
 import { hashPassword, verifyPassword } from "@/lib/auth";
 import { updateUserPasswordHash } from "@/lib/store";
@@ -16,7 +17,7 @@ export async function PUT(request: NextRequest) {
   if (!verifyPassword(currentPassword, user.passwordHash)) {
     return NextResponse.json({ error: "Текущий пароль неверен" }, { status: 400 });
   }
-  if (newPassword.length < 8) {
+  if (newPassword.length < MIN_PASSWORD_LENGTH) {
     return NextResponse.json({ error: "Новый пароль должен быть не короче 8 символов" }, { status: 400 });
   }
 

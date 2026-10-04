@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { placeholderAvatar } from "@/lib/avatar";
-import { CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
+import { VISIBLE_CATEGORIES, CATEGORY_LABEL, type Category } from "@/lib/categories";
 
 type RecommendedCreator = {
   id: string;
@@ -27,6 +27,7 @@ export function CircleOnboarding({
   const [creators, setCreators] = useState<RecommendedCreator[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function toggleCategory(c: Category) {
     setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -36,14 +37,21 @@ export function CircleOnboarding({
     setStep("creators");
     // Kept as the shopper's interests — they drive the personal "Для вас"
     // ordering later, not just this one-off recommendation.
+    setError(null);
     fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ interests: categories }),
-    });
-    const res = await fetch(`/api/creators/recommended?categories=${categories.join(",")}`);
-    const data = await res.json();
-    setCreators(data.creators ?? []);
+    }).catch(() => {});
+    try {
+      const res = await fetch(`/api/creators/recommended?categories=${categories.join(",")}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setCreators(data.creators ?? []);
+    } catch {
+      setCreators([]);
+      setError("Не удалось загрузить креаторов. Вернитесь назад и попробуйте ещё раз.");
+    }
   }
 
   function toggleCreator(id: string) {
@@ -57,16 +65,31 @@ export function CircleOnboarding({
 
   async function finish() {
     setSaving(true);
-    await Promise.all(
-      [...selected].map((creatorId) =>
+    setError(null);
+    const ids = [...selected];
+    const results = await Promise.all(
+      ids.map((creatorId) =>
         fetch("/api/follows", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ creatorId }),
         })
+          .then((r) => r.ok)
+          .catch(() => false)
       )
     );
     setSaving(false);
+    const failed = ids.filter((_, i) => !results[i]);
+    if (failed.length > 0) {
+      // Keep only the ones that didn't go through, so "Добавить" retries them.
+      setSelected(new Set(failed));
+      setError(
+        failed.length === ids.length
+          ? "Не удалось добавить креаторов. Попробуйте ещё раз."
+          : `Добавили не всех: осталось ${failed.length}. Нажмите «Добавить» ещё раз.`
+      );
+      return;
+    }
     onDone();
   }
 
@@ -92,7 +115,7 @@ export function CircleOnboarding({
               Выберите категории: покажем реальных креаторов, которые уже добавляют в них товары.
             </p>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
+              {VISIBLE_CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -168,6 +191,7 @@ export function CircleOnboarding({
                 ))}
               </div>
             )}
+            <p role="alert" className="text-error text-sm empty:hidden">{error}</p>
             <div className="flex gap-3">
               <button
                 type="button"
