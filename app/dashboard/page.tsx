@@ -11,6 +11,7 @@ type Me = {
   role: "shopper" | "creator" | "brand";
   displayName: string;
   slug?: string;
+  wishlistPublic?: boolean;
   bio?: string;
   avatarUrl?: string;
   brandDomain?: string;

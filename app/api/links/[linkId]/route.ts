@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isSafeImageUrl } from "@/lib/safeUrl";
 import { requireCreator } from "@/lib/require-creator";
 import { deleteLink, getLink, updateLink } from "@/lib/store";
 import { CATEGORIES } from "@/lib/categories";
@@ -36,6 +37,10 @@ export async function PUT(
   }
   if (body?.title !== undefined && !String(body.title).trim()) {
     return NextResponse.json({ error: "Название не может быть пустым" }, { status: 400 });
+  }
+
+  if (body?.imageUrl && !isSafeImageUrl(String(body.imageUrl))) {
+    return NextResponse.json({ error: "Некорректная ссылка на картинку" }, { status: 400 });
   }
 
   const updated = await updateLink(linkId, {

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
+import { clientIpFrom } from "@/lib/bot-detection";
 import { setResetToken } from "@/lib/store";
 import { EMAIL_ENABLED, EXPOSE_LINKS, sendResetPasswordEmail } from "@/lib/email";
 
@@ -8,6 +10,13 @@ export async function POST(request: NextRequest) {
 
   if (!email) {
     return NextResponse.json({ error: "email обязателен" }, { status: 400 });
+  }
+
+  if (
+    (await isRateLimited(`forgot:ip:${clientIpFrom(request.headers)}`, 10, 60 * 60)) ||
+    (await isRateLimited(`forgot:email:${email.toLowerCase()}`, 3, 60 * 60))
+  ) {
+    return NextResponse.json(TOO_MANY, { status: 429 });
   }
 
   const token = await setResetToken(email);

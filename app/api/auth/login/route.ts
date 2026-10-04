@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
+import { clientIpFrom } from "@/lib/bot-detection";
 import { homePathFor } from "@/lib/landing";
 import { getCreatorByUserId, getUserByEmail } from "@/lib/store";
 import { createSession, verifyPassword, SESSION_COOKIE } from "@/lib/auth";
@@ -10,6 +12,14 @@ export async function POST(request: NextRequest) {
 
   if (!email || !password) {
     return NextResponse.json({ error: "Введите email и пароль" }, { status: 400 });
+  }
+
+  const ip = clientIpFrom(request.headers);
+  if (
+    (await isRateLimited(`login:ip:${ip}`, 30, 15 * 60)) ||
+    (await isRateLimited(`login:email:${email.toLowerCase()}`, 10, 15 * 60))
+  ) {
+    return NextResponse.json(TOO_MANY, { status: 429 });
   }
 
   const user = await getUserByEmail(email);

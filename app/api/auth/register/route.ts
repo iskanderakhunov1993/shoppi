@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
+import { clientIpFrom } from "@/lib/bot-detection";
 import { createUser, getUserByEmail, markUserVerified, type Role } from "@/lib/store";
 import { hashPassword } from "@/lib/auth";
 import { EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
@@ -17,6 +19,9 @@ export async function POST(request: NextRequest) {
       { error: "Введите email и пароль (не короче 6 символов)" },
       { status: 400 }
     );
+  }
+  if (await isRateLimited(`register:ip:${clientIpFrom(request.headers)}`, 10, 60 * 60)) {
+    return NextResponse.json(TOO_MANY, { status: 429 });
   }
   if (!role || !ROLES.includes(role as Role)) {
     return NextResponse.json(

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
+import { clientIpFrom } from "@/lib/bot-detection";
 import { getUserByResetToken, updateUserPasswordHash, clearResetToken, markUserVerified } from "@/lib/store";
 import { hashPassword } from "@/lib/auth";
 
@@ -14,6 +16,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (await isRateLimited(`reset:ip:${clientIpFrom(request.headers)}`, 20, 60 * 60)) {
+    return NextResponse.json(TOO_MANY, { status: 429 });
+  }
   const user = await getUserByResetToken(token);
   if (!user) {
     return NextResponse.json({ error: "Ссылка недействительна или устарела" }, { status: 400 });

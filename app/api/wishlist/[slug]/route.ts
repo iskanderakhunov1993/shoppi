@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCreatorById, getUserBySlug, listFavoriteLinks } from "@/lib/store";
+import { requireUser } from "@/lib/require-user";
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +9,12 @@ export async function GET(
   const { slug } = await params;
   const user = await getUserBySlug(slug);
   if (!user || user.role !== "shopper") {
+    return NextResponse.json({ error: "Wishlist not found" }, { status: 404 });
+  }
+  // Private by default: only the owner sees it until they share it.
+  const viewer = await requireUser(request);
+  const isOwner = viewer?.id === user.id;
+  if (!user.wishlistPublic && !isOwner) {
     return NextResponse.json({ error: "Wishlist not found" }, { status: 404 });
   }
 
@@ -37,6 +44,8 @@ export async function GET(
   });
 
   return NextResponse.json({
+    isPublic: Boolean(user.wishlistPublic),
+    isOwner,
     slug: user.slug,
     displayName: user.displayName ?? "Покупатель",
     avatarUrl: user.avatarUrl,

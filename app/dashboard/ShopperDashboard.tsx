@@ -39,7 +39,7 @@ const TAB_HINT: Record<Tab, string> = {
   circles: "Группируйте креаторов из «Мои креаторы» по темам, например «Уход» или «На дачу».",
 };
 
-export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string; interests?: Category[] } }) {
+export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string; interests?: Category[]; wishlistPublic?: boolean } }) {
   const [tab, setTabState] = useState<Tab>("overview");
   const [interests, setInterests] = useState<Category[]>(me.interests ?? []);
 
@@ -165,12 +165,20 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 </a>
                 <button
                   type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${origin}/wishlist/${me.slug}`);
+                  onClick={async () => {
+                    // Copying the link is the act of sharing it.
+                    if (!me.wishlistPublic) {
+                      await fetch("/api/me", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ wishlistPublic: true }),
+                      }).catch(() => {});
+                    }
+                    navigator.clipboard.writeText(`${origin}/wishlist/${me.slug}`).catch(() => {});
                     setLinkCopied(true);
                     setTimeout(() => setLinkCopied(false), 1800);
                   }}
-                  aria-label="Скопировать ссылку на вишлист"
+                  aria-label="Скопировать ссылку на вишлист (откроет доступ по ссылке)"
                   title={`${origin ? origin.replace(/^https?:\/\//, "") : ""}/wishlist/${me.slug}`}
                   className="w-9 h-9 flex items-center justify-center border border-line text-stone hover:text-ink hover:border-ink transition-colors cursor-pointer"
                 >

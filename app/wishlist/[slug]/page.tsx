@@ -26,10 +26,14 @@ async function getWishlist(slug: string) {
   const protocol = host?.startsWith("localhost") ? "http" : "https";
   const res = await fetch(`${protocol}://${host}/api/wishlist/${slug}`, {
     cache: "no-store",
+    // Forward the session so the owner can preview a private wishlist.
+    headers: { cookie: h.get("cookie") ?? "" },
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to load wishlist");
   return res.json() as Promise<{
+    isPublic: boolean;
+    isOwner: boolean;
     slug: string;
     displayName: string;
     avatarUrl?: string;
@@ -59,6 +63,15 @@ export default async function WishlistPage({
         />
         <span className="font-display italic text-stone text-base block mb-1">Вишлист</span>
         <h1 className="font-display text-4xl">{wishlist.displayName}</h1>
+        {wishlist.isOwner && !wishlist.isPublic && (
+          <p className="text-stone text-[13px] mt-4">
+            Вишлист виден только вам. Открыть доступ по ссылке можно в{" "}
+            <a href="/dashboard/settings" className="underline underline-offset-4 hover:text-ink">
+              настройках
+            </a>
+            .
+          </p>
+        )}
       </div>
 
       {wishlist.links.length === 0 ? (

@@ -7,8 +7,7 @@ import {
   setBrandArticles,
   setUserInterests,
   updateCreator,
-  updateUserProfile,
-} from "@/lib/store";
+  updateUserProfile, setWishlistPublic } from "@/lib/store";
 import { parseArticleInput } from "@/lib/marketplace";
 import { isCategory } from "@/lib/categories";
 
@@ -69,6 +68,7 @@ export async function GET(request: NextRequest) {
     avatarUrl: user.avatarUrl ?? "",
     slug,
     interests: user.interests ?? [],
+    wishlistPublic: Boolean(user.wishlistPublic),
   });
 }
 
@@ -165,6 +165,7 @@ export async function PUT(request: NextRequest) {
     }
     const interests = Array.isArray(body?.interests) ? body.interests.filter(isCategory) : undefined;
     if (interests) await setUserInterests(user.id, interests);
+    if (typeof body?.wishlistPublic === "boolean") await setWishlistPublic(user.id, body.wishlistPublic);
     const updated = await updateUserProfile(user.id, {
       displayName: body?.displayName?.trim(),
       avatarUrl: body?.avatarUrl,
@@ -174,6 +175,7 @@ export async function PUT(request: NextRequest) {
       avatarUrl: updated.avatarUrl ?? "",
       slug: await ensureUserSlug(user.id),
       interests: interests ?? user.interests ?? [],
+      wishlistPublic: typeof body?.wishlistPublic === "boolean" ? body.wishlistPublic : Boolean(user.wishlistPublic),
     });
   }
 

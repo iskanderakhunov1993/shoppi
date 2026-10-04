@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
+import { clientIpFrom } from "@/lib/bot-detection";
 import { getUserByEmail } from "@/lib/store";
 import { EXPOSE_LINKS, sendVerificationEmail } from "@/lib/email";
 
@@ -7,6 +9,13 @@ export async function POST(request: NextRequest) {
   const email = body?.email as string | undefined;
   if (!email) {
     return NextResponse.json({ error: "email is required" }, { status: 400 });
+  }
+
+  if (
+    (await isRateLimited(`resend:ip:${clientIpFrom(request.headers)}`, 10, 60 * 60)) ||
+    (await isRateLimited(`resend:email:${email.toLowerCase()}`, 3, 60 * 60))
+  ) {
+    return NextResponse.json(TOO_MANY, { status: 429 });
   }
 
   const user = await getUserByEmail(email);

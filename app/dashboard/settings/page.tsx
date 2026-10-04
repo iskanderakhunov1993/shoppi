@@ -15,6 +15,8 @@ type Me = {
   role: "shopper" | "creator" | "brand";
   email: string;
   displayName: string;
+  slug?: string;
+  wishlistPublic?: boolean;
 };
 
 export default function SettingsPage() {
@@ -28,6 +30,8 @@ export default function SettingsPage() {
   const [savedName, setSavedName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [wishlistPublic, setWishlistPublic] = useState(false);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -45,6 +49,7 @@ export default function SettingsPage() {
     setMe(data);
     setDisplayName(data.displayName ?? "");
     setSavedName(data.displayName ?? "");
+    setWishlistPublic(Boolean(data.wishlistPublic));
   }, [router]);
 
   useEffect(() => {
@@ -80,6 +85,22 @@ export default function SettingsPage() {
     setSavedName(displayName.trim());
     setNameSaved(true);
     setTimeout(() => setNameSaved(false), 2500);
+  }
+
+  async function toggleWishlist(next: boolean) {
+    setWishlistError(null);
+    setWishlistPublic(next);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wishlistPublic: next }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setWishlistPublic(!next);
+      setWishlistError("Не удалось сохранить. Попробуйте ещё раз.");
+    }
   }
 
   async function savePassword(e: React.FormEvent) {
@@ -144,6 +165,9 @@ export default function SettingsPage() {
         <nav aria-label="Разделы настроек" className="hidden md:block">
           <ul className="sticky top-8 flex flex-col gap-3 text-[13px]">
             <li><a href="#profile" className="text-ink">Профиль</a></li>
+            {isShopper && (
+              <li><a href="#privacy" className="text-stone hover:text-ink transition-colors">Вишлист</a></li>
+            )}
             <li><a href="#password" className="text-stone hover:text-ink transition-colors">Пароль</a></li>
           </ul>
         </nav>
@@ -190,6 +214,34 @@ export default function SettingsPage() {
               </span>
             </div>
           </form>
+
+          {isShopper && (
+            <section id="privacy" className="flex flex-col gap-3 pt-8 border-t border-line scroll-mt-8">
+              <h2 className="font-display text-2xl">Вишлист</h2>
+              <label className="flex items-start gap-3 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={wishlistPublic}
+                  onChange={(e) => toggleWishlist(e.target.checked)}
+                />
+                <span className="text-[14px]">
+                  Доступен по ссылке
+                  <span className="block text-stone text-[12px] mt-0.5">
+                    {wishlistPublic
+                      ? "Любой, у кого есть ссылка, увидит сохранённые товары."
+                      : "Сейчас вишлист виден только вам."}
+                  </span>
+                </span>
+              </label>
+              {wishlistPublic && me.slug && (
+                <a href={`/wishlist/${me.slug}`} target="_blank" rel="noopener noreferrer" className="text-[13px] text-stone underline underline-offset-4 hover:text-ink w-fit">
+                  Открыть вишлист
+                </a>
+              )}
+              <p role="alert" className="text-error text-sm empty:hidden">{wishlistError}</p>
+            </section>
+          )}
 
           <section id="password" className="flex flex-col gap-4 pt-8 border-t border-line scroll-mt-8">
             <div className="flex items-center justify-between gap-4">

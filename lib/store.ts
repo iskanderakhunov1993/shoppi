@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import { sql, nextSeq } from "./db.ts";
 import { normalizeCategory, type Category } from "./categories.ts";
 
@@ -27,6 +27,8 @@ export type User = {
   // for shoppers, and lazily on first use rather than at signup, since
   // most existing accounts predate this feature.
   displayName?: string;
+  // Off until the shopper shares it: a wishlist is personal by default.
+  wishlistPublic?: boolean;
   avatarUrl?: string;
   slug?: string;
   // Shopper's own "что мне интересно" picks — drives the personal "Для вас"
@@ -115,6 +117,7 @@ function toUser(r: Row): User {
     displayName: opt(r.display_name),
     avatarUrl: opt(r.avatar_url),
     slug: opt(r.slug),
+    wishlistPublic: Boolean(r.wishlist_public),
     interests: r.interests ? parseCategories(str(r.interests)) : undefined,
   };
 }
@@ -286,12 +289,29 @@ export async function getUserBySlug(slug: string): Promise<User | undefined> {
  */
 export async function ensureUserSlug(userId: string): Promise<string> {
   const user = (await getUserById(userId))!;
-  if (user.slug) return user.slug;
+  // Older slugs were built from the email's local part, which leaked it
+  // in every shared wishlist URL — those get replaced.
+  const emailBased = slugify(user.email.split("@")[0]);
+  if (user.slug && !(emailBased && user.slug.startsWith(`${emailBased}-`))) return user.slug;
 
-  const base = slugify(user.email.split("@")[0]);
-  const slug = `${base}-${userId.slice(0, 6)}`;
+  const fromName = slugify(transliterate(user.displayName ?? "")).slice(0, 24).replace(/-+$/, "");
+  const suffix = randomBytes(4).toString("hex");
+  const slug = `${fromName || "wishlist"}-${suffix}`;
   await sql`UPDATE users SET slug = ${slug} WHERE id = ${userId}`;
   return slug;
+}
+
+export async function setWishlistPublic(userId: string, value: boolean): Promise<void> {
+  await sql`UPDATE users SET wishlist_public = ${value} WHERE id = ${userId}`;
+}
+
+const TRANSLIT: Record<string, string> = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l",
+  м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+  щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+function transliterate(input: string): string {
+  return [...input.toLowerCase()].map((ch) => TRANSLIT[ch] ?? ch).join("");
 }
 
 export async function updateUserProfile(

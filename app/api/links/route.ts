@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isSafeImageUrl, isSafeProductUrl } from "@/lib/safeUrl";
 import { requireCreator } from "@/lib/require-creator";
 import { addLink, countClicksForLinks, listLinksByCreator } from "@/lib/store";
 import { parseMarketplaceItem } from "@/lib/marketplace";
@@ -47,10 +48,11 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  try {
-    new URL(targetUrl);
-  } catch {
-    return NextResponse.json({ error: "Введите корректную ссылку на товар" }, { status: 400 });
+  if (!isSafeProductUrl(targetUrl)) {
+    return NextResponse.json({ error: "Введите корректную ссылку на товар (https://…)" }, { status: 400 });
+  }
+  if (body?.imageUrl && !isSafeImageUrl(String(body.imageUrl))) {
+    return NextResponse.json({ error: "Некорректная ссылка на картинку" }, { status: 400 });
   }
 
   const { marketplace, articleId } = parseMarketplaceItem(targetUrl);
