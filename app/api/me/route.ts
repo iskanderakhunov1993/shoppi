@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       onboarded: creator?.onboarded ?? false,
       categories: creator?.categories ?? [],
       hidePopular: creator?.hidePopular ?? false,
+      mediaKitPublic: creator?.mediaKitPublic ?? false,
     });
   }
 
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
     slug,
     interests: user.interests ?? [],
     wishlistPublic: Boolean(user.wishlistPublic),
+    bio: user.bio ?? "",
   });
 }
 
@@ -110,6 +112,7 @@ export async function PUT(request: NextRequest) {
       onboarded: typeof body?.onboarded === "boolean" ? body.onboarded : undefined,
       categories: Array.isArray(body?.categories) ? body.categories.filter(isCategory) : undefined,
       hidePopular: typeof body?.hidePopular === "boolean" ? body.hidePopular : undefined,
+      mediaKitPublic: typeof body?.mediaKitPublic === "boolean" ? body.mediaKitPublic : undefined,
     });
 
     return NextResponse.json({
@@ -125,6 +128,7 @@ export async function PUT(request: NextRequest) {
       onboarded: updated?.onboarded ?? false,
       categories: updated?.categories ?? [],
       hidePopular: updated?.hidePopular ?? false,
+      mediaKitPublic: updated?.mediaKitPublic ?? false,
     });
   }
 
@@ -168,9 +172,10 @@ export async function PUT(request: NextRequest) {
     if (typeof body?.wishlistPublic === "boolean") await setWishlistPublic(user.id, body.wishlistPublic);
     const updated = await updateUserProfile(user.id, {
       displayName: body?.displayName?.trim(),
-      avatarUrl: body?.avatarUrl,
+      bio: typeof body?.bio === "string" ? body.bio.trim().slice(0, 160) || null : undefined,
     });
     return NextResponse.json({
+      bio: updated.bio ?? "",
       displayName: updated.displayName,
       avatarUrl: updated.avatarUrl ?? "",
       slug: await ensureUserSlug(user.id),

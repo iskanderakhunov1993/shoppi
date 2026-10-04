@@ -29,6 +29,7 @@ export type User = {
   displayName?: string;
   // Off until the shopper shares it: a wishlist is personal by default.
   wishlistPublic?: boolean;
+  bio?: string;
   avatarUrl?: string;
   slug?: string;
   // Shopper's own "что мне интересно" picks — drives the personal "Для вас"
@@ -58,6 +59,8 @@ export type Creator = {
   // Lets a creator opt out of showing the "Популярное" (Most Popular)
   // auto-section publicly — same idea as ShopMy's hide toggle on it.
   hidePopular: boolean;
+  // Click stats on /<slug>/stats are private until the creator opts in.
+  mediaKitPublic: boolean;
 };
 
 export type Link = {
@@ -118,6 +121,7 @@ function toUser(r: Row): User {
     avatarUrl: opt(r.avatar_url),
     slug: opt(r.slug),
     wishlistPublic: Boolean(r.wishlist_public),
+    bio: opt(r.bio),
     interests: r.interests ? parseCategories(str(r.interests)) : undefined,
   };
 }
@@ -142,6 +146,7 @@ function toCreator(r: Row): Creator {
     onboarded: Boolean(r.onboarded),
     categories: r.categories ? parseCategories(str(r.categories)) : undefined,
     hidePopular: Boolean(r.hide_popular),
+    mediaKitPublic: Boolean(r.media_kit_public),
   };
 }
 
@@ -316,16 +321,37 @@ function transliterate(input: string): string {
 
 export async function updateUserProfile(
   userId: string,
-  patch: { displayName?: string; avatarUrl?: string }
+  patch: { displayName?: string; avatarUrl?: string; bio?: string | null }
 ): Promise<User> {
   const current = (await getUserById(userId))!;
   await sql`
     UPDATE users
     SET display_name = ${patch.displayName ?? current.displayName ?? null},
-        avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null}
+        avatar_url = ${patch.avatarUrl ?? current.avatarUrl ?? null},
+        bio = ${patch.bio === undefined ? (current.bio ?? null) : patch.bio}
     WHERE id = ${userId}
   `;
   return (await getUserById(userId))!;
+}
+
+export async function getPublicMediaKitSlug(): Promise<string | undefined> {
+  const rows = await sql`SELECT slug FROM creators WHERE media_kit_public = true ORDER BY created_at LIMIT 1`;
+  return rows[0] ? str(rows[0].slug) : undefined;
+}
+
+/** Shopper photos, kept out of the users table like creator_avatars. */
+export async function saveUserAvatar(userId: string, mime: string, base64: string): Promise<void> {
+  await sql`
+    INSERT INTO user_avatars (user_id, mime, data, updated_at)
+    VALUES (${userId}, ${mime}, ${base64}, now())
+    ON CONFLICT (user_id) DO UPDATE SET mime = EXCLUDED.mime, data = EXCLUDED.data, updated_at = now()
+  `;
+}
+
+export async function getUserAvatar(userId: string): Promise<{ mime: string; bytes: Buffer } | undefined> {
+  const rows = await sql`SELECT mime, data FROM user_avatars WHERE user_id = ${userId}`;
+  if (!rows[0]) return undefined;
+  return { mime: str(rows[0].mime), bytes: Buffer.from(str(rows[0].data), "base64") };
 }
 
 /** The affiliate template of whichever brand has claimed this article, if any. */
@@ -370,6 +396,7 @@ export async function updateCreator(
     onboarded?: boolean;
     categories?: Category[] | null;
     hidePopular?: boolean;
+    mediaKitPublic?: boolean;
   }
 ): Promise<Creator | undefined> {
   const current = await getCreatorById(creatorId);
@@ -392,7 +419,8 @@ export async function updateCreator(
         contact_email = ${patch.contactEmail === undefined ? (current.contactEmail ?? null) : patch.contactEmail},
         onboarded = ${patch.onboarded ?? current.onboarded},
         categories = ${nextCategories ? JSON.stringify(nextCategories) : null},
-        hide_popular = ${patch.hidePopular ?? current.hidePopular}
+        hide_popular = ${patch.hidePopular ?? current.hidePopular},
+        media_kit_public = ${patch.mediaKitPublic ?? current.mediaKitPublic}
     WHERE id = ${creatorId}
   `;
 

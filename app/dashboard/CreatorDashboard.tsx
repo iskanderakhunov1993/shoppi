@@ -46,6 +46,7 @@ export function CreatorDashboard({
     onboarded?: boolean;
     categories?: Category[];
     hidePopular?: boolean;
+    mediaKitPublic?: boolean;
   };
   onProfileSaved: () => void;
 }) {

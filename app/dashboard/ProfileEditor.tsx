@@ -22,6 +22,7 @@ export function ProfileEditor({
     youtubeHandle?: string;
     contactEmail?: string;
     hidePopular?: boolean;
+    mediaKitPublic?: boolean;
   };
   onSaved: () => void;
   defaultOpen?: boolean;
@@ -38,6 +39,7 @@ export function ProfileEditor({
   });
   const [contactEmail, setContactEmail] = useState(me.contactEmail ?? "");
   const [hidePopular, setHidePopular] = useState(me.hidePopular ?? false);
+  const [mediaKitPublic, setMediaKitPublic] = useState(me.mediaKitPublic ?? false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export function ProfileEditor({
     const res = await fetch("/api/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, bio, ...socials, contactEmail, hidePopular }),
+      body: JSON.stringify({ displayName, bio, ...socials, contactEmail, hidePopular, mediaKitPublic }),
     });
     const data = await res.json();
     setSaving(false);
@@ -145,6 +147,16 @@ export function ProfileEditor({
           />
           Скрыть вкладку «Популярное» на витрине: не показывать покупателям, какие товары
           кликают чаще.
+        </label>
+        <label className="flex items-start gap-2.5 text-[13px] leading-relaxed cursor-pointer">
+          <input
+            type="checkbox"
+            checked={mediaKitPublic}
+            onChange={(e) => setMediaKitPublic(e.target.checked)}
+            className="mt-0.5 shrink-0"
+          />
+          Открыть медиакит по ссылке: бренды увидят переходы и топ товаров. Пока выключено, медиакит
+          видите только вы.
         </label>
       </section>
 

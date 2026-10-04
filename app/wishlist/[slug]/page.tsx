@@ -1,3 +1,4 @@
+import { pluralizeProducts } from "@/lib/plural";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { AdLabel } from "@/app/components/AdLabel";
@@ -35,6 +36,7 @@ async function getWishlist(slug: string) {
   return res.json() as Promise<{
     isPublic: boolean;
     isOwner: boolean;
+    bio?: string;
     slug: string;
     displayName: string;
     avatarUrl?: string;
@@ -64,6 +66,10 @@ export default async function WishlistPage({
         />
         <span className="font-display italic text-stone text-base block mb-1">Вишлист</span>
         <h1 className="font-display text-4xl">{wishlist.displayName}</h1>
+        {wishlist.bio && <p className="text-stone text-[15px] mt-3 max-w-md mx-auto">{wishlist.bio}</p>}
+        <p className="text-stone text-[12px] uppercase tracking-wide mt-4">
+          {wishlist.links.length} {pluralizeProducts(wishlist.links.length)}
+        </p>
         {wishlist.isOwner && !wishlist.isPublic && (
           <p className="text-stone text-[13px] mt-4">
             Вишлист виден только вам. Открыть доступ по ссылке можно в{" "}

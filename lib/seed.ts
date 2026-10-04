@@ -10,8 +10,7 @@ import {
   updateCreator,
   listCreatorsWithProducts,
   type Creator,
-  type Role,
-} from "./store.ts";
+  type Role, getPublicMediaKitSlug } from "./store.ts";
 import { parseMarketplaceItem } from "./marketplace.ts";
 import { placeholderAvatar } from "./avatar.ts";
 import type { Category } from "./categories.ts";
@@ -120,6 +119,11 @@ async function runSeed(): Promise<void> {
 /** Slug for the "Пример витрины / медиакита" links: the fullest real storefront. */
 export async function getShowcaseCreatorSlug(): Promise<string | undefined> {
   return (await listCreatorsWithProducts(1))[0]?.slug;
+}
+
+/** A creator who made their media kit public, for the "Пример медиакита" links. */
+export async function getShowcaseMediaKitSlug(): Promise<string | undefined> {
+  return getPublicMediaKitSlug();
 }
 
 // Public pages call this on every request. The seed is idempotent but

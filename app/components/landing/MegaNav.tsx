@@ -9,9 +9,9 @@ import { BRANDS_ENABLED } from "@/lib/featureFlags";
 type Item = { label: string; href: string; description: string };
 type Menu = { key: string; label: string; align: "left" | "center" | "right"; items: Item[] };
 
-function buildMenus(demoSlug?: string): Menu[] {
+function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
   const example = demoSlug ? `/${demoSlug}` : "/curators";
-  const exampleStats = demoSlug ? `/${demoSlug}/stats` : "/curators";
+  const exampleStats = statsSlug ? `/${statsSlug}/stats` : "/curators";
 
   return [
     {
@@ -166,6 +166,7 @@ function FindsBadge({ count }: { count: number }) {
 export function MegaNav({
   signedIn,
   demoSlug,
+  statsSlug,
   overlay = false,
   onboarding,
   avatarUrl,
@@ -175,6 +176,7 @@ export function MegaNav({
 }: {
   signedIn: boolean;
   demoSlug?: string;
+  statsSlug?: string;
   overlay?: boolean;
   onboarding?: { done: number; total: number };
   avatarUrl?: string;
@@ -191,7 +193,7 @@ export function MegaNav({
   const router = useRouter();
   const pathname = usePathname();
   const isActive = (href: string) => href.split("?")[0] === pathname;
-  const menus = buildMenus(demoSlug).filter((menu) => BRANDS_ENABLED || menu.key !== "brands");
+  const menus = buildMenus(demoSlug, statsSlug).filter((menu) => BRANDS_ENABLED || menu.key !== "brands");
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();

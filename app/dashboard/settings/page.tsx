@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AvatarUpload } from "@/app/dashboard/AvatarUpload";
 import { Field, boxedInputClass, buttonClass, secondaryButtonClass } from "@/app/components/Field";
 
 const ROLE_LABEL: Record<string, string> = {
@@ -17,6 +18,8 @@ type Me = {
   displayName: string;
   slug?: string;
   wishlistPublic?: boolean;
+  avatarUrl?: string;
+  bio?: string;
 };
 
 export default function SettingsPage() {
@@ -28,6 +31,9 @@ export default function SettingsPage() {
   const [nameSaved, setNameSaved] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [savedName, setSavedName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [bio, setBio] = useState("");
+  const [savedBio, setSavedBio] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [wishlistPublic, setWishlistPublic] = useState(false);
@@ -49,6 +55,9 @@ export default function SettingsPage() {
     setMe(data);
     setDisplayName(data.displayName ?? "");
     setSavedName(data.displayName ?? "");
+    setAvatarUrl(data.avatarUrl ?? "");
+    setBio(data.bio ?? "");
+    setSavedBio(data.bio ?? "");
     setWishlistPublic(Boolean(data.wishlistPublic));
   }, [router]);
 
@@ -57,6 +66,7 @@ export default function SettingsPage() {
   }, [loadMe]);
 
   async function saveName(e: React.FormEvent) {
+    const isShopperRole = me?.role === "shopper";
     e.preventDefault();
     setNameError(null);
     setSavingName(true);
@@ -67,7 +77,7 @@ export default function SettingsPage() {
       res = await fetch("/api/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName: displayName.trim() }),
+        body: JSON.stringify(isShopperRole ? { displayName: displayName.trim(), bio } : { displayName: displayName.trim() }),
       });
       data = await res.json().catch(() => ({}));
     } catch {
@@ -83,6 +93,7 @@ export default function SettingsPage() {
     }
     setDisplayName(displayName.trim());
     setSavedName(displayName.trim());
+    setSavedBio(bio.trim());
     setNameSaved(true);
     setTimeout(() => setNameSaved(false), 2500);
   }
@@ -144,7 +155,8 @@ export default function SettingsPage() {
   }
 
   const isShopper = me.role === "shopper";
-  const nameDirty = displayName.trim() !== savedName && displayName.trim().length > 0;
+  const nameDirty =
+    displayName.trim().length > 0 && (displayName.trim() !== savedName || (isShopper && bio.trim() !== savedBio));
 
   return (
     <main className="flex-1 flex flex-col">
@@ -176,6 +188,15 @@ export default function SettingsPage() {
           <form id="profile" onSubmit={saveName} className="flex flex-col gap-4 scroll-mt-8">
             <h2 className="font-display text-2xl">Профиль</h2>
 
+            {isShopper && (
+              <div className="flex items-center gap-5">
+                <AvatarUpload avatarUrl={avatarUrl} seed={me.slug ?? me.email} onChange={setAvatarUrl} size={80} />
+                <p className="text-stone text-[12px] max-w-[220px]">
+                  Фото видно на вашем вишлисте, если вы откроете его по ссылке.
+                </p>
+              </div>
+            )}
+
             <Field label={isShopper ? "Имя" : "Имя на витрине"} htmlFor="displayName">
               <input
                 id="displayName"
@@ -188,6 +209,21 @@ export default function SettingsPage() {
                 required
               />
             </Field>
+
+            {isShopper && (
+              <Field label="О себе" htmlFor="bio">
+                <textarea
+                  id="bio"
+                  name="bio"
+                  rows={2}
+                  maxLength={160}
+                  placeholder="Например: собираю уход для чувствительной кожи"
+                  className={`${boxedInputClass} resize-none`}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                />
+              </Field>
+            )}
 
             <Field label="Email" htmlFor="email">
               <input

@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE } from "@/lib/auth";
 import { seedDemoAccounts } from "@/lib/seed";
 import {
   countClicksForLinks,
   creatorClickStats,
   getCreatorBySlug,
+  getSessionUserId,
   listLinksByCreator,
 } from "@/lib/store";
 import { LandingNav } from "@/app/components/landing/LandingNav";
@@ -23,6 +26,12 @@ export default async function MediaKitPage({
 
   const creator = await getCreatorBySlug(creatorSlug);
   if (!creator) notFound();
+
+  // Click stats are the creator's business data: hidden until they opt in.
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const viewerId = token ? await getSessionUserId(token) : null;
+  const isOwner = viewerId === creator.userId;
+  if (!creator.mediaKitPublic && !isOwner) notFound();
 
   const stats = await creatorClickStats(creator.id);
   const links = await listLinksByCreator(creator.id);
@@ -58,6 +67,11 @@ export default async function MediaKitPage({
             <div>
               <span className="text-[11px] uppercase tracking-widest text-stone">Медиакит</span>
               <h1 className="font-display text-4xl md:text-5xl mt-1">{creator.displayName}</h1>
+              {isOwner && !creator.mediaKitPublic && (
+                <p className="text-stone text-[13px] mt-2">
+                  Медиакит виден только вам. Открыть его брендам можно в профиле витрины в кабинете.
+                </p>
+              )}
             </div>
           </div>
           {creator.bio && <p className="text-stone text-sm max-w-lg">{creator.bio}</p>}

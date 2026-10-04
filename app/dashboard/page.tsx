@@ -25,6 +25,7 @@ type Me = {
   onboarded?: boolean;
   categories?: Category[];
   hidePopular?: boolean;
+  mediaKitPublic?: boolean;
 };
 
 export default function DashboardPage() {

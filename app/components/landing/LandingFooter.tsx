@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getShowcaseCreatorSlug } from "@/lib/seed";
+import { getShowcaseCreatorSlug, getShowcaseMediaKitSlug } from "@/lib/seed";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
 
 type Column = { title: string; links: { label: string; href: string }[] };
@@ -12,7 +12,8 @@ type Column = { title: string; links: { label: string; href: string }[] };
 export async function LandingFooter() {
   const slug = await getShowcaseCreatorSlug();
   const example = slug ? `/${slug}` : "/curators";
-  const exampleStats = slug ? `/${slug}/stats` : "/curators";
+  const statsSlug = await getShowcaseMediaKitSlug();
+  const exampleStats = statsSlug ? `/${statsSlug}/stats` : "/curators";
 
   const columns: Column[] = [
     {

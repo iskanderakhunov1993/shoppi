@@ -46,6 +46,7 @@ export async function GET(
   return NextResponse.json({
     isPublic: Boolean(user.wishlistPublic),
     isOwner,
+    bio: user.bio ?? "",
     slug: user.slug,
     displayName: user.displayName ?? "Покупатель",
     avatarUrl: user.avatarUrl,

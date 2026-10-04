@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/require-user";
-import { getCreatorByUserId, saveCreatorAvatar, updateCreator } from "@/lib/store";
+import { getCreatorByUserId, saveCreatorAvatar, saveUserAvatar, updateCreator, updateUserProfile } from "@/lib/store";
 
 // The client downsizes the photo to a small square before sending, so a
 // generous cap is enough and keeps the JSON body well under Vercel's limit.
@@ -9,12 +9,11 @@ const DATA_URL = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
 
 export async function POST(request: NextRequest) {
   const user = await requireUser(request);
-  if (!user || user.role !== "creator") {
-    return NextResponse.json({ error: "Доступно только креаторам" }, { status: 403 });
+  if (!user) {
+    return NextResponse.json({ error: "Нужно войти в аккаунт" }, { status: 401 });
   }
-  const creator = await getCreatorByUserId(user.id);
-  if (!creator) {
-    return NextResponse.json({ error: "Профиль креатора не найден" }, { status: 404 });
+  if (user.role !== "creator" && user.role !== "shopper") {
+    return NextResponse.json({ error: "Фото профиля недоступно для этого аккаунта" }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);
@@ -27,6 +26,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Фото слишком большое" }, { status: 413 });
   }
 
+  if (user.role === "shopper") {
+    await saveUserAvatar(user.id, mime, base64);
+    const avatarUrl = `/api/user-avatar/${user.id}?v=${Date.now()}`;
+    await updateUserProfile(user.id, { avatarUrl });
+    return NextResponse.json({ avatarUrl });
+  }
+
+  const creator = await getCreatorByUserId(user.id);
+  if (!creator) {
+    return NextResponse.json({ error: "Профиль креатора не найден" }, { status: 404 });
+  }
   await saveCreatorAvatar(creator.id, mime, base64);
   // The version query keeps browsers from showing the previous photo
   // from their long-lived cache after a change.
