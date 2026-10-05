@@ -17,9 +17,9 @@ export function RoleTeasers() {
             Ведите витрину без чужого алгоритма.
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 md:mb-0 list-disc list-inside marker:text-line">
-            <li>Своя публичная страница с одной ссылкой для подписчиков</li>
-            <li>Добавляйте товары в один клик по ссылке</li>
-            <li>Видите клики по каждой вещи в реальном времени</li>
+            <li>Одна ссылка на все находки</li>
+            <li>Товар добавляется по ссылке с WB или Ozon</li>
+            <li>Видно, что смотрят и покупают</li>
           </ul>
         </div>
         <Link

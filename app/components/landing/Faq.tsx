@@ -8,12 +8,12 @@ const ALL_ITEMS = [
       : "Нет. Аккаунт покупателя и креатора бесплатный.",
   },
   {
-    q: "Как считаются клики?",
-    a: "Каждая ссылка на витрине проходит через нашу короткую ссылку: переход логируется и сразу ведёт на товар.",
+    q: "Где я покупаю товар?",
+    a: "На Wildberries или Ozon: ссылка ведёт прямо на страницу товара.",
   },
   {
-    q: "Нужно ли проходить отбор, чтобы стать креатором?",
-    a: "Пока нет. Регистрация открыта всем, без заявки и модерации.",
+    q: "Как стать креатором?",
+    a: "Зарегистрироваться и добавить первую ссылку. Без заявок и отбора.",
   },
   {
     brandOnly: true,
@@ -28,8 +28,7 @@ export function Faq() {
   return (
     <section id="faq" className="px-6 md:px-10 py-16 md:py-24 border-b border-line">
       <div className="max-w-[1200px] mx-auto">
-        <span className="text-[11px] uppercase tracking-widest text-stone">Вопросы</span>
-        <h2 className="font-display text-2xl md:text-3xl mt-3 mb-10">Коротко о главном</h2>
+        <h2 className="font-display text-2xl md:text-3xl mb-10">Вопросы</h2>
         <div className="grid md:grid-cols-2 md:gap-x-14">
           {ITEMS.map((item, i) => (
             <div

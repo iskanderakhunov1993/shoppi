@@ -19,7 +19,7 @@ const BENTO: Record<number, { span: string; size: "tall" | "big" }> = {
 // yet — used only as a fallback; once a real product exists in the
 // category its actual cover wins. A nicer stand-in than the
 // typographic plate, but still not pretending to be live content.
-const STATIC_COVERS: Partial<Record<Category, string>> = {
+export const STATIC_COVERS: Partial<Record<Category, string>> = {
   shoes: "/category-covers/shoes.webp",
   perfume: "/category-covers/perfume.webp",
   face_care: "/category-covers/face_care.webp",

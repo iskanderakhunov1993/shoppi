@@ -9,9 +9,9 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
           <div>
             <h2 className="font-display text-4xl md:text-5xl">Креаторы</h2>
           </div>
-          <p className="text-stone text-sm max-w-xs">
-            Люди, чьему вкусу вы доверяете больше, чем ленте алгоритма.
-          </p>
+          <a href="/curators" className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors">
+            Все креаторы →
+          </a>
         </div>
 
         {creators.length === 0 ? (
