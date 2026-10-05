@@ -20,6 +20,7 @@ type Me = {
   wishlistPublic?: boolean;
   avatarUrl?: string;
   bio?: string;
+  digestOptOut?: boolean;
 };
 
 export default function SettingsPage() {
@@ -38,6 +39,7 @@ export default function SettingsPage() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [wishlistPublic, setWishlistPublic] = useState(false);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
+  const [digestOn, setDigestOn] = useState(true);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -59,6 +61,7 @@ export default function SettingsPage() {
     setBio(data.bio ?? "");
     setSavedBio(data.bio ?? "");
     setWishlistPublic(Boolean(data.wishlistPublic));
+    setDigestOn(!data.digestOptOut);
   }, [router]);
 
   useEffect(() => {
@@ -110,6 +113,22 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error();
     } catch {
       setWishlistPublic(!next);
+      setWishlistError("Не удалось сохранить. Попробуйте ещё раз.");
+    }
+  }
+
+  async function toggleDigest(next: boolean) {
+    setWishlistError(null);
+    setDigestOn(next);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ digestOptOut: !next }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setDigestOn(!next);
       setWishlistError("Не удалось сохранить. Попробуйте ещё раз.");
     }
   }
@@ -253,7 +272,7 @@ export default function SettingsPage() {
 
           {isShopper && (
             <section id="privacy" className="flex flex-col gap-3 pt-8 border-t border-line scroll-mt-8">
-              <h2 className="font-display text-2xl">Вишлист</h2>
+              <h2 className="font-display text-2xl">Вишлист и письма</h2>
               <label className="flex items-start gap-3 cursor-pointer w-fit">
                 <input
                   type="checkbox"
@@ -275,6 +294,20 @@ export default function SettingsPage() {
                   Открыть вишлист
                 </a>
               )}
+              <label className="flex items-start gap-3 cursor-pointer w-fit mt-2">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={digestOn}
+                  onChange={(e) => toggleDigest(e.target.checked)}
+                />
+                <span className="text-[14px]">
+                  Письмо с новинками раз в неделю
+                  <span className="block text-stone text-[12px] mt-0.5">
+                    Новые находки креаторов, на которых вы подписаны. Не приходит, если новинок нет.
+                  </span>
+                </span>
+              </label>
               <p role="alert" className="text-error text-sm empty:hidden">{wishlistError}</p>
             </section>
           )}

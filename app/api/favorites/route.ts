@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clientIpFrom } from "@/lib/bot-detection";
+import { visitorFingerprint } from "@/lib/auth";
+import { track } from "@/lib/events";
 import { requireUser } from "@/lib/require-user";
 import { addFavorite, getLink, listFavoriteLinks, removeFavorite } from "@/lib/store";
 
@@ -30,11 +33,14 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => null);
   const linkId = body?.linkId as string | undefined;
-  if (!linkId || !(await getLink(linkId))) {
+  const link = linkId ? await getLink(linkId) : undefined;
+  if (!linkId || !link) {
     return NextResponse.json({ error: "Unknown linkId" }, { status: 400 });
   }
 
   await addFavorite(user.id, linkId);
+  const visitor = visitorFingerprint(clientIpFrom(request.headers), request.headers.get("user-agent") ?? "");
+  await track("favorite_add", { visitor, userId: user.id, creatorId: link.creatorId, linkId });
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 

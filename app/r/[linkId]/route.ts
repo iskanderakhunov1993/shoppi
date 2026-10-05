@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { track } from "@/lib/events";
 import { getAffiliateTemplateForArticle, getLink, hasRecentClick, recordClick } from "@/lib/store";
 import { isBotUserAgent, clientIpFrom } from "@/lib/bot-detection";
 import { visitorFingerprint } from "@/lib/auth";
@@ -53,7 +54,7 @@ export async function GET(
     const host = escape(new URL(targetUrl).hostname.replace(/^www\./, ""));
     return page(
       "Переход на внешний сайт",
-      `<h1>Переход на ${host}</h1><p>Это сайт магазина, не Shoppi. Проверьте адрес, прежде чем вводить данные или оплачивать.</p><a class="b" href="/r/${encodeURIComponent(linkId)}?go=1" rel="nofollow">Перейти на ${host}</a><br><a href="/">На Shoppi</a>`
+      `<h1>Переход на ${host}</h1><p>Это сайт магазина, не Shoppi. Проверьте адрес, прежде чем вводить данные или оплачивать.</p><a class="b" href="/r/${encodeURIComponent(linkId)}?go=1${request.nextUrl.searchParams.get("src") === "digest" ? "&src=digest" : ""}" rel="nofollow">Перейти на ${host}</a><br><a href="/">На Shoppi</a>`
     );
   }
 
@@ -64,6 +65,14 @@ export async function GET(
   // A reader refreshing or coming back within the window is one visit,
   // not several. Bot hits are always recorded so the raw total stays true.
   const isRepeat = !isBot && (await hasRecentClick(linkId, fingerprint, 30));
+
+  if (!isRepeat && !isBot) {
+    await track(request.nextUrl.searchParams.get("src") === "digest" ? "digest_click" : "link_click", {
+      visitor: fingerprint,
+      creatorId: link.creatorId,
+      linkId,
+    });
+  }
 
   if (!isRepeat) {
     await recordClick(linkId, {

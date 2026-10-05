@@ -1,4 +1,8 @@
+import { after } from "next/server";
 import { cookies, headers } from "next/headers";
+import { clientIpFrom, isBotUserAgent } from "@/lib/bot-detection";
+import { visitorFingerprint } from "@/lib/auth";
+import { track } from "@/lib/events";
 import { AdLabel } from "@/app/components/AdLabel";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/app/components/FollowButton";
@@ -106,6 +110,12 @@ export default async function StorefrontPage({
   const host = h.get("host");
   const protocol = host?.startsWith("localhost") ? "http" : "https";
   const storefrontUrl = `${protocol}://${host}/${creatorSlug}`;
+  if (!isOwner && !isBotUserAgent(h.get("user-agent"))) {
+    // After the response: analytics must never slow the storefront down.
+    const visitor = visitorFingerprint(clientIpFrom(h), h.get("user-agent") ?? "");
+    const creatorId = creator.id;
+    after(() => track("storefront_view", { visitor, userId: viewerId ?? undefined, creatorId }));
+  }
 
   return (
     <main className="flex-1 flex flex-col">

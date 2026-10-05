@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clientIpFrom } from "@/lib/bot-detection";
+import { visitorFingerprint } from "@/lib/auth";
+import { track } from "@/lib/events";
 import { requireUser } from "@/lib/require-user";
 import {
   circleFeed,
@@ -64,6 +67,8 @@ export async function POST(request: NextRequest) {
   }
 
   await followCreator(user.id, creator.id);
+  const visitor = visitorFingerprint(clientIpFrom(request.headers), request.headers.get("user-agent") ?? "");
+  await track("follow_add", { visitor, userId: user.id, creatorId: creator.id });
   return NextResponse.json({ ok: true, followers: await countFollowers(creator.id) }, { status: 201 });
 }
 

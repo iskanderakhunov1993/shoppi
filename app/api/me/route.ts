@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { setDigestOptOut } from "@/lib/digest";
 import { requireUser } from "@/lib/require-user";
 import {
   ensureUserSlug,
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest) {
     interests: user.interests ?? [],
     wishlistPublic: Boolean(user.wishlistPublic),
     bio: user.bio ?? "",
+    digestOptOut: Boolean(user.digestOptOut),
   });
 }
 
@@ -170,6 +172,7 @@ export async function PUT(request: NextRequest) {
     const interests = Array.isArray(body?.interests) ? body.interests.filter(isCategory) : undefined;
     if (interests) await setUserInterests(user.id, interests);
     if (typeof body?.wishlistPublic === "boolean") await setWishlistPublic(user.id, body.wishlistPublic);
+    if (typeof body?.digestOptOut === "boolean") await setDigestOptOut(user.id, body.digestOptOut);
     const updated = await updateUserProfile(user.id, {
       displayName: body?.displayName?.trim(),
       bio: typeof body?.bio === "string" ? body.bio.trim().slice(0, 160) || null : undefined,

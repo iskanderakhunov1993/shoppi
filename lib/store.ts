@@ -30,6 +30,7 @@ export type User = {
   // Off until the shopper shares it: a wishlist is personal by default.
   wishlistPublic?: boolean;
   bio?: string;
+  digestOptOut?: boolean;
   avatarUrl?: string;
   slug?: string;
   // Shopper's own "что мне интересно" picks — drives the personal "Для вас"
@@ -122,6 +123,7 @@ function toUser(r: Row): User {
     slug: opt(r.slug),
     wishlistPublic: Boolean(r.wishlist_public),
     bio: opt(r.bio),
+    digestOptOut: Boolean(r.digest_opt_out),
     interests: r.interests ? parseCategories(str(r.interests)) : undefined,
   };
 }

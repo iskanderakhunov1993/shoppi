@@ -1,34 +1,48 @@
 // Client-only: remembers what a signed-out visitor tried to do, so after
-// login they land back on the same page and the action completes itself.
+// login — or after signup and email confirmation, possibly in another
+// tab — they land back on the same page and the action completes itself.
 
-type Pending = { kind: "follow" | "favorite"; id: string; at: number };
+type Pending = { kind: "follow" | "favorite"; id: string; path: string; at: number };
 const KEY = "shoppi:pending-action";
-const TTL_MS = 30 * 60 * 1000;
+// Long enough to sign up, find the confirmation email and come back.
+const TTL_MS = 24 * 60 * 60 * 1000;
+
+function read(): Pending | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Pending;
+    if (Date.now() - p.at > TTL_MS) {
+      localStorage.removeItem(KEY);
+      return null;
+    }
+    return p;
+  } catch {
+    return null;
+  }
+}
 
 export function loginUrlFor(kind: Pending["kind"], id: string): string {
+  const path = window.location.pathname + window.location.search;
   try {
-    sessionStorage.setItem(KEY, JSON.stringify({ kind, id, at: Date.now() } satisfies Pending));
+    localStorage.setItem(KEY, JSON.stringify({ kind, id, path, at: Date.now() } satisfies Pending));
   } catch {}
-  const here = window.location.pathname + window.location.search;
-  return `/login?next=${encodeURIComponent(here)}`;
+  return `/login?next=${encodeURIComponent(path)}`;
 }
 
 /** Returns true (and clears it) when this exact action is pending. */
 export function takePendingAction(kind: Pending["kind"], id: string): boolean {
+  const p = read();
+  if (!p || p.kind !== kind || p.id !== id) return false;
   try {
-    const raw = sessionStorage.getItem(KEY);
-    if (!raw) return false;
-    const p = JSON.parse(raw) as Pending;
-    if (Date.now() - p.at > TTL_MS) {
-      sessionStorage.removeItem(KEY);
-      return false;
-    }
-    if (p.kind !== kind || p.id !== id) return false;
-    sessionStorage.removeItem(KEY);
-    return true;
-  } catch {
-    return false;
-  }
+    localStorage.removeItem(KEY);
+  } catch {}
+  return true;
+}
+
+/** Where to go after login when the URL has no ?next (e.g. after signup). */
+export function pendingReturnPath(): string | null {
+  return safeNextPath(read()?.path ?? null);
 }
 
 /** Only same-site relative paths are allowed as a post-login target. */

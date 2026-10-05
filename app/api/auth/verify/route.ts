@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { track } from "@/lib/events";
 import { verifyUser } from "@/lib/store";
 
 export async function GET(request: NextRequest) {
@@ -12,5 +13,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Ссылка недействительна или уже использована" }, { status: 400 });
   }
 
+  await track("email_verified", { userId: user.id });
   return NextResponse.json({ email: user.email, verified: true });
 }

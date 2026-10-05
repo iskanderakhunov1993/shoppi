@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { visitorFingerprint } from "@/lib/auth";
+import { track } from "@/lib/events";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth";
 import { isRateLimited, TOO_MANY } from "@/lib/rateLimit";
 import { clientIpFrom } from "@/lib/bot-detection";
@@ -47,6 +49,10 @@ export async function POST(request: NextRequest) {
     role as Role,
     brandDomain?.trim()
   );
+  await track("signup", {
+    visitor: visitorFingerprint(clientIpFrom(request.headers), request.headers.get("user-agent") ?? ""),
+    userId: user.id,
+  });
 
   const host = request.headers.get("host");
   const protocol = host?.startsWith("localhost") ? "http" : "https";

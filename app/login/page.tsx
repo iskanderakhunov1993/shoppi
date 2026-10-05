@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { safeNextPath } from "@/lib/pendingAction";
+import { pendingReturnPath, safeNextPath } from "@/lib/pendingAction";
 import { Field, inputClass, buttonClass } from "@/app/components/Field";
 import { BRANDS_ENABLED, DEMO_LOGIN_ENABLED } from "@/lib/featureFlags";
 
@@ -21,11 +21,15 @@ const DEMO_ROLES = (Object.keys(DEMO_LABEL) as Role[]).filter(
 
 // Set by buttons that need an account ("Сохранить", "Подписаться").
 function returnPath(): string | null {
-  return safeNextPath(new URLSearchParams(window.location.search).get("next"));
+  return safeNextPath(new URLSearchParams(window.location.search).get("next")) ?? pendingReturnPath();
 }
 
 export default function LoginPage() {
   const router = useRouter();
+  const [signupHref, setSignupHref] = useState("/signup");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("next")) setSignupHref("/signup?role=shopper");
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +92,8 @@ export default function LoginPage() {
             <h1 className="font-display text-2xl mb-1">Вход</h1>
             <p className="text-stone text-sm">
               Нет аккаунта?{" "}
-              <Link href="/signup" className="text-ink underline underline-offset-4">
+              {/* Came here from "Сохранить"/"Подписаться": those are shopper actions. */}
+              <Link href={signupHref} className="text-ink underline underline-offset-4">
                 Зарегистрироваться
               </Link>
             </p>
