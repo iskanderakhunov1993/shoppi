@@ -7,10 +7,10 @@ export function CuratorGrid({ creators }: { creators: Creator[] }) {
       <div className="max-w-[1200px] mx-auto">
         <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
-            <h2 className="font-display text-4xl md:text-5xl">Креаторы</h2>
+            <h2 className="font-display text-4xl md:text-5xl">Блогеры</h2>
           </div>
           <a href="/curators" className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors">
-            Все креаторы →
+            Все блогеры →
           </a>
         </div>
 

@@ -14,19 +14,20 @@ export function RoleTeasers() {
       >
         <div className={BRANDS_ENABLED ? "" : "max-w-md"}>
           <h2 className="font-display text-2xl md:text-3xl mb-5 max-w-xs">
-            Ведите витрину без чужого алгоритма.
+            Ведёте блог? Соберите рекомендации на одной странице
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 md:mb-0 list-disc list-inside marker:text-line">
-            <li>Одна ссылка на все находки</li>
+            <li>Одна ссылка для шапки профиля</li>
             <li>Товар добавляется по ссылке из любого магазина</li>
-            <li>Видно, что смотрят и покупают</li>
+            <li>Видно, сколько живых людей перешло к товару</li>
+            <li>Медиакит для брендов: цифры, а не только охват</li>
           </ul>
         </div>
         <Link
           href="/signup?role=creator"
           className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-80 transition-opacity w-fit mt-auto md:mt-0 md:flex-none"
         >
-          Стать креатором
+          Создать витрину бесплатно
         </Link>
       </div>
       {BRANDS_ENABLED && (

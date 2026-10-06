@@ -12,6 +12,8 @@ import { ShopByCategory } from "@/app/components/landing/ShopByCategory";
 import { ShopByBrand } from "@/app/components/landing/ShopByBrand";
 import { RoleTeasers } from "@/app/components/landing/RoleTeasers";
 import { Faq } from "@/app/components/landing/Faq";
+import { LiveRecommendations } from "@/app/components/landing/LiveRecommendations";
+import { FinalCta } from "@/app/components/landing/FinalCta";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { Reveal } from "@/app/components/Reveal";
 import { BRANDS_ENABLED } from "@/lib/featureFlags";
@@ -44,12 +46,14 @@ export default async function Home() {
           overlay treatment. */}
       <LandingNav />
       <Hero />
+      <Reveal><LiveRecommendations /></Reveal>
       <Reveal><HowItWorks /></Reveal>
       <Reveal><CuratorGrid creators={creators} /></Reveal>
       <Reveal><ShopByCategory /></Reveal>
       {BRANDS_ENABLED && <Reveal><ShopByBrand domains={domains} /></Reveal>}
       <Reveal><RoleTeasers /></Reveal>
       <Reveal><Faq /></Reveal>
+      <FinalCta />
       <LandingFooter />
     </main>
   );

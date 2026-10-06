@@ -18,11 +18,11 @@ export function Hero() {
           Shoppi · рекомендации блогеров
         </span>
         <h1 className="font-display text-[34px] md:text-[52px] leading-[1.05] tracking-tight text-ink">
-          Что купить — советуют блогеры, которым вы доверяете
+          Покупайте то, что советуют люди, а не реклама
         </h1>
         <p className="font-body text-stone text-[15px] md:text-base max-w-md mt-4">
-          Блогеры собирают товары, которыми пользуются сами, — с маркетплейсов, сайтов брендов
-          и любых магазинов. Вы подписываетесь и покупаете по ссылке. Бесплатно.
+          Товары из сторис и постов блогеров собраны на одной странице: с фото, ценой и
+          ссылкой на магазин. Подпишитесь на тех, кому доверяете.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-8">
@@ -30,7 +30,7 @@ export function Hero() {
             href="/finds"
             className="text-[13px] font-semibold uppercase tracking-wide text-paper bg-ink px-6 py-3.5 hover:opacity-85 transition-opacity"
           >
-            Смотреть находки
+            Смотреть рекомендации
           </Link>
           <Link
             href="/signup?role=creator"
