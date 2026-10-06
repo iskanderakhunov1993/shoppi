@@ -128,3 +128,64 @@ body {
     }
   }
 }
+
+/* ---------------------------------------------- landing v4 ("люди, а не реклама")
+   The home page has its own palette and type, scoped to .lv4 so the rest
+   of the product keeps its editorial look. Shared components inside (nav,
+   follow/favorite buttons) pick the palette up through the same tokens. */
+.lv4 {
+  --paper: #f6f5f8;
+  --card: #ffffff;
+  --raise: #ecebf0;
+  --ink: #17151c;
+  --stone: #706c7a;
+  --line: #e4e2ea;
+  --acc: #5b3df5;
+  --font-display: var(--font-unbounded);
+  --font-body: var(--font-onest);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lv4 {
+    --paper: #121116; --card: #1c1a22; --raise: #26232d; --ink: #f3f2f7;
+    --stone: #a29fad; --line: #2a2731; --acc: #8b76ff;
+  }
+}
+:root[data-theme="dark"] .lv4 {
+  --paper: #121116; --card: #1c1a22; --raise: #26232d; --ink: #f3f2f7;
+  --stone: #a29fad; --line: #2a2731; --acc: #8b76ff;
+}
+.lv4 .font-display { font-weight: 400; }
+.lv4 .text-acc { color: var(--acc); }
+.lv4 :focus-visible { outline-color: var(--acc); }
+.lv4-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ink); color: var(--paper);
+  padding: 15px 22px; border-radius: 14px; font-weight: 500; font-size: 15px;
+  transition: transform .15s;
+}
+.lv4-btn:hover { transform: translateY(-1px); }
+.lv4-btn-o { background: var(--card); color: var(--ink); }
+.lv4-strike { text-decoration: none; color: var(--stone); position: relative; white-space: nowrap; }
+.lv4-strike::after {
+  content: ""; position: absolute; left: -2%; right: -2%; top: 54%; height: .08em;
+  background: var(--acc); transform-origin: left;
+  animation: lv4-strike .8s cubic-bezier(.6,0,.2,1) .4s both;
+}
+@keyframes lv4-strike { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.lv4-faq summary::-webkit-details-marker { display: none; }
+.lv4-faq summary::after {
+  content: "+"; flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--paper); color: var(--acc); display: grid; place-items: center;
+  font-size: 18px; transition: transform .2s;
+}
+.lv4-faq[open] summary::after { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) {
+  .lv4-strike::after { animation: none; }
+}
+.lv4-follow button {
+  border-radius: 12px; text-transform: none; letter-spacing: 0;
+  font-size: 14px; font-weight: 500; padding: 10px 16px;
+}

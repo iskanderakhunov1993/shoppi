@@ -1,25 +1,31 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { Onest, Unbounded } from "next/font/google";
 import { seedDemoAccounts, listLandingCreators } from "@/lib/seed";
-import { getCreatorByUserId, listDistinctBrandDomains, getSessionUserId, getUserById } from "@/lib/store";
+import { getCreatorByUserId, getSessionUserId, getUserById } from "@/lib/store";
 import { homePathFor } from "@/lib/landing";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { LandingNav } from "@/app/components/landing/LandingNav";
-import { Hero } from "@/app/components/landing/Hero";
-import { HowItWorks } from "@/app/components/landing/HowItWorks";
-import { CuratorGrid } from "@/app/components/landing/CuratorGrid";
-import { ShopByCategory } from "@/app/components/landing/ShopByCategory";
-import { ShopByBrand } from "@/app/components/landing/ShopByBrand";
-import { RoleTeasers } from "@/app/components/landing/RoleTeasers";
-import { Faq } from "@/app/components/landing/Faq";
-import { LiveRecommendations } from "@/app/components/landing/LiveRecommendations";
-import { FinalCta } from "@/app/components/landing/FinalCta";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { Reveal } from "@/app/components/Reveal";
-import { BRANDS_ENABLED } from "@/lib/featureFlags";
+import { HeroV4 } from "@/app/components/landing/v4/Hero";
+import {
+  BloggersV4,
+  CategoriesV4,
+  FaqV4,
+  FinalV4,
+  ForBloggersV4,
+  HowItWorksV4,
+  LiveRecommendationsV4,
+} from "@/app/components/landing/v4/Sections";
 
-// Reads mutable in-memory store state (seeded demo creators) on every
-// request — must not be statically prerendered at build time.
+// The landing's own type pair; everything else in the product keeps
+// Playfair + Inter (see .lv4 in globals.css).
+const unbounded = Unbounded({ variable: "--font-unbounded", subsets: ["latin", "cyrillic"], weight: ["400", "500"] });
+const onest = Onest({ variable: "--font-onest", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
+
+// Reads live creators and links on every request — must not be
+// statically prerendered at build time.
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -35,25 +41,18 @@ export default async function Home() {
 
   await seedDemoAccounts();
   const creators = await listLandingCreators();
-  const domains = BRANDS_ENABLED ? await listDistinctBrandDomains() : [];
 
   return (
-    <main className="flex-1 flex flex-col">
-      {/* The bar is fixed, so it rides over the hero rather than sitting
-          above it, and stays put once the page scrolls. The hero itself
-          is now a plain themed section (no fixed dark backdrop), so the
-          nav needs normal theme-aware colors, not the white-on-dark
-          overlay treatment. */}
+    <main className={`lv4 ${unbounded.variable} ${onest.variable} flex-1 flex flex-col`}>
       <LandingNav />
-      <Hero />
-      <Reveal><LiveRecommendations /></Reveal>
-      <Reveal><HowItWorks /></Reveal>
-      <Reveal><CuratorGrid creators={creators} /></Reveal>
-      <Reveal><ShopByCategory /></Reveal>
-      {BRANDS_ENABLED && <Reveal><ShopByBrand domains={domains} /></Reveal>}
-      <Reveal><RoleTeasers /></Reveal>
-      <Reveal><Faq /></Reveal>
-      <FinalCta />
+      <HeroV4 creators={creators} />
+      <Reveal><LiveRecommendationsV4 /></Reveal>
+      <Reveal><HowItWorksV4 /></Reveal>
+      <Reveal><BloggersV4 creators={creators} /></Reveal>
+      <Reveal><CategoriesV4 /></Reveal>
+      <Reveal><ForBloggersV4 /></Reveal>
+      <Reveal><FaqV4 /></Reveal>
+      <FinalV4 />
       <LandingFooter />
     </main>
   );
