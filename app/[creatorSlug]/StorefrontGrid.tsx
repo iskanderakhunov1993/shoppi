@@ -451,14 +451,15 @@ export function StorefrontGrid({
                 (i + 1) % 3 !== 0 ? "lg:border-r" : ""
               } ${(i + 1) % 2 !== 0 ? "sm:border-r lg:border-r-0" : ""}`}
             >
-              <div className="relative bg-line overflow-hidden">
-                <a href={link.wrappedUrl} className="block w-full">
+              <div className="relative overflow-hidden">
+                {/* Square cell, product centred with air around it (ShopMy-style). */}
+                <a href={link.wrappedUrl} className="flex items-center justify-center w-full aspect-square p-6 md:p-10">
                   {link.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={link.imageUrl}
                       alt={link.title}
-                      className="w-full h-auto object-contain hover:opacity-90 transition-opacity"
+                      className="max-w-full max-h-full object-contain hover:scale-[1.03] transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full aspect-square" aria-hidden="true" />

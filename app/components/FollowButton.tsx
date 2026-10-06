@@ -89,18 +89,19 @@ export function FollowButton({
       onClick={handleClick}
       disabled={pending || !known}
       aria-pressed={following}
-      className={`text-[12px] uppercase tracking-wide transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap ${
-        compact ? "px-3 py-1.5" : "px-5 py-2.5 w-full sm:w-auto"
-      } ${
-        following
-          ? compact
-            ? "bg-paper text-ink hover:bg-ink hover:text-paper"
-            : "border border-ink text-ink hover:bg-ink hover:text-paper"
-          : "bg-ink text-paper hover:opacity-80"
+      className={`transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap ${
+        compact
+          ? `text-[12px] uppercase tracking-wide px-3 py-1.5 ${
+              following ? "bg-paper text-ink hover:bg-ink hover:text-paper" : "bg-ink text-paper hover:opacity-80"
+            }`
+          : // Storefront: an outlined pill, like ShopMy's "Add to Favorites".
+            `text-[14px] px-7 py-2.5 rounded-full border border-ink w-full sm:w-auto ${
+              following ? "bg-ink text-paper hover:opacity-85" : "text-ink hover:bg-ink hover:text-paper"
+            }`
       }`}
     >
-      {shopperOnly ? "Только для покупателей" : following ? (compact ? "Подписан" : "В ваших блогерах") : compact ? "Подписаться" : "Добавить в моих блогеров"}
-      {!compact && followers > 0 && <span className="opacity-70 ml-2 normal-case">· {followers}</span>}
+      {shopperOnly ? "Только для покупателей" : following ? (compact ? "Подписан" : "Вы подписаны") : "Подписаться"}
+      {!compact && followers > 0 && <span className="opacity-60 ml-2">· {followers}</span>}
     </button>
   );
 }
