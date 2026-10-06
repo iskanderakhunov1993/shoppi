@@ -20,7 +20,7 @@ export function RoleTeasers() {
             <li>Одна ссылка для шапки профиля</li>
             <li>Товар добавляется по ссылке из любого магазина</li>
             <li>Видно, сколько живых людей перешло к товару</li>
-            <li>Медиакит для брендов: цифры, а не только охват</li>
+            <li>Медиакит с цифрами переходов, чтобы показать брендам</li>
           </ul>
         </div>
         <Link
@@ -37,8 +37,8 @@ export function RoleTeasers() {
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 list-disc list-inside marker:text-line">
             <li>Привяжите домен и увидите все ссылки на него</li>
-            <li>Клики по каждому товару, без ручных таблиц</li>
-            <li>Никаких заявок и модерации на старте</li>
+            <li>Клики по каждому товару считаются сами</li>
+            <li>Подключение без заявок и модерации</li>
           </ul>
           <Link
             href="/signup?role=brand"

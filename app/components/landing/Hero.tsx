@@ -21,8 +21,8 @@ export function Hero() {
           Покупайте то, что советуют люди, а не реклама
         </h1>
         <p className="font-body text-stone text-[15px] md:text-base max-w-md mt-4">
-          Товары из сторис и постов блогеров собраны на одной странице: с фото, ценой и
-          ссылкой на магазин. Подпишитесь на тех, кому доверяете.
+          Товары из сторис и постов блогеров на одной странице, с ценой и ссылкой на магазин.
+          Подпишитесь на тех, кому доверяете.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-8">
@@ -36,7 +36,7 @@ export function Hero() {
             href="/signup?role=creator"
             className="text-[13px] font-semibold uppercase tracking-wide text-ink border border-line px-6 py-3.5 hover:border-ink transition-colors"
           >
-            Я блогер — создать витрину
+            Создать свою витрину
           </Link>
         </div>
       </div>
