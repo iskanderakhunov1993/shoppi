@@ -156,6 +156,14 @@ export function StorefrontGrid({
     );
   }
 
+  const isPopular = tab === "popular" || tab === "popular_month" || tab === "popular_week";
+  // Any non-popular, non-collection tab (latest, "Для вас", a category) lives under "Последние".
+  const isLatest = !isPopular && tab !== "collections" && tab !== "social";
+  const subPill = (on: boolean) =>
+    `text-[12.5px] px-3 py-1 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+      on ? "bg-ink text-paper" : "text-stone hover:text-ink"
+    }`;
+
   return (
     <div>
       <div className="relative border-b border-line">
@@ -194,30 +202,10 @@ export function StorefrontGrid({
           <button
             onClick={() => selectTab("popular")}
             className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              tab === "popular" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
+              isPopular ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
             }`}
           >
             Популярное
-          </button>
-        )}
-        {!hidePopular && links.length > 0 && (
-          <button
-            onClick={() => selectTab("popular_month")}
-            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              tab === "popular_month" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
-            }`}
-          >
-            Популярное за месяц
-          </button>
-        )}
-        {!hidePopular && links.length > 0 && (
-          <button
-            onClick={() => selectTab("popular_week")}
-            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              tab === "popular_week" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
-            }`}
-          >
-            Популярное за неделю
           </button>
         )}
         {collections.length > 0 && (
@@ -240,34 +228,31 @@ export function StorefrontGrid({
             Соцсети
           </button>
         )}
-        {links.length > 0 && (
-          <button
-            onClick={() => selectTab("for_you")}
-            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              tab === "for_you" ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
-            }`}
-          >
-            Для вас
-          </button>
-        )}
-        {categories.length > 0 && <span className="text-line select-none flex-none">·</span>}
-        {categories.map((c) => (
-          <button
-            key={c}
-            onClick={() => selectTab(c)}
-            className={`text-[13px] px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              tab === c ? "border border-ink text-ink" : "border border-transparent text-stone hover:text-ink"
-            }`}
-          >
-            {CATEGORY_LABEL[c] ?? c}
-          </button>
-        ))}
       </div>
       {/* Right-edge fade hints that the tab row scrolls further — the row
           has no visible scrollbar, so without this a 7+ tab list can look
           like it simply ends at the viewport edge. */}
       <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-paper to-transparent" />
       </div>
+
+      {/* Second row: period for "Популярное", personal + category filters for
+          "Последние" — kept out of the main row so it reads like ShopMy's three tabs. */}
+      {isPopular && (
+        <div className="flex items-center gap-1 px-8 py-2.5 overflow-x-auto border-b border-line">
+          {([["popular", "За всё время"], ["popular_month", "За месяц"], ["popular_week", "За неделю"]] as const).map(([t, label]) => (
+            <button key={t} onClick={() => selectTab(t)} className={subPill(tab === t)}>{label}</button>
+          ))}
+        </div>
+      )}
+      {isLatest && links.length > 0 && (
+        <div className="flex items-center gap-1 px-8 py-2.5 overflow-x-auto border-b border-line">
+          <button onClick={() => selectTab("latest")} className={subPill(tab === "latest")}>Все</button>
+          <button onClick={() => selectTab("for_you")} className={subPill(tab === "for_you")}>Для вас</button>
+          {categories.map((c) => (
+            <button key={c} onClick={() => selectTab(c)} className={subPill(tab === c)}>{CATEGORY_LABEL[c] ?? c}</button>
+          ))}
+        </div>
+      )}
 
       {isOwner && (
         <div className="flex items-center gap-2 px-8 py-3 overflow-x-auto border-b border-line">
