@@ -21,7 +21,7 @@ const SUGGESTIONS = ["Уход", "Макияж", "На дачу", "Подарк�
 const PLURAL = new Intl.PluralRules("ru");
 const creatorsWord = (n: number) => {
   const f = PLURAL.select(n);
-  return f === "one" ? "креатор" : f === "few" ? "креатора" : "креаторов";
+  return f === "one" ? "блогер" : f === "few" ? "блогера" : "блогеров";
 };
 
 export function MyCircles({
@@ -179,9 +179,9 @@ export function MyCircles({
 
       {availableCreators.length < 2 && (
         <p className="text-stone text-[13px] -mt-4 max-w-md">
-          Круги пригодятся, когда вы подпишетесь на нескольких креаторов.{" "}
+          Круги пригодятся, когда вы подпишетесь на нескольких блогеров.{" "}
           <a href="/curators" className="underline underline-offset-4 hover:text-ink transition-colors">
-            Найти креаторов
+            Найти блогеров
           </a>
         </p>
       )}
@@ -191,7 +191,7 @@ export function MyCircles({
       ) : circles.length === 0 ? (
         <div className="flex flex-col gap-4 max-w-md">
           <p className="font-display italic text-stone text-lg">
-            Круг собирает нескольких креаторов в одну ленту по теме.
+            Круг собирает нескольких блогеров в одну ленту по теме.
           </p>
           <div className="flex flex-wrap gap-2" aria-label="Подсказки названий">
             {SUGGESTIONS.map((name) => (
@@ -211,7 +211,7 @@ export function MyCircles({
               onClick={onOpenCreators}
               className="text-[12px] uppercase tracking-wide text-stone hover:text-ink transition-colors cursor-pointer w-fit"
             >
-              Мои креаторы →
+              Мои блогеры →
             </button>
           )}
         </div>
@@ -247,7 +247,7 @@ export function MyCircles({
               <div className="px-4 pb-2 flex justify-end items-center gap-3 min-h-9">
                 {confirmDeleteId === circle.id ? (
                   <>
-                    <span className="text-[12px] text-stone">Удалить круг? Креаторы останутся.</span>
+                    <span className="text-[12px] text-stone">Удалить круг? Блогеры останутся.</span>
                     <button
                       type="button"
                       onClick={() => deleteCircle(circle.id)}
@@ -287,7 +287,7 @@ export function MyCircles({
                           Состав круга
                         </h4>
                         {availableCreators.length === 0 ? (
-                          <p className="text-stone text-[13px]">Сначала подпишитесь на креаторов.</p>
+                          <p className="text-stone text-[13px]">Сначала подпишитесь на блогеров.</p>
                         ) : (
                           <div className="flex flex-wrap gap-2">
                             {availableCreators.map((c) => {
@@ -319,11 +319,11 @@ export function MyCircles({
 
                       <div>
                         <h4 className="text-[11px] uppercase tracking-wider text-stone mb-3">
-                          Находки этого круга
+                          Рекомендации этого круга
                         </h4>
                         {detail.feed.length === 0 ? (
                           <p className="text-stone text-[13px]">
-                            Пока пусто. Добавьте креатора с товарами на витрине.
+                            Пока пусто. Добавьте блогера с товарами на витрине.
                           </p>
                         ) : (
                           <ul className="flex flex-col">

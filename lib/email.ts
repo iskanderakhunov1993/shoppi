@@ -118,24 +118,24 @@ export async function sendDigestEmail(opts: {
     .join("");
   const word = (n: number) => {
     const m10 = n % 10, m100 = n % 100;
-    if (m10 === 1 && m100 !== 11) return "новая находка";
-    if ([2, 3, 4].includes(m10) && ![12, 13, 14].includes(m100)) return "новые находки";
-    return "новых находок";
+    if (m10 === 1 && m100 !== 11) return "новая рекомендация";
+    if ([2, 3, 4].includes(m10) && ![12, 13, 14].includes(m100)) return "новые рекомендации";
+    return "новых рекомендаций";
   };
 
   try {
     const { error } = await resend.emails.send({
       from: FROM,
       to: opts.email,
-      subject: `${opts.total} ${word(opts.total)} от ваших креаторов — Shoppi`,
+      subject: `${opts.total} ${word(opts.total)} от ваших блогеров — Shoppi`,
       headers: { "List-Unsubscribe": `<${opts.unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
       html: `
         <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; color: #111;">
           <h1 style="font-size: 22px; font-weight: 400; font-family: Georgia, serif;">${opts.total} ${word(opts.total)} за неделю</h1>
-          <p style="color: #737066;">Креаторы, на которых вы подписаны, добавили новые товары.</p>
+          <p style="color: #737066;">Блогеры, на которых вы подписаны, добавили новые товары.</p>
           <table style="width: 100%; border-collapse: collapse;">${rows}</table>
           <p style="margin-top: 20px;">
-            <a href="${esc(opts.allUrl)}" style="display: inline-block; background: #111; color: #fff; padding: 12px 20px; text-decoration: none; font-weight: 600;">Смотреть все находки</a>
+            <a href="${esc(opts.allUrl)}" style="display: inline-block; background: #111; color: #fff; padding: 12px 20px; text-decoration: none; font-weight: 600;">Смотреть все рекомендации</a>
           </p>
           <p style="color: #737066; font-size: 12px; margin-top: 28px;">
             Письмо приходит раз в неделю, если есть новинки. <a href="${esc(opts.unsubscribeUrl)}" style="color: #737066;">Отписаться</a>

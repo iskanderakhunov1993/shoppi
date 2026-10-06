@@ -351,7 +351,7 @@ describe("opportunities", () => {
     const opportunity = await createOpportunity({
       brandUserId: brand.id,
       title: "Обзор нового крема",
-      description: "Ищем креатора для честного обзора.",
+      description: "Ищем блогера для честного обзора.",
       compensation: "Продукт + 3000₽",
       category: "face_care",
     });

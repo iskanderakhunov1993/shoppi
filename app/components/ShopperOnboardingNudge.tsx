@@ -49,8 +49,8 @@ export function ShopperOnboardingNudge({ initialInterests = [] }: { initialInter
           steps={[
             {
               n: 1,
-              title: "Подпишитесь на креатора",
-              description: "Добавьте того, чьему вкусу доверяете, и его находки появятся у вас в ленте.",
+              title: "Подпишитесь на блогера",
+              description: "Добавьте того, чьему вкусу доверяете, и его рекомендации появятся у вас в ленте.",
               done: hasFollow,
               cta: {
                 label: "Быстрый подбор",
@@ -60,7 +60,7 @@ export function ShopperOnboardingNudge({ initialInterests = [] }: { initialInter
                 },
               },
               secondaryCta: {
-                label: "Все креаторы",
+                label: "Все блогеры",
                 onClick: () => {
                   window.location.href = "/curators";
                 },
@@ -69,10 +69,10 @@ export function ShopperOnboardingNudge({ initialInterests = [] }: { initialInter
             {
               n: 2,
               title: "Сохраните товар в избранное",
-              description: "На любой витрине креатора нажмите «Сохранить»: товар появится в «Сохранённом».",
+              description: "На любой витрине блогера нажмите «Сохранить»: товар появится в «Сохранённом».",
               done: hasFavorite,
               cta: {
-                label: "Смотреть креаторов",
+                label: "Смотреть блогеров",
                 onClick: () => {
                   window.location.href = "/curators";
                 },

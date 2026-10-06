@@ -87,7 +87,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <h2 className="text-[11px] uppercase tracking-wider text-stone mb-4">Креаторы</h2>
+        <h2 className="text-[11px] uppercase tracking-wider text-stone mb-4">Блогеры</h2>
         {creators.length === 0 ? (
           <p className="text-stone text-[14px]">За этот период событий нет.</p>
         ) : (
@@ -95,7 +95,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
             <table className="w-full text-[13.5px] tabular-nums">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-wider text-stone">
-                  <th className="py-2 font-normal">Креатор</th>
+                  <th className="py-2 font-normal">Блогер</th>
                   <th className="py-2 font-normal text-right">Просмотры</th>
                   <th className="py-2 font-normal text-right">Переходы</th>
                   <th className="py-2 font-normal text-right">Сохранения</th>

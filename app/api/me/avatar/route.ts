@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
   const creator = await getCreatorByUserId(user.id);
   if (!creator) {
-    return NextResponse.json({ error: "Профиль креатора не найден" }, { status: 404 });
+    return NextResponse.json({ error: "Профиль блогера не найден" }, { status: 404 });
   }
   await saveCreatorAvatar(creator.id, mime, base64);
   // The version query keeps browsers from showing the previous photo

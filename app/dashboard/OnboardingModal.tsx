@@ -34,7 +34,7 @@ export function OnboardingModal({
         </span>
         <h2 className="font-display text-2xl mt-2">Настройте Shoppi под себя</h2>
         <p className="text-stone text-sm leading-relaxed mt-2">
-          Пара шагов, и лента будет собирать находки только тех, кому вы доверяете.
+          Пара шагов, и лента будет собирать рекомендации только тех, кому вы доверяете.
         </p>
 
         <div className="flex flex-col gap-6 mt-7">

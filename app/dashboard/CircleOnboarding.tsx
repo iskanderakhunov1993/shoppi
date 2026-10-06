@@ -50,7 +50,7 @@ export function CircleOnboarding({
       setCreators(data.creators ?? []);
     } catch {
       setCreators([]);
-      setError("Не удалось загрузить креаторов. Вернитесь назад и попробуйте ещё раз.");
+      setError("Не удалось загрузить блогеров. Вернитесь назад и попробуйте ещё раз.");
     }
   }
 
@@ -85,7 +85,7 @@ export function CircleOnboarding({
       setSelected(new Set(failed));
       setError(
         failed.length === ids.length
-          ? "Не удалось добавить креаторов. Попробуйте ещё раз."
+          ? "Не удалось добавить блогеров. Попробуйте ещё раз."
           : `Добавили не всех: осталось ${failed.length}. Нажмите «Добавить» ещё раз.`
       );
       return;
@@ -98,7 +98,7 @@ export function CircleOnboarding({
       <div className="bg-card border border-line w-full max-w-lg max-h-[85vh] overflow-y-auto p-8 flex flex-col gap-6">
         <div className="flex items-start justify-between">
           <h2 className="font-display text-2xl">
-            {step === "categories" ? "Что вам интересно?" : "Кого добавим в креаторы?"}
+            {step === "categories" ? "Что вам интересно?" : "Кого добавим в блогеры?"}
           </h2>
           <button
             onClick={onClose}
@@ -112,7 +112,7 @@ export function CircleOnboarding({
         {step === "categories" && (
           <>
             <p className="text-stone text-sm leading-relaxed -mt-4">
-              Выберите категории: покажем реальных креаторов, которые уже добавляют в них товары.
+              Выберите категории: покажем реальных блогеров, которые уже добавляют в них товары.
             </p>
             <div className="flex flex-wrap gap-2">
               {VISIBLE_CATEGORIES.map((c) => (
@@ -145,13 +145,13 @@ export function CircleOnboarding({
         {step === "creators" && (
           <>
             <p className="text-stone text-sm leading-relaxed -mt-4">
-              Добавьте кого-то из них, и их находки соберутся у вас в ленте. Можно изменить позже.
+              Добавьте кого-то из них, и их рекомендации соберутся у вас в ленте. Можно изменить позже.
             </p>
             {creators === null ? (
               <p className="text-stone text-sm">Загрузка…</p>
             ) : creators.length === 0 ? (
               <p className="text-stone text-sm">
-                Пока нет креаторов в этих категориях. Загляните позже или посмотрите{" "}
+                Пока нет блогеров в этих категориях. Загляните позже или посмотрите{" "}
                 <a href="/curators" className="underline">
                   весь список
                 </a>

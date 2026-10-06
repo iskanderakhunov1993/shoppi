@@ -54,7 +54,7 @@ export function CreatorMosaic({
                 }`}
               >
                 <span className={`font-display italic block ${featured ? "text-base md:text-xl" : "text-[11px]"}`}>
-                  Креатор
+                  Блогер
                 </span>
                 <span
                   className={`font-display block leading-[1.05] [overflow-wrap:anywhere] ${

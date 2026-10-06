@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const ITEMS = [
   {
     title: "Привяжите домен",
-    body: "Укажите свой домен при регистрации, и Shoppi найдёт все ссылки креаторов, ведущие на него.",
+    body: "Укажите свой домен при регистрации, и Shoppi найдёт все ссылки блогеров, ведущие на него.",
   },
   {
     title: "Клики без таблиц",
@@ -35,7 +35,7 @@ export default async function BrandsPage() {
         titlePrefix="Никто не продвигает продукт"
         titleEmphasis="так,"
         titleSuffix="как люди, которые его любят."
-        subhead="Смотрите, кто из креаторов уже ссылается на ваш домен, и сколько кликов это приносит."
+        subhead="Смотрите, кто из блогеров уже ссылается на ваш домен, и сколько кликов это приносит."
         ctaLabel="Подключить домен"
         ctaHref="/signup?role=brand"
         imageSeed="shoppi-brands"

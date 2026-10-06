@@ -35,8 +35,8 @@ const VALID_TABS: Tab[] = ["overview", "saved", "circle", "circles"];
 const TAB_HINT: Record<Tab, string> = {
   overview: "Ваши подписки, круги и сохранённые товары в одном месте.",
   saved: "Товары, сохранённые с любой витрины. Эта же подборка доступна по ссылке «Мой вишлист» вверху.",
-  circle: "Те, на кого вы подписаны напрямую: их находки собираются в ленте ниже.",
-  circles: "Группируйте креаторов из «Мои креаторы» по темам, например «Уход» или «На дачу».",
+  circle: "Те, на кого вы подписаны напрямую: их рекомендации собираются в ленте ниже.",
+  circles: "Группируйте блогеров из «Мои блогеры» по темам, например «Уход» или «На дачу».",
 };
 
 export function ShopperDashboard({ me }: { me: { displayName: string; slug?: string; interests?: Category[]; wishlistPublic?: boolean } }) {
@@ -208,7 +208,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               href="/curators"
               className="text-[12px] uppercase tracking-wide text-stone border border-line px-3 py-2 hover:border-ink hover:text-ink transition-colors"
             >
-              Все креаторы
+              Все блогеры
             </Link>
             {me.slug && favorites && favorites.length > 0 && (
               <>
@@ -271,7 +271,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             tab === "circle" ? "border-ink text-ink" : "border-transparent text-stone hover:text-ink"
           }`}
         >
-          Мои креаторы{circle ? ` · ${circle.creators.length}` : ""}
+          Мои блогеры{circle ? ` · ${circle.creators.length}` : ""}
         </button>
         <button
           onClick={() => setTab("circles")}
@@ -310,7 +310,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           role="status"
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-ink text-paper px-5 py-3 flex items-center gap-5 text-[13px] shadow-lg"
         >
-          <span>{pendingUnfollow.displayName} больше не в ваших креаторах</span>
+          <span>{pendingUnfollow.displayName} больше не в ваших блогерах</span>
           <button
             type="button"
             onClick={undoUnfollow}
@@ -326,7 +326,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] uppercase tracking-wider text-stone">
-                Последние находки от ваших креаторов
+                Последние рекомендации от ваших блогеров
               </h3>
               {circle && circle.feed.length > 0 && (
                 <button
@@ -342,9 +342,9 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <p className="text-stone text-sm">Загрузка…</p>
             ) : circle.feed.length === 0 ? (
               <p className="font-display italic text-stone text-sm">
-                Пока пусто. Как только кто-то из ваших креаторов добавит товар, он появится тут.{" "}
+                Пока пусто. Как только кто-то из ваших блогеров добавит товар, он появится тут.{" "}
                 <a href="/finds" className="not-italic underline underline-offset-4">
-                  Посмотрите находки всей площадки
+                  Посмотрите рекомендации всей площадки
                 </a>
                 .
               </p>
@@ -398,8 +398,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           ) : favorites.length === 0 ? (
             <EmptyState
               title="Пока пусто."
-              description="Откройте витрину креатора и нажмите «Сохранить» на товаре: он появится здесь, и к нему можно будет вернуться позже."
-              cta={{ label: "Смотреть креаторов", href: "/curators" }}
+              description="Откройте витрину блогера и нажмите «Сохранить» на товаре: он появится здесь, и к нему можно будет вернуться позже."
+              cta={{ label: "Смотреть блогеров", href: "/curators" }}
             />
           ) : (
             <ul className="flex flex-col">
@@ -448,9 +448,9 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 <span className="bg-line" />
                 <span className="bg-line" />
               </div>
-              <p className="font-display italic text-base text-stone">Пока нет креаторов</p>
+              <p className="font-display italic text-base text-stone">Пока нет блогеров</p>
               <p className="text-stone text-sm leading-relaxed">
-                Подпишитесь на первых креаторов, чьему вкусу доверяете, и их находки соберутся в одну
+                Подпишитесь на первых блогеров, чьему вкусу доверяете, и их рекомендации соберутся в одну
                 ленту, вместо того чтобы проверять каждую витрину по отдельности.
               </p>
               <button
@@ -458,7 +458,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 onClick={() => setShowOnboarding(true)}
                 className="w-fit text-[12px] font-semibold uppercase tracking-wide text-paper bg-ink px-5 py-3 hover:opacity-80 transition-opacity cursor-pointer"
               >
-                Найти креаторов
+                Найти блогеров
               </button>
             </div>
           ) : (
@@ -466,7 +466,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-[11px] uppercase tracking-wider text-stone">
-                    В ваших креаторах
+                    В ваших блогерах
                   </h3>
                   <button
                     type="button"
@@ -494,7 +494,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                       <button
                         type="button"
                         onClick={() => unfollow(c)}
-                        aria-label={`Убрать ${c.displayName} из креаторов`}
+                        aria-label={`Убрать ${c.displayName} из блогеров`}
                         className="w-8 h-8 -my-1.5 -mr-2 flex items-center justify-center text-stone hover:text-error transition-colors cursor-pointer text-[17px] leading-none"
                       >
                         ×
@@ -506,11 +506,11 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
 
               <div>
                 <h3 className="text-[11px] uppercase tracking-wider text-stone mb-4">
-                  Их находки
+                  Их рекомендации
                 </h3>
                 {circle.feed.length === 0 ? (
                   <p className="font-display italic text-stone">
-                    Ваши креаторы пока ничего не добавили.
+                    Ваши блогеры пока ничего не добавили.
                   </p>
                 ) : (
                   <ul className="flex flex-col">
@@ -582,8 +582,8 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
           steps={[
             {
               n: 1,
-              title: "Подпишитесь на креатора",
-              description: "Добавьте того, чьему вкусу доверяете, и его находки появятся у вас в ленте.",
+              title: "Подпишитесь на блогера",
+              description: "Добавьте того, чьему вкусу доверяете, и его рекомендации появятся у вас в ленте.",
               done: hasFollow,
               cta: {
                 label: "Быстрый подбор",
@@ -593,7 +593,7 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
                 },
               },
               secondaryCta: {
-                label: "Все креаторы",
+                label: "Все блогеры",
                 onClick: () => {
                   window.location.href = "/curators";
                 },
@@ -602,10 +602,10 @@ export function ShopperDashboard({ me }: { me: { displayName: string; slug?: str
             {
               n: 2,
               title: "Сохраните товар в избранное",
-              description: "На любой витрине креатора нажмите «Сохранить»: товар появится в «Сохранённом».",
+              description: "На любой витрине блогера нажмите «Сохранить»: товар появится в «Сохранённом».",
               done: hasFavorite,
               cta: {
-                label: "Смотреть креаторов",
+                label: "Смотреть блогеров",
                 onClick: () => {
                   window.location.href = "/curators";
                 },

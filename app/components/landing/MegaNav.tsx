@@ -22,24 +22,24 @@ function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
         {
           label: "Обзор",
           href: "/shoppers",
-          description: "Зачем покупать по рекомендации креатора, а не по ленте алгоритма.",
+          description: "Зачем покупать по рекомендации блогера, а не по ленте алгоритма.",
         },
         {
-          label: "По креатору",
+          label: "По блогеру",
           href: "/curators",
           description: "Витрины людей, чьему вкусу вы доверяете, а не лента алгоритма.",
         },
         {
-          label: "Последние находки",
+          label: "Последние рекомендации",
           href: "/finds",
-          description: "Товары от всех креаторов сразу, по порядку добавления.",
+          description: "Товары от всех блогеров сразу, по порядку добавления.",
         },
         ...(BRANDS_ENABLED
           ? [
               {
                 label: "По магазину",
                 href: "/#brands-catalog",
-                description: "Сайты, куда чаще всего ведут ссылки креаторов.",
+                description: "Сайты, куда чаще всего ведут ссылки блогеров.",
               },
             ]
           : []),
@@ -51,13 +51,13 @@ function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
         {
           label: "Все категории",
           href: "/categories",
-          description: "От косметики до электроники: товары креаторов по темам.",
+          description: "От косметики до электроники: товары блогеров по темам.",
         },
       ],
     },
     {
       key: "creators",
-      label: "Креаторам",
+      label: "Блогерам",
       align: "center",
       items: [
         {
@@ -68,12 +68,12 @@ function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
         {
           label: "Как это устроено",
           href: "/#how",
-          description: "Три шага от вашей находки до перехода подписчика.",
+          description: "Три шага от вашей рекомендации до перехода подписчика.",
         },
         {
           label: "Пример витрины",
           href: example,
-          description: "Живая страница креатора, ровно то, что получите вы.",
+          description: "Живая страница блогера, ровно то, что получите вы.",
         },
         {
           label: "Пример медиакита",
@@ -81,7 +81,7 @@ function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
           description: "Страница со статистикой, которую можно показать рекламодателю.",
         },
         {
-          label: "Стать креатором",
+          label: "Стать блогером",
           href: "/signup?role=creator",
           description: "Регистрация открыта всем, без заявки и модерации.",
         },
@@ -95,7 +95,7 @@ function buildMenus(demoSlug?: string, statsSlug?: string): Menu[] {
         {
           label: "Обзор",
           href: "/brands",
-          description: "Кто из креаторов уже ссылается на ваши товары, привязка по артикулу и честные живые переходы.",
+          description: "Кто из блогеров уже ссылается на ваши товары, привязка по артикулу и честные живые переходы.",
         },
         {
           label: "Подключить домен",
@@ -138,16 +138,16 @@ function quickLinksFor(role: Role | undefined, creatorSlug?: string): { label: s
     return [
       { label: "Моя витрина", href: creatorSlug ? `/${creatorSlug}` : "/dashboard" },
       { label: "Ссылки", href: "/dashboard?tab=products" },
-      { label: "Креаторы", href: "/curators" },
-      { label: "Находки", href: "/finds" },
+      { label: "Блогеры", href: "/curators" },
+      { label: "Рекомендации", href: "/finds" },
     ];
   }
   // shopper, brand, or unknown role — brands have no dedicated quick
   // links yet since the role is paused (BRANDS_ENABLED), so they get
   // the same shopper-facing shortcuts.
   return [
-    { label: "Креаторы", href: "/curators" },
-    { label: "Находки", href: "/finds" },
+    { label: "Блогеры", href: "/curators" },
+    { label: "Рекомендации", href: "/finds" },
     { label: "Категории", href: "/categories" },
     { label: "Круги", href: "/dashboard?tab=circles" },
     { label: "Сохранённое", href: "/dashboard?tab=saved" },
@@ -339,7 +339,7 @@ export function MegaNav({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onBlur={() => !searchQuery && setSearchOpen(false)}
-                placeholder="Товары и креаторы"
+                placeholder="Товары и блогеры"
                 className={`text-[13px] w-48 px-3 py-1.5 border-b bg-transparent outline-none ${
                   transparent ? "border-white text-white placeholder:text-white/60" : "border-ink text-ink placeholder:text-stone"
                 }`}

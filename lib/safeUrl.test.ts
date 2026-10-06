@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isSafeImageUrl, isSafeProductUrl } from "./safeUrl";
+import { isSafeImageUrl, isSafeProductUrl, needsRedirectConfirmation } from "./safeUrl";
 
 describe("isSafeProductUrl", () => {
   it("accepts ordinary shop pages", () => {
@@ -28,5 +28,18 @@ describe("isSafeImageUrl", () => {
   it("allows resized data-URL uploads but not other data URLs", () => {
     expect(isSafeImageUrl("data:image/jpeg;base64,AAAA")).toBe(true);
     expect(isSafeImageUrl("data:text/html,hi")).toBe(false);
+  });
+});
+
+describe("needsRedirectConfirmation", () => {
+  it("lets ordinary shops and brand sites straight through", () => {
+    for (const ok of ["https://www.ozon.ru/product/1", "https://brand-shop.ru/item", "https://www.lamoda.ru/p/x"]) {
+      expect(needsRedirectConfirmation(ok), ok).toBe(false);
+    }
+  });
+  it("asks for shorteners and punycode look-alikes", () => {
+    for (const bad of ["https://bit.ly/abc", "https://clck.ru/xyz", "https://xn--80ak6aa92e.com/"]) {
+      expect(needsRedirectConfirmation(bad), bad).toBe(true);
+    }
   });
 });

@@ -1010,7 +1010,7 @@ export async function countFavoritesForLinks(linkIds: string[]): Promise<Map<str
 // actions (follow, then manually build a named circle later) — the same
 // mix-up ShopMy avoids by having curator selection create the circle in
 // one step. Every follow now keeps the shopper's default circle in sync,
-// so "Мои креаторы" and "Круги" never drift apart without a second step.
+// so "Мои блогеры" and "Круги" never drift apart without a second step.
 export async function followCreator(userId: string, creatorId: string): Promise<void> {
   await sql`
     INSERT INTO follows (user_id, creator_id, created_at) VALUES (${userId}, ${creatorId}, ${new Date().toISOString()})
@@ -1074,7 +1074,7 @@ export type RecentLink = Link & {
 
 /**
  * Same shape as listRecentLinks, but scoped to creators this shopper
- * follows — the personalized half of "Находки" (the other half being
+ * follows — the personalized half of "Рекомендации" (the other half being
  * the platform-wide feed).
  */
 export async function listFollowedLinks(
@@ -1099,7 +1099,7 @@ export async function listFollowedLinks(
 }
 
 /** Same as listFollowedLinks, scoped to one category — powers the
- * "Мои креаторы" tab on a category page the same way it works on
+ * "Мои блогеры" tab on a category page the same way it works on
  * /finds. */
 export async function listFollowedLinksByCategory(
   userId: string,
@@ -1161,7 +1161,7 @@ export async function listRecentLinks(opts: { limit?: number } = {}): Promise<Re
 
 /**
  * Count of links from followed creators added after the shopper last
- * checked their "Мои креаторы" feed — powers the notification badge.
+ * checked their "Мои блогеры" feed — powers the notification badge.
  * A never-visited feed (finds_seen_at is null) counts everything so
  * the badge doesn't silently start at 0 for new followers.
  */

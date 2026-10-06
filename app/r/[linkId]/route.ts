@@ -3,7 +3,7 @@ import { track } from "@/lib/events";
 import { getAffiliateTemplateForArticle, getLink, hasRecentClick, recordClick } from "@/lib/store";
 import { isBotUserAgent, clientIpFrom } from "@/lib/bot-detection";
 import { visitorFingerprint } from "@/lib/auth";
-import { isSafeProductUrl } from "@/lib/safeUrl";
+import { isSafeProductUrl, needsRedirectConfirmation } from "@/lib/safeUrl";
 
 /**
  * Wraps the raw marketplace URL in a brand's CPA-network deep link when one
@@ -42,19 +42,18 @@ export async function GET(
   if (!link || !targetUrl || !isSafeProductUrl(targetUrl)) {
     return page(
       "Товар недоступен",
-      `<h1>Товар больше недоступен</h1><p>Креатор убрал эту ссылку или она устарела.</p><a class="b" href="/finds">Смотреть находки</a>`,
+      `<h1>Товар больше недоступен</h1><p>Блогер убрал эту ссылку или она устарела.</p><a class="b" href="/finds">Смотреть рекомендации</a>`,
       404
     );
   }
 
-  // Unknown shops get a confirmation step instead of a silent redirect,
-  // so a /r/ link can't be used to bounce people to a look-alike site.
-  const knownShop = link.marketplace && link.marketplace !== "other";
-  if (!knownShop && request.nextUrl.searchParams.get("go") !== "1") {
+  // Any shop is fine (marketplaces, brand sites, small stores); only links
+  // that hide or imitate their destination get a confirmation step.
+  if (needsRedirectConfirmation(targetUrl) && request.nextUrl.searchParams.get("go") !== "1") {
     const host = escape(new URL(targetUrl).hostname.replace(/^www\./, ""));
     return page(
       "Переход на внешний сайт",
-      `<h1>Переход на ${host}</h1><p>Это сайт магазина, не Shoppi. Проверьте адрес, прежде чем вводить данные или оплачивать.</p><a class="b" href="/r/${encodeURIComponent(linkId)}?go=1${request.nextUrl.searchParams.get("src") === "digest" ? "&src=digest" : ""}" rel="nofollow">Перейти на ${host}</a><br><a href="/">На Shoppi</a>`
+      `<h1>Переход на ${host}</h1><p>Ссылка ведёт через сокращатель или похожий на другой адрес. Проверьте сайт, прежде чем вводить данные или оплачивать.</p><a class="b" href="/r/${encodeURIComponent(linkId)}?go=1${request.nextUrl.searchParams.get("src") === "digest" ? "&src=digest" : ""}" rel="nofollow">Перейти на ${host}</a><br><a href="/">На Shoppi</a>`
     );
   }
 

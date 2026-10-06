@@ -19,7 +19,7 @@ export const FUNNEL: { name: EventName; label: string }[] = [
   { name: "storefront_view", label: "Открыли витрину" },
   { name: "link_click", label: "Перешли в магазин" },
   { name: "favorite_add", label: "Сохранили товар" },
-  { name: "follow_add", label: "Подписались на креатора" },
+  { name: "follow_add", label: "Подписались на блогера" },
   { name: "signup", label: "Зарегистрировались" },
   { name: "email_verified", label: "Подтвердили почту" },
 ];

@@ -11,7 +11,7 @@ type Role = "shopper" | "creator" | "brand";
 
 const DEMO_LABEL: Record<Role, string> = {
   shopper: "Демо: Покупатель",
-  creator: "Демо: Креатор",
+  creator: "Демо: Блогер",
   brand: "Демо: Бренд",
 };
 

@@ -23,3 +23,19 @@ export function isSafeProductUrl(raw: string): boolean {
 export function isSafeImageUrl(raw: string): boolean {
   return raw.startsWith("data:image/") || isSafeProductUrl(raw);
 }
+
+// Shorteners hide the real destination, and punycode hosts can imitate a
+// familiar shop (xn--...). Ordinary shop and brand sites go straight through.
+const SHORTENERS = ["bit.ly", "clck.ru", "tinyurl.com", "goo.su", "vk.cc", "t.co", "cutt.ly", "is.gd", "u.to", "rebrand.ly", "ow.ly", "shorturl.at"];
+
+/** True when a product link deserves a "check the address" step before redirecting. */
+export function needsRedirectConfirmation(raw: string): boolean {
+  let host: string;
+  try {
+    host = new URL(raw).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return true;
+  }
+  if (host.split(".").some((part) => part.startsWith("xn--"))) return true;
+  return SHORTENERS.some((s) => host === s || host.endsWith(`.${s}`));
+}

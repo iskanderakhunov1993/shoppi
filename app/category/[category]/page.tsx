@@ -119,7 +119,7 @@ export default async function CategoryPage({
                   showFollowing ? "border-ink text-ink" : "border-line text-stone hover:border-ink hover:text-ink"
                 }`}
               >
-                Мои креаторы
+                Мои блогеры
               </Link>
             </div>
           )}
@@ -128,7 +128,7 @@ export default async function CategoryPage({
             <EmptyState
               title={
                 showFollowing
-                  ? "Ваши креаторы пока не добавили товары в этой категории."
+                  ? "Ваши блогеры пока не добавили товары в этой категории."
                   : "В этой категории пока нет опубликованных товаров."
               }
             />

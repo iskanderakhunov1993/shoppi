@@ -7,11 +7,11 @@ export function pluralizeProducts(n: number): string {
   return "товаров";
 }
 
-/** Russian plural for "креатор": 1 креатора (genitive after "выбор"), 2 креаторов, 5 креаторов. */
+/** Russian plural for "блогер": 1 блогера (genitive after "выбор"), 2 блогеров, 5 блогеров. */
 export function pluralizeCreators(n: number): string {
   const mod10 = n % 10;
   const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return "креатора";
-  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return "креаторов";
-  return "креаторов";
+  if (mod10 === 1 && mod100 !== 11) return "блогера";
+  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return "блогеров";
+  return "блогеров";
 }

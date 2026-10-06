@@ -8,7 +8,7 @@ import { Field, boxedInputClass, buttonClass, secondaryButtonClass } from "@/app
 
 const ROLE_LABEL: Record<string, string> = {
   shopper: "Покупатель",
-  creator: "Креатор",
+  creator: "Блогер",
   brand: "Бренд",
 };
 
@@ -304,7 +304,7 @@ export default function SettingsPage() {
                 <span className="text-[14px]">
                   Письмо с новинками раз в неделю
                   <span className="block text-stone text-[12px] mt-0.5">
-                    Новые находки креаторов, на которых вы подписаны. Не приходит, если новинок нет.
+                    Новые рекомендации блогеров, на которых вы подписаны. Не приходит, если новинок нет.
                   </span>
                 </span>
               </label>

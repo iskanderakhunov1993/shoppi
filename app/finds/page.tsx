@@ -41,11 +41,11 @@ export default async function FindsPage({
       <section className="px-6 md:px-10 pt-32 pb-10 border-b border-line">
         <div className="max-w-[1200px] mx-auto">
           <span className="font-display italic text-lg text-stone block mb-1">Всё сразу</span>
-          <h1 className="font-display text-4xl md:text-5xl mb-3">Последние находки</h1>
+          <h1 className="font-display text-4xl md:text-5xl mb-3">Последние рекомендации</h1>
           <p className="text-stone text-[14px] max-w-lg mb-6">
             {showFollowing
-              ? "Товары только от креаторов, на которых вы подписаны, по порядку добавления."
-              : "Товары от всех креаторов площадки, по порядку добавления — без ранжирования и без алгоритма. Самый простой способ найти нового креатора, не проверяя каждую витрину по отдельности."}
+              ? "Товары только от блогеров, на которых вы подписаны, по порядку добавления."
+              : "Товары от всех блогеров площадки, по порядку добавления — без ранжирования и без алгоритма. Самый простой способ найти нового блогера, не проверяя каждую витрину по отдельности."}
           </p>
           {isShopperViewer && (
             <div className="flex gap-2">
@@ -55,7 +55,7 @@ export default async function FindsPage({
                   !showFollowing ? "border-ink text-ink" : "border-line text-stone hover:border-ink hover:text-ink"
                 }`}
               >
-                Все находки
+                Все рекомендации
               </Link>
               <Link
                 href="/finds?tab=following"
@@ -63,7 +63,7 @@ export default async function FindsPage({
                   showFollowing ? "border-ink text-ink" : "border-line text-stone hover:border-ink hover:text-ink"
                 }`}
               >
-                Мои креаторы
+                Мои блогеры
               </Link>
             </div>
           )}
@@ -75,8 +75,8 @@ export default async function FindsPage({
           <EmptyState
             title={
               showFollowing
-                ? "Пока пусто — подпишитесь на креаторов, чтобы видеть их находки здесь."
-                : "Пока пусто — креаторы ещё не добавили товары."
+                ? "Пока пусто — подпишитесь на блогеров, чтобы видеть их рекомендации здесь."
+                : "Пока пусто — блогеры ещё не добавили товары."
             }
           />
         </div>
