@@ -18,7 +18,7 @@ export function RoleTeasers() {
           </h2>
           <ul className="text-stone text-sm leading-relaxed flex flex-col gap-2 mb-8 md:mb-0 list-disc list-inside marker:text-line">
             <li>Одна ссылка на все находки</li>
-            <li>Товар добавляется по ссылке с WB или Ozon</li>
+            <li>Товар добавляется по ссылке из любого магазина</li>
             <li>Видно, что смотрят и покупают</li>
           </ul>
         </div>

@@ -18,11 +18,11 @@ export function Hero() {
           Shoppi · рекомендации блогеров
         </span>
         <h1 className="font-display text-[34px] md:text-[52px] leading-[1.05] tracking-tight text-ink">
-          Что купить на Wildberries и Ozon — советуют блогеры
+          Что купить — советуют блогеры, которым вы доверяете
         </h1>
         <p className="font-body text-stone text-[15px] md:text-base max-w-md mt-4">
-          Блогеры собирают товары, которыми пользуются сами. Вы подписываетесь на тех, кому
-          доверяете, и покупаете по ссылке на маркетплейсе. Бесплатно.
+          Блогеры собирают товары, которыми пользуются сами, — с маркетплейсов, сайтов брендов
+          и любых магазинов. Вы подписываетесь и покупаете по ссылке. Бесплатно.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-8">
