@@ -5,6 +5,12 @@ on:
   push:
     branches: [master]
 
+# All runs share one `test` schema in the database, and the tests truncate
+# it — two runs at once corrupt each other, so they queue up instead.
+concurrency:
+  group: shared-test-db
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
