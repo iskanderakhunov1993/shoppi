@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Unit tests run against the `test` schema of the shared database.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        # Route/layout types (LayoutProps etc.) are generated, not committed.
+        run: npx next typegen && npx tsc --noEmit -p .
+      - name: Lint
+        # ponytail: non-blocking until the existing ~40 warnings are cleaned up; make it blocking after.
+        continue-on-error: true
+        run: npm run lint
+      - name: Unit tests
+        if: env.DATABASE_URL != ''
+        run: npm test
