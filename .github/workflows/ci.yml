@@ -19,7 +19,8 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Typecheck
-        run: npx tsc --noEmit -p .
+        # Route/layout types (LayoutProps etc.) are generated, not committed.
+        run: npx next typegen && npx tsc --noEmit -p .
       - name: Lint
         # ponytail: non-blocking until the existing ~40 warnings are cleaned up; make it blocking after.
         continue-on-error: true
